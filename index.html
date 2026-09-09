@@ -213,6 +213,11 @@ h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS'
 /* The capitals are a proportion of the name, not a size of their own, so
    shrinking the name keeps its shape instead of flattening it. */
 h1.wordmark .cap{font-size:1.65em;color:var(--brand)}
+/* Which of the two this is. Small, set apart, and in the colour the app uses
+   for something switched on — a tester should never have to wonder whether the
+   thing in their hand is the app or the workbench. */
+h1.wordmark .lab-mark{font-size:0.42em;font-weight:600;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--mode);vertical-align:0.9em;margin-left:0.35em}
 /* The T's crossbar hangs over whatever follows it, so the u sits in a void the
    S never makes. Sidebearings say the two pairs are evenly spaced — and they
    are, measured across the whole letter — but the eye reads the white area at
@@ -1194,14 +1199,14 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 // Runs before first paint so the page never flashes the wrong theme.
 (function(){
   var t=null;
-  try{t=localStorage.getItem('scaletune-theme');}catch(e){}
+  try{t=localStorage.getItem('scaletune-lab-theme');}catch(e){}
   if(!t)t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
   /* And the language, before anything is painted. The pack arrives after the
      first paint, so the page said lang="en" while it was about to be read in
      Portuguese — which is a browser's cue to offer a translation. */
   try{
-    var l=localStorage.getItem('scaletune-lang');
+    var l=localStorage.getItem('scaletune-lab-lang');
     if(l)document.documentElement.setAttribute('lang',l);
   }catch(e){}
 })();
@@ -1216,7 +1221,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <button class="theme-btn" id="undo-btn" type="button" onclick="desfazer()"
             data-ta="aria.undo" aria-label="Undo the last thing you did">↺</button>
   </span>
-  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une</h1>
+  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une<span class="lab-mark">lab</span></h1>
   <span class="head-btns">
     <!-- Where the saved exercises live. A drawer is not a setting of the mode,
          so it stopped being a panel among the panels and became a place you go.
@@ -4613,7 +4618,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='2026-09-09p';
+const APP_VERSION='lab-2026-09-10a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6883,7 +6888,7 @@ function setNoteNames(k){
   if(!NOTE_STYLES[k]||state.noteNames===k)return;
   state.noteNames=k;
   notesChosen=true;
-  try{localStorage.setItem('scaletune-notes',k);}catch(e){}
+  try{localStorage.setItem('scaletune-lab-notes',k);}catch(e){}
   repaintNoteNames();
 }
 function repaintNoteNames(){
@@ -8043,7 +8048,7 @@ function readFolders(){
   const bom=p=>Array.isArray(p)&&p.length&&p.length<=8&&p.every(n=>typeof n==='string'&&n.trim());
   exFolders={};
   try{
-    const raw=localStorage.getItem('scaletune-ex-folders');
+    const raw=localStorage.getItem('scaletune-lab-ex-folders');
     const a=raw?JSON.parse(raw):null;
     if(Array.isArray(a)){
       /* The shape from before the drawers were split. A folder that holds
@@ -8082,7 +8087,7 @@ function readFolders(){
   });
 }
 function writeFolders(){
-  try{localStorage.setItem('scaletune-ex-folders',JSON.stringify(exFolders));return true;}
+  try{localStorage.setItem('scaletune-lab-ex-folders',JSON.stringify(exFolders));return true;}
   catch(e){setStatus(tr('ex.full','There is no room to save that.'));return false;}
 }
 // the folders directly inside a path, by name, in the order they were made
@@ -8148,7 +8153,7 @@ function ondeEstou(){return exPath.length?exPath.join(' / '):tr('sec.exercises',
 
 function readExercises(){
   try{
-    const raw=localStorage.getItem('scaletune-exercises');
+    const raw=localStorage.getItem('scaletune-lab-exercises');
     const a=raw?JSON.parse(raw):[];
     exercises=Array.isArray(a)?a.filter(e=>e&&typeof e.n==='string'&&e.s).slice(0,EX_MAX):[];
   }catch(e){exercises=[];}
@@ -8158,7 +8163,7 @@ function readExercises(){
   readFolders();
 }
 function writeExercises(){
-  try{localStorage.setItem('scaletune-exercises',JSON.stringify(exercises));return true;}
+  try{localStorage.setItem('scaletune-lab-exercises',JSON.stringify(exercises));return true;}
   catch(e){setStatus(tr('ex.full','There is no room to save that.'));return false;}
 }
 /* The name is the identity: saving over a name you already have replaces it,
@@ -8365,7 +8370,7 @@ const PAT_MAX=200;
 let patterns=[];
 function readPatterns(){
   try{
-    const raw=localStorage.getItem('scaletune-patterns');
+    const raw=localStorage.getItem('scaletune-lab-patterns');
     const a=raw?JSON.parse(raw):[];
     // the same guard, and the same fault: a pattern saved in the new shape has
     // no single list, so this was discarding every one of them on the way in
@@ -8374,7 +8379,7 @@ function readPatterns(){
   }catch(e){patterns=[];}
 }
 function writePatterns(){
-  try{localStorage.setItem('scaletune-patterns',JSON.stringify(patterns));return true;}
+  try{localStorage.setItem('scaletune-lab-patterns',JSON.stringify(patterns));return true;}
   catch(e){setStatus(tr('ex.full','There is no room to save that.'));return false;}
 }
 function savePatternAs(){
@@ -9935,7 +9940,7 @@ function initSections(){
     const stale=[];
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
-      if(k&&(k.indexOf('scaletune-sec-')===0||k==='scaletune-pattern'))stale.push(k);
+      if(k&&(k.indexOf('scaletune-lab-sec-')===0||k==='scaletune-lab-pattern'))stale.push(k);
     }
     stale.forEach(k=>localStorage.removeItem(k));
   }catch(e){}
@@ -9967,7 +9972,7 @@ function applyTheme(t){
 }
 function setTheme(t){
   applyTheme(t);
-  try{localStorage.setItem('scaletune-theme',t);}catch(e){}
+  try{localStorage.setItem('scaletune-lab-theme',t);}catch(e){}
 }
 
 /* ---------- settings ---------- */
@@ -10084,7 +10089,7 @@ function rebuildEverything(){
 let langLoading=null;
 function setLang(code){
   if(!LANGS.some(l=>l.code===code)||LANG===code)return Promise.resolve();
-  try{localStorage.setItem('scaletune-lang',code);}catch(e){}
+  try{localStorage.setItem('scaletune-lab-lang',code);}catch(e){}
   return loadPack(code).then(()=>{
     LANG=code;
     document.documentElement.setAttribute('lang',code);
@@ -10132,11 +10137,11 @@ snapshotMarkup();
    letters keeps letters. */
 let notesChosen=false;
 try{
-  const n=localStorage.getItem('scaletune-notes');
+  const n=localStorage.getItem('scaletune-lab-notes');
   if(n&&NOTE_STYLES[n]){state.noteNames=n;notesChosen=true;}
 }catch(e){}
 try{
-  const l=localStorage.getItem('scaletune-lang');
+  const l=localStorage.getItem('scaletune-lab-lang');
   if(l&&LANGS.some(x=>x.code===l)&&l!=='en'){
     // the pack arrives after the first paint; the app is readable in English until it does
     LANG='en';

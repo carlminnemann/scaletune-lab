@@ -1,7 +1,7 @@
 {
-  "name": "ScaleTune",
-  "short_name": "ScaleTune",
-  "description": "Reference drone, scales and arpeggios for strings, winds and voice.",
+  "name": "ScaleTune Lab",
+  "short_name": "ScaleTune Lab",
+  "description": "The ScaleTune workbench: what is being tried out, before it reaches the app people use.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
