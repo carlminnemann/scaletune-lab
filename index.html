@@ -622,7 +622,9 @@ body.painel .sec-body>div[id$="-line"]>.btn-wrap>button{min-height:clamp(46px,8.
 
 /* Which block of a page-driven panel is on the screen. Written as a rule so
    that nothing a builder does to style.display can undo it. */
-body.paginas .sec-body>*:not(#pag-row):not(.panel-clear):not(.pagina-aberta){display:none!important}
+/* The pulse is not one of the panel's blocks: it belongs to the transport, so it
+   stays whether the boxes or a page are on the screen. */
+body.paginas .sec-body>*:not(#pag-row):not(.panel-clear):not(.pagina-aberta):not(#pulse-wrap){display:none!important}
 body.paginas .sec-body>.pagina-aberta{display:block!important}
 body.paginas .sec-body>.pagina-aberta.mgroup{margin-bottom:0}
 
@@ -1397,6 +1399,34 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 .beats-row.carries{position:relative}
 .beats-row.carries::after{content:'♪';position:absolute;left:-2px;top:50%;transform:translateY(-50%);
   font-size:12px;color:var(--brand)}
+/* ---------- the pulse, while it runs ----------
+   Off the screen entirely until Start, and then it is the biggest thing on it:
+   circles twice the size of the ones you tap to set the accents, a beat that
+   lights and swells rather than merely changing colour, and the tempo written
+   quietly underneath — the one number worth reading at arm's length from a
+   stand. The accent keeps the app's red and the plain beats its yellow. */
+#pulse-wrap{display:none}
+/* The light a beat throws needs somewhere to fall: the scrolling area cuts what
+   leaves its box, and the first circle's halo was being clipped at the left
+   edge. The room is taken here, so the circles are worked out inside it. */
+body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:var(--s2);flex:0 0 auto;padding:8px 18px;
+  margin:0 0 var(--s2);min-height:clamp(64px,16vh,140px)}
+.pulse-bpm{font-size:12px;color:var(--text3);letter-spacing:0.06em;
+  font-variant-numeric:tabular-nums}
+/* Stretched across what holds it, or a grid in a centred column shrinks to its
+   own contents — and then it is measuring the circles it was asked to size. */
+.beats-row.pulse{margin:0;align-self:stretch}
+.beats-row.pulse .beat-dot{border-width:2px;cursor:default;
+  transition:transform .07s ease-out,background .07s,box-shadow .07s,border-color .07s}
+/* A beat arrives: the circle fills, grows a little and throws light around
+   itself. At 60 BPM the swell is over in a twelfth of the beat, so it reads as
+   a strike and not as a pulse of its own. */
+.beats-row.pulse .beat-dot.active-beat{transform:scale(1.12);
+  box-shadow:0 0 0 3px var(--yellow-bg),0 0 15px 1px var(--yellow)}
+.beats-row.pulse .beat-dot.acc-low.active-beat{
+  box-shadow:0 0 0 3px var(--red-bg),0 0 17px 2px var(--red)}
+.beats-row.pulse .beat-dot.acc-off.active-beat{transform:scale(1.06);box-shadow:none}
 /* The hint is centred under the circles, so a Clear on the left below it reads
    as crowded even at the same distance the Scales panel uses — there the text
    is left-aligned and the two share an edge. It gets the extra room instead. */
@@ -1834,6 +1864,18 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 <details class="sec" id="metro-section" style="display:none">
   <summary><span data-t="sec.metronome">Metronome</span><span class="sec-sum" id="sum-metro"></span></summary>
   <div class="sec-body metro-body">
+  <!-- What the metronome shows while it runs. The bar's own circles live inside
+       the Bar page, and a page is a thing you open to set something — so with
+       the panels turned into boxes there was nothing at all to look at while it
+       played: eleven names and a Stop button. These are the same circles, twice
+       the size, above whatever else is on the screen, and they are the one
+       thing here you look at rather than press. -->
+  <div class="pulse-wrap" id="pulse-wrap">
+    <div class="beats-row pulse" id="pulse-row"></div>
+    <div class="beats-row pulse" id="pulse-poly-a"></div>
+    <div class="beats-row pulse" id="pulse-poly-b"></div>
+    <div class="pulse-bpm" id="pulse-bpm"></div>
+  </div>
   <!-- Drone is a note to tune against, and a click over it is a choice rather
        than the point, so there it is asked for. -->
   <div class="mgroup" id="metro-on-block" style="display:none">
@@ -4560,8 +4602,10 @@ function schedulePolyFlash(layer,i,when){
   const d=(when-audioCtx.currentTime)*1000;
   pendingTimeouts.push(setTimeout(()=>{
     if(!state.playing)return;
-    document.querySelectorAll('#poly-row-'+layer+' .beat-dot')
-      .forEach((el,idx)=>el.classList.toggle('active-beat',idx===i));
+    ['#poly-row-'+layer,'#pulse-poly-'+layer].forEach(sel=>{
+      document.querySelectorAll(sel+' .beat-dot')
+        .forEach((el,idx)=>el.classList.toggle('active-beat',idx===i));
+    });
   },Math.max(0,d)));
 }
 
@@ -4785,9 +4829,20 @@ function scheduleFlash(i,when){
   const d=(when-audioCtx.currentTime)*1000;
   pendingTimeouts.push(setTimeout(()=>flashBeat(i),Math.max(0,d)));
 }
+/* Each row is counted from its own first circle. This was one flat list of every
+   .beat-dot on the page, which held while the bar was the only row there was —
+   with the running display drawn as well, the eleventh dot of the document is
+   not the eleventh beat of anything. */
 function flashBeat(i){
   if(!state.playing)return;
-  document.querySelectorAll('.beat-dot').forEach((d,idx)=>d.classList.toggle('active-beat',idx===i));
+  ['#beats-row','#pulse-row'].forEach(sel=>{
+    document.querySelectorAll(sel+' .beat-dot')
+      .forEach((d,idx)=>d.classList.toggle('active-beat',idx===i));
+  });
+  /* Read again at the top of each bar rather than wired to every place a tempo
+     can move: a ramp changes it while it runs, and this is the one moment the
+     number is not being looked at. */
+  if(i===0)pintaPulsoBpm();
 }
 
 function stopPlayback(){
@@ -4812,6 +4867,7 @@ function setPlayUI(on){
     ?(on?tr('play.stopListening','■ Stop listening'):tr('play.listen','● Listen'))
     :(on?tr('play.stop','■ Stop'):tr('play.start','▶ Start'));
   b.classList.toggle('playing',on);
+  renderPulse();   // the running metronome's own display comes and goes with it
   // clears (or lights) the green "sounding now" marker on the study list
   if(state.mode==='scale'||state.mode==='arpeggio'){
     paintSetButtons('[data-scale]','scale','scale');
@@ -4891,6 +4947,7 @@ function updateBPM(v){
   state.practice.rampFrom=state.bpm;
   buildSpeedControls();
   refreshSectionSummaries();
+  pintaPulsoBpm();
 }
 function updateVol(v){
   state.volume=parseFloat(v);
@@ -5333,7 +5390,13 @@ function arrumaPaginas(){
   }
   const body=document.querySelector('#'+painelAberto+'>.sec-body');
   if(!body||!row)return;
-  if(row.parentNode!==body)body.insertBefore(row,body.firstChild);
+  /* The boxes go to the top of the panel — under the running pulse where there
+     is one, because the metronome's own display belongs above everything it can
+     be asked to change while it plays. */
+  const pulso=document.getElementById('pulse-wrap');
+  const antes=(pulso&&pulso.parentNode===body)?pulso.nextSibling:body.firstChild;
+  if(row.parentNode!==body||row.previousElementSibling!==(pulso&&pulso.parentNode===body?pulso:null))
+    body.insertBefore(row,antes);
   const pag=paginasDoPainel().find(d=>d.k===subPag);
   const naFrente=!pag;
   row.style.display=naFrente?'':'none';
@@ -8547,6 +8610,7 @@ function renderPolyBeats(){
     }
     layoutBeats(row);
   });
+  renderPulse();     // the two layers changed, and the running display shows them
 }
 
 /* Click, or one of the styles. A style is not a second thing playing over the
@@ -10104,6 +10168,53 @@ function buildBeats(){
   renderBeats();
 }
 
+/* ---------- the pulse, while it runs ----------
+   The circles you tap to set the accents live inside the Bar page. A page is
+   opened to change something and closed again, so once the panels became boxes
+   the running metronome had nothing on the screen at all. This is the same bar,
+   drawn again at twice the size, shown only while it plays and only where there
+   is a pulse to show: the metronome's own mode, a mode being clicked over, and
+   the drone when a click has been asked for. */
+function temPulso(){
+  if(state.mode==='drone')return !!state.metroInDrone;
+  return state.mode!=='tuner'&&state.mode!=='ear';
+}
+function pulsoLigado(){return !!state.playing&&temPulso();}
+function pulsoDots(row,n,acc,quadrado){
+  row.innerHTML='';
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div');
+    d.className='beat-dot'+(quadrado?' poly':'')+' acc-'+acc(i);
+    row.appendChild(d);
+  }
+  row.style.display=n?'':'none';
+  layoutBeats(row);
+}
+function renderPulse(){
+  const wrap=document.getElementById('pulse-wrap');
+  if(!wrap)return;
+  document.body.classList.toggle('tocando',pulsoLigado());
+  if(!pulsoLigado())return;
+  const uma=document.getElementById('pulse-row');
+  const a=document.getElementById('pulse-poly-a'),b=document.getElementById('pulse-poly-b');
+  if(state.poly.on){
+    pulsoDots(uma,0,()=>'high');
+    pulsoDots(a,state.poly.a,i=>polyAccFor('a',i));
+    pulsoDots(b,state.poly.b,i=>polyAccFor('b',i),true);
+  }else{
+    pulsoDots(uma,state.sig,i=>state.accents[i]||'high');
+    pulsoDots(a,0,()=>'high');
+    pulsoDots(b,0,()=>'high');
+  }
+  pintaPulsoBpm();
+}
+/* The one number worth reading while it runs. It is written here and nowhere
+   else on a running screen — the box that used to carry it says only its name
+   now, and the Tempo page has it in full. */
+function pintaPulsoBpm(){
+  const el=document.getElementById('pulse-bpm');
+  if(el)el.textContent=state.bpm+' BPM';
+}
 function renderBeats(){
   const row=document.getElementById('beats-row');row.innerHTML='';
   for(let i=0;i<state.sig;i++){
@@ -10119,6 +10230,7 @@ function renderBeats(){
     row.appendChild(d);
   }
   layoutBeats(row);
+  renderPulse();      // the bar changed, and the running display is the same bar
 }
 
 /* ---------- collapsible sections ---------- */
@@ -10282,15 +10394,24 @@ function gridifyAll(){document.querySelectorAll('.btn-wrap,.rot-chips').forEach(
    beside sixteen on two lines at 28 — the same panel, two different sizes. A
    comfortable floor keeps the sizes near each other. */
 const DOT_MAX=28,DOT_MIN=20,DOT_GAP=8;
+/* The running display is read from a stand, not tapped: its circles are twice
+   the size, and they give way later — four beats across a phone come out at 64,
+   and only sixteen against sixteen fall back to the tapping size. */
+const PULSE_MAX=64,PULSE_MIN=22;
 function layoutBeats(row){
   if(!row)return;
   const n=row.children.length;
   if(!n)return;
-  const w=row.parentElement?row.parentElement.clientWidth:0;
+  const pulso=row.classList.contains('pulse');
+  /* The running row is measured on itself, not on what holds it: clientWidth
+     counts padding, and the room reserved around the circles for the light they
+     throw would have been handed straight back to the circles. */
+  const w=pulso?row.clientWidth:(row.parentElement?row.parentElement.clientWidth:0);
   if(!w)return;
+  const MAX=pulso?PULSE_MAX:DOT_MAX,MIN=pulso?PULSE_MIN:DOT_MIN;
   let cols=n,rows=1;
-  while(cols>1&&(w-(cols-1)*DOT_GAP)/cols<DOT_MIN){rows++;cols=Math.ceil(n/rows);}
-  const size=Math.max(DOT_MIN,Math.min(DOT_MAX,Math.floor((w-(cols-1)*DOT_GAP)/cols)));
+  while(cols>1&&(w-(cols-1)*DOT_GAP)/cols<MIN){rows++;cols=Math.ceil(n/rows);}
+  const size=Math.max(MIN,Math.min(MAX,Math.floor((w-(cols-1)*DOT_GAP)/cols)));
   row.style.setProperty('--cols',cols);
   row.style.setProperty('--dot',size+'px');
 }
