@@ -379,6 +379,21 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
   border:1px solid var(--border2);border-radius:999px;background:var(--bg2);
   color:var(--text3);cursor:pointer;touch-action:manipulation}
 .poly-switch.on{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
+/* ---------- ear training ---------- */
+.ear-panel{padding:var(--s4) var(--s4) var(--s3)}
+.ear-head{display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
+.ear-score{font-size:12px;color:var(--text3);letter-spacing:0.04em}
+.ear-again{margin-left:auto;flex:0 0 auto;width:auto;min-width:46px;padding:0 12px;font-size:16px}
+/* What just happened, in one line, where the eye already is. It keeps its
+   height when it has nothing to say, so answering does not move the buttons
+   under the finger that is about to press the next one. */
+.ear-say{min-height:2.6em;font-size:15px;line-height:1.3;color:var(--text2);
+  margin-bottom:var(--s3);display:flex;align-items:center}
+.ear-say .ear-mark{font-weight:600}
+.ear-say.certo .ear-mark{color:var(--mode)}
+.ear-say.errado .ear-mark{color:var(--stop)}
+#ear-answers .pick-btn.certo{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
+#ear-answers .pick-btn.errado{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
 .mode-bar{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin:0 0 var(--s3)}
 .mode-back{display:flex;align-items:center;gap:7px;width:auto;
   margin:0;padding:4px 2px;border:0;background:none;cursor:pointer;
@@ -1244,6 +1259,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <button class="mode-btn" id="btn-mode-free" onclick="entraModo('free')" data-t="free">Free</button>
   <button class="mode-btn" id="btn-mode-tuner" onclick="entraModo('tuner')" data-t="tuner">Tuner</button>
   <button class="mode-btn" id="btn-mode-metro" onclick="entraModo('metro')" data-t="metro">♩ Metro</button>
+  <button class="mode-btn" id="btn-mode-ear" onclick="entraModo('ear')" data-t="ear">Ear</button>
 </div>
 
 <!-- The way back to the six. It says which mode you are in, so it is a label as
@@ -1462,6 +1478,34 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
         <span class="group-label" data-t="turn.note">Turning note</span>
         <span class="btn-wrap seg" id="free-turn-row" data-cols="fixed"></span></div>
       <button class="clear-btn panel-clear" data-panel="freerange" onclick="limpaPainel('freerange')">✕ Clear</button>
+    </div>
+  </details>
+</div>
+
+<!-- ============ EAR ============ -->
+<!-- The app can already play any note with his own instruments, so asking one
+     and waiting for an answer is the whole of it. The question is above and the
+     answers under it, because that is the order a question is asked in. -->
+<div id="ear-section" style="display:none">
+  <div class="panel ear-panel">
+    <div class="ear-head">
+      <span class="ear-score" id="ear-score"></span>
+      <button class="pick-btn ear-again" id="ear-again" type="button" onclick="earToca()"
+              data-ta="aria.earAgain" aria-label="Play it again">&#9834;</button>
+    </div>
+    <div class="ear-say" id="ear-say"></div>
+    <div class="btn-wrap" id="ear-answers"></div>
+  </div>
+  <details class="sec" id="sec-ear">
+    <summary><span data-t="ear.which">Intervals</span><span class="sec-sum" id="sum-ear"></span></summary>
+    <div class="sec-body">
+      <div class="btn-wrap" id="ear-pick"></div>
+      <div class="head" style="margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="ear.how">Played</span>
+        <span class="btn-wrap seg" id="ear-how-row" data-cols="fixed"></span></div>
+      <div class="head" style="margin-top:var(--s3);margin-bottom:0">
+        <span class="group-label" data-t="ear.from">From</span>
+        <span class="btn-wrap seg" id="ear-root-row" data-cols="fixed"></span></div>
     </div>
   </details>
 </div>
@@ -1914,6 +1958,13 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <dt data-t="through-the-modes">Through the modes</dt><dd data-t="h.p.modes">The seven modes of one scale, each from its own note and one octave each. It wants a single seven-note scale and no shape.</dd>
     <dt data-t="updown.means">Up-Down means</dt><dd data-t="h.r.updown">Only with something in rotation. <em>Alternate</em> takes one item up and the next one down; <em>Each both ways</em> finishes an item — up and back down — before the rotation moves.</dd>
     <dt data-t="what-a-pass-is">What a pass is</dt><dd data-t="h.p.pass">One round of the notes. The figure changes first, then the scale or chord, then the key.</dd>
+  </dl></div>
+
+  <div class="help-sec" id="help-ear"><h3 data-t="ear">Ear</h3><dl>
+    <dt data-t="ear.which">Intervals</dt><dd data-t="h.ear.which">Which ones can come up. Tap to add or take one away; the answers you are offered are exactly these, so a short list is an easier round.</dd>
+    <dt data-t="ear.how">Played</dt><dd data-t="h.ear.how">The two notes one after the other, upwards or downwards, or both together. <em>Mixed</em> chooses for each question.</dd>
+    <dt data-t="ear.from">From</dt><dd data-t="h.ear.from"><em>One note</em> always sets off from the note the app is on, which trains the interval against a key you know. <em>Anywhere</em> picks a starting note of its own — harder, and the more honest test.</dd>
+    <dt data-t="ear.round.k">The round</dt><dd data-t="h.ear.round">The button under the screen starts, plays it again while you think, and asks the next one once you have answered. The ♪ beside the score repeats it at any time, answer given or not. The count is this round's; leaving the mode starts a new one.</dd>
   </dl></div>
 
   <div class="help-sec" id="help-metro"><h3 data-t="metronome">Metronome</h3><dl>
@@ -2417,6 +2468,10 @@ let state={
   bothWays:false,
   blueNotes:false,           // the added note in the two pentatonics
 
+  /* Ear training. Which intervals are in play, how they are sounded, and
+     whether they always set off from the note the app is on or from anywhere.
+     The seven it opens with are the ones a first lesson uses. */
+  ear:{sel:{1:true,2:true,3:true,4:true,5:true,7:true,12:true},how:'up',roam:false},
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   /* Whether a free set of notes takes its first note again an octave up before
      it turns back. C E G with it is C E G C; without it the line is the three
@@ -4475,7 +4530,10 @@ function stopPlayback(){
 function setPlayUI(on){
   updateRotationPanelSoon();
   const b=document.getElementById('play-btn');
-  b.textContent=state.mode==='tuner'
+  b.textContent=state.mode==='ear'
+    ?(!earQ?tr('play.start','▶ Start')
+           :(earQ.answered?tr('ear.next','Next one'):tr('ear.again','▶ Play again')))
+    :state.mode==='tuner'
     ?(on?tr('play.stopListening','■ Stop listening'):tr('play.listen','● Listen'))
     :(on?tr('play.stop','■ Stop'):tr('play.start','▶ Start'));
   b.classList.toggle('playing',on);
@@ -4487,6 +4545,8 @@ function setPlayUI(on){
 }
 
 function togglePlay(){
+  // In Ear the one button is the whole loop: start, play again, next question.
+  if(state.mode==='ear'){earBotao();return;}
   // In the tuner the button starts and stops the microphone; there is nothing
   // to play, and anything playing would be heard by it.
   if(state.mode==='tuner'){
@@ -4618,7 +4678,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10a';
+const APP_VERSION='lab-2026-09-10b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4668,7 +4728,8 @@ function setTimbre(t){
    same as opening the app — which is the rule the whole app is built on. */
 let emCasa=true;
 const MODE_BTN={drone:'btn-mode-drone',scale:'btn-mode-scale',arpeggio:'btn-mode-arp',
-                free:'btn-mode-free',metro:'btn-mode-metro',tuner:'btn-mode-tuner'};
+                free:'btn-mode-free',metro:'btn-mode-metro',tuner:'btn-mode-tuner',
+                ear:'btn-mode-ear'};
 function modeLabel(m){
   const b=document.getElementById(MODE_BTN[m]);
   return b?b.textContent.trim():m;
@@ -4685,7 +4746,8 @@ function pintaCasa(){
   const f=document.getElementById('folder-btn');
   if(f){
     // the tuner has no setup worth saving, so it has no drawer
-    f.style.display=(state.mode==='tuner')?'none':'';
+    // neither the tuner nor ear training has a setup worth putting on a shelf
+    f.style.display=(state.mode==='tuner'||state.mode==='ear')?'none':'';
     f.classList.toggle('vazia',exercisesDoModo().length===0&&pastasDoModo().length===0);
   }
   paintHelpMarks();      // the marks hang on panels, and the panels just moved
@@ -4695,6 +4757,9 @@ function pintaCasa(){
 function entraModo(m){
   emCasa=false;
   pastaAberta=false;
+  /* Nothing is remembered between visits, the score included: coming into Ear
+     is starting a round, not resuming one. */
+  if(m==='ear')earZera();
   setMode(m);
   const sc=document.getElementById('scroll-area');
   if(sc)sc.scrollTop=0;
@@ -4734,6 +4799,165 @@ function fechaPasta(){
   pintaCasa();
 }
 
+/* ---------- ear training ----------
+   Everything it needs was already here: an instrument that plays any note, and
+   the note names to ask about. What is new is the loop — ask, listen, answer,
+   say what it was — and the loop is deliberately the same shape for every kind
+   of question, because intervals are only the first of them.
+
+   The labels are the international short forms, m3 and P5 and TT, which are
+   what the method books print and what nobody has to translate. */
+const EAR_STEPS=[1,2,3,4,5,6,7,8,9,10,11,12];
+const EAR_LABEL={1:'m2',2:'M2',3:'m3',4:'M3',5:'P4',6:'TT',7:'P5',
+                 8:'m6',9:'M6',10:'m7',11:'M7',12:'P8'};
+let earQ=null,earAsked=0,earRight=0;
+/* The words come from a language pack, and a pack is a file: it is written as
+   text, never as markup, wherever it lands inside a line that has markup. */
+const earTexto=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function earOn(){return EAR_STEPS.filter(n=>state.ear.sel[n]);}
+function earZera(){earQ=null;earAsked=0;earRight=0;}
+/* A question. The starting note is either the one the app is set to — which
+   trains the interval against a key you know — or anywhere in three octaves,
+   which is the harder and more honest test. Either way it stays inside the
+   range the samples cover. */
+function earNova(){
+  const pool=earOn();
+  if(!pool.length){setStatus(tr('ear.none','Choose at least one interval first.'));return;}
+  const semis=pool[Math.floor(Math.random()*pool.length)];
+  let base=semitone(state.root,state.rootOct);
+  if(state.ear.roam){
+    const lo=semitone('C',2),hi=semitone('C',5);
+    base=lo+Math.floor(Math.random()*(hi-lo+1));
+  }
+  const teto=semitone('C',6);
+  while(base+semis>teto)base-=12;
+  let how=state.ear.how;
+  if(how==='mix')how=['up','down','harmonic'][Math.floor(Math.random()*3)];
+  earQ={semis,base,how,answered:false,right:false,said:0};
+  renderEar();
+  setPlayUI(false);      // the button becomes "play it again" while you think
+  earToca();
+}
+/* Played with whatever instrument the mode is on — his own recordings, which is
+   the point: an interval on a bowed string is not an interval on a sine. */
+function earToca(){
+  if(!earQ)return;
+  Promise.resolve(initAudio()).then(()=>{
+    if(isSampled(state.timbre)&&!samplerReady(state.timbre)){
+      loadSampler(state.timbre,earToca);
+      return;
+    }
+    stopAllAudio();
+    const t=audioCtx.currentTime+0.08,dur=0.9,gap=0.75;
+    const baixo=earQ.base,alto=earQ.base+earQ.semis;
+    if(earQ.how==='harmonic'){scheduleTone(baixo,t,dur);scheduleTone(alto,t,dur);}
+    else if(earQ.how==='down'){scheduleTone(alto,t,dur);scheduleTone(baixo,t+gap,dur);}
+    else{scheduleTone(baixo,t,dur);scheduleTone(alto,t+gap,dur);}
+  }).catch(()=>{});
+}
+function earResponde(n){
+  if(!earQ||earQ.answered)return;
+  earQ.answered=true;earQ.said=n;
+  earQ.right=(n===earQ.semis);
+  /* Counted when it is answered, not when it is asked: a question you skipped
+     by changing the intervals under it was never a question you got wrong. */
+  earAsked++;
+  if(earQ.right)earRight++;
+  renderEar();
+  setPlayUI(false);          // the button becomes the next question
+}
+/* One button does the whole loop: it starts, it plays again while you are
+   thinking, and it asks the next one once you have answered. */
+function earBotao(){
+  if(!earQ||earQ.answered)earNova();
+  else earToca();
+}
+function renderEar(){
+  const score=document.getElementById('ear-score');
+  if(score)score.textContent=earAsked
+    ? tr('ear.score','{r} of {n}',{r:earRight,n:earAsked}) : '';
+  const say=document.getElementById('ear-say');
+  if(say){
+    say.className='ear-say';
+    if(!earQ)say.textContent=tr('ear.ready','Start, listen, and choose what you heard.');
+    else if(!earQ.answered)say.textContent=tr('ear.listen','Which one was it?');
+    else if(earQ.right){
+      say.className='ear-say certo';
+      say.innerHTML=earTexto(tr('ear.right','Right'))+' — <span class="ear-mark">'+EAR_LABEL[earQ.semis]+'</span>';
+    } else {
+      say.className='ear-say errado';
+      say.innerHTML=earTexto(tr('ear.wrong','It was'))+' <span class="ear-mark">'+EAR_LABEL[earQ.semis]+
+        '</span> — '+earTexto(tr('ear.yousaid','you said {s}',{s:EAR_LABEL[earQ.said]}));
+    }
+  }
+  const row=document.getElementById('ear-answers');
+  if(row){
+    row.innerHTML='';
+    earOn().forEach(n=>{
+      const b=document.createElement('button');
+      b.className='pick-btn';
+      if(earQ&&earQ.answered){
+        if(n===earQ.semis)b.className+=' certo';
+        else if(n===earQ.said)b.className+=' errado';
+      }
+      b.textContent=EAR_LABEL[n];
+      b.onclick=()=>earResponde(n);
+      row.appendChild(b);
+    });
+    gridify(row);
+  }
+  const again=document.getElementById('ear-again');
+  if(again)again.style.display=earQ?'':'none';
+  refreshSectionSummaries();
+}
+function buildEarPick(){
+  const row=document.getElementById('ear-pick');
+  if(!row)return;
+  row.innerHTML='';
+  EAR_STEPS.forEach(n=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.ear.sel[n]?' active':'');
+    b.textContent=EAR_LABEL[n];
+    b.onclick=()=>{
+      state.ear.sel[n]=!state.ear.sel[n];
+      /* Answering with a button that is no longer offered would be answering a
+         question that can no longer be asked, so the round starts again. */
+      earQ=null;
+      buildEarPick();renderEar();setPlayUI(false);
+    };
+    row.appendChild(b);
+  });
+  gridify(row);
+}
+function buildEarHowRow(){
+  const row=document.getElementById('ear-how-row');
+  if(!row)return;
+  row.innerHTML='';
+  [['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],
+   ['harmonic',tr('ear.together','Together')],['mix',tr('ear.mixed','Mixed')]].forEach(([k,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(state.ear.how===k?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.ear.how=k;buildEarHowRow();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+  gridify(row);
+}
+function buildEarRootRow(){
+  const row=document.getElementById('ear-root-row');
+  if(!row)return;
+  row.innerHTML='';
+  [[false,tr('ear.fixed','One note')],[true,tr('ear.roam','Anywhere')]].forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(!!state.ear.roam===v?' active':'');
+    b.textContent=label;
+    b.onclick=()=>{state.ear.roam=v;buildEarRootRow();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+  gridify(row);
+}
+function buildEar(){buildEarPick();buildEarHowRow();buildEarRootRow();renderEar();}
+
 /* ---------- mode switching ---------- */
 function setMode(m){
   const wasPlaying=state.playing;
@@ -4743,7 +4967,10 @@ function setMode(m){
   state.mode=m;
   if(modeChanged&&METRO_FRESH){metroTake(m);redrawMetro();}
   const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro',
-        isTuner=m==='tuner';
+        isTuner=m==='tuner',isEar=m==='ear';
+  /* Ear training listens to nothing and counts nothing: it plays a question and
+     waits. Everything the other modes need — the pulse, the range, what moves
+     between passes — has nothing to say about it, so none of it is there. */
   // the tuner listens, so it must not be listening to us
   if(!isTuner)stopTuner();
   // and the button is redrawn either way: it says Start or Listen depending on
@@ -4757,28 +4984,31 @@ function setMode(m){
      they are the same elements shown and hidden. */
   if(modeChanged)document.querySelectorAll('details.sec,details.mfold').forEach(d=>d.open=false);
   [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],
-   ['free','btn-mode-free'],['metro','btn-mode-metro'],['tuner','btn-mode-tuner']]
+   ['free','btn-mode-free'],['metro','btn-mode-metro'],['tuner','btn-mode-tuner'],
+   ['ear','btn-mode-ear']]
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
   document.getElementById('tuner-section').style.display=isTuner?'':'none';
   // the tuner has no setup to save, and nothing saved would mean anything in it
   // the drawer is a place you go to, not a panel in the mode: pintaCasa decides
   document.getElementById('sec-exercises').style.display=
-    (isTuner||!pastaAberta)?'none':'';
+    (isTuner||isEar||!pastaAberta)?'none':'';
   document.getElementById('drone-section').style.display=isDrone?'':'none';
   if(isDrone)setTimeout(fitNoteGrids,0);
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
   document.getElementById('free-section').style.display=m==='free'?'':'none';
+  document.getElementById('ear-section').style.display=isEar?'':'none';
+  if(isEar)buildEar();
   if(m==='free')setTimeout(fitNoteGrids,0);
   document.getElementById('scale-lists').style.display=m==='scale'?'':'none';
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?tr('sec.chords','Chords'):tr('sec.scales','Scales');
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   // in Metro there is nothing above the metronome to be divided from
-  document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone)?'none':'';
+  document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone||isEar)?'none':'';
   const ms=document.getElementById('metro-section');
-  ms.style.display=isTuner?'none':'';
+  ms.style.display=(isTuner||isEar)?'none':'';
   buildMetroOnRow();
   buildListModeRow();
-  splitMetro(!isTuner);
+  splitMetro(!isTuner&&!isEar);
   updateSupersededControls();      // the accompaniment is Metro's alone
   /* The panels close when the mode changes; the folds inside them are panels in
      everything but name, so they close with them.
@@ -4796,8 +5026,8 @@ function setMode(m){
     }
   });
   // Metro plays no notes, so the note readout has nothing to read but a dash
-  document.getElementById('current-note').style.display=isMetro?'none':'';
-  document.getElementById('current-freq').style.display=isMetro?'none':'';
+  document.getElementById('current-note').style.display=(isMetro||isEar)?'none':'';
+  document.getElementById('current-freq').style.display=(isMetro||isEar)?'none':'';
   // Metro is nothing but the metronome, so the metronome is not foldable there.
   // What it was before is remembered, so leaving Metro gives it back.
   if(isMetro){
@@ -4806,7 +5036,8 @@ function setMode(m){
   } else if(ms.classList.contains('pinned')){
     ms.classList.remove('pinned');ms.open=metroWasOpen;
   }
-  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner)?'none':'';
+  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner||isEar)?'none':'';
+  // which instrument asks the question is exactly the point, so Timbre stays
   document.getElementById('sec-sound').style.display=(isMetro||isTuner)?'none':'';
   /* Whether the exercise stops after one round applies wherever there is a
      round, so the panel is there for all of them — but the drone has no rounds
@@ -4815,7 +5046,7 @@ function setMode(m){
   /* Practice Progressions is about what moves between passes of a line of
      notes, and Metro has no notes — the panel stood there holding one control
      that had nothing to do with its name. */
-  document.getElementById('sec-progress').style.display=(isDrone||isMetro||isTuner)?'none':'';
+  document.getElementById('sec-progress').style.display=(isDrone||isMetro||isTuner||isEar)?'none':'';
   /* Thirds and 1 2 3 are ways of walking a scale. A chord has three or four
      notes and no steps between them to walk, so the shapes go. */
   document.getElementById('seqpat-block').style.display=(m==='scale')?'':'none';
@@ -7874,7 +8105,7 @@ function applyExercise(x){
 
   if(state.playing){state.playing=false;setPlayUI(false);stopPlayback();}
 
-  set('mode',oneOf(x.mode,['drone','scale','arpeggio','free','metro','tuner']));
+  set('mode',oneOf(x.mode,['drone','scale','arpeggio','free','metro','tuner','ear']));
   set('root',oneOf(x.root,NOTES));
   set('rootOct',num(x.rootOct,OCT_MIN,OCT_MAX));
   set('rootOctWanted',num(x.rootOctWanted,OCT_MIN,OCT_MAX));
@@ -8040,7 +8271,7 @@ let exMoving=null;       // the exercise in hand, while it is being moved
 const mesmoCaminho=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
 const dentroDe=(p,base)=>p.length>=base.length&&base.every((v,i)=>p[i]===v);
 const caminhoDe=e=>Array.isArray(e&&e.f)?e.f:[];
-const EX_MODOS=['drone','scale','arpeggio','free','metro','tuner'];
+const EX_MODOS=['drone','scale','arpeggio','free','metro','tuner','ear'];
 const modoDe=e=>{const m=e&&e.s&&e.s.mode;return EX_MODOS.indexOf(m)>=0?m:'scale';};
 function pastasDoModo(){return exFolders[state.mode]||(exFolders[state.mode]=[]);}
 function exercisesDoModo(){return exercises.filter(e=>modoDe(e)===state.mode);}
@@ -8937,6 +9168,14 @@ const SECTIONS=[
   {id:'sec-freerange',sum:'sum-freerange',group:'range',
    text:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.freeSpan})+' · '+
         dirLabel(state.freeDirection)},
+  {id:'sec-ear',      sum:'sum-ear',
+   text:()=>{
+     const n=earOn().length;
+     if(!n)return tr('ear.noneShort','none chosen');
+     const como={up:tr('ear.up','Up'),down:tr('ear.down','Down'),
+                 harmonic:tr('ear.together','Together'),mix:tr('ear.mixed','Mixed')}[state.ear.how];
+     return tr('ear.count',{one:'{n} interval',other:'{n} intervals'},{n})+' · '+como.toLowerCase();
+   }},
   {id:'sec-sound',    sum:'sum-sound',
    text:()=>{
      const t=TIMBRES.find(x=>x.k===state.timbre);
@@ -9736,7 +9975,7 @@ document.addEventListener('keydown',e=>{
 const HELP_FOR={
   'sec-exercises':'help-exercises',
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
-  'sec-freenotes':'help-free','sec-freerange':'help-range',
+  'sec-freenotes':'help-free','sec-freerange':'help-range','sec-ear':'help-ear',
   'metro-section':'help-metro','metro-more':'help-metro-run',
   'sec-rhythm':'help-phrasing','sec-sound':'help-timbre',
 };
