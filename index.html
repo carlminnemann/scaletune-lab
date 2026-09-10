@@ -283,7 +283,7 @@ body.home .head-btns{display:none}
    choice the player made on this screen, so it does not wear one. */
 body.home #mode-row .mode-btn.active{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
 body.home .scroll,body.home .btn-row,
-body.home .current-note,body.home .current-freq{display:none}
+body.home .current-note,body.home .current-freq{display:none!important}
 /* By id, not by class: Single / Study list borrows .mode-row to be shaped like
    the modes, and hiding the class hid it too — which is how the study list
    vanished from Scale and Arpeggio. */
@@ -301,8 +301,10 @@ body.home #mode-row .mode-btn,body.ouvido #ear-row .mode-btn{height:auto;min-hei
 /* The list of kinds is only there while none is chosen, and while it is there
    the exercise's own screen is not. */
 body:not(.ouvido) #ear-row{display:none}
+/* Marked important on purpose: these two screens are whole screens, and a rule
+   written later for a panel must not be able to put a panel back on them. */
 body.ouvido .scroll,body.ouvido .btn-row,
-body.ouvido .current-note,body.ouvido .current-freq{display:none}
+body.ouvido .current-note,body.ouvido .current-freq{display:none!important}
 /* The settings are read-once choices — the language, the theme, what the notes
    are called — so on this screen they sit at the foot rather than in the corner
    beside the name. A 34px button under six big ones looked like a mistake: it
@@ -4863,7 +4865,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10i';
+const APP_VERSION='lab-2026-09-10j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4960,7 +4962,8 @@ function pintaCasa(){
 function entraModo(m){
   emCasa=false;
   pastaAberta=false;
-  painelAberto=null;      // a mode opens on its boxes, never inside one
+  // a mode opens on its boxes, never inside one, and never inside the last one
+  limpaEstadoDoModo();
   /* Nothing is remembered between visits, the score included: coming into Ear
      is starting a round, not resuming one. */
   if(m==='ear'){earZera();state.ear.kind=null;}
@@ -4974,6 +4977,16 @@ function entraModo(m){
 }
 /* Leaving a mode stops what it was playing. Start belongs to the mode, so a
    drone left running would be a sound with nothing on the screen to stop it. */
+/* Coming out to the six clears everything that was open inside a mode. It did
+   not, and the metronome's boxes stayed standing behind the home screen: the
+   panel was still open, so the rules that lay out a panel were still in force
+   and they won against the ones that lay out the home screen. */
+function limpaEstadoDoModo(){
+  painelAberto=null;subPag=null;
+  if(typeof earPag!=='undefined')earPag=null;
+  document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag');
+  document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
+}
 function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
   // inside a page of ear options, back is back to the exercise
@@ -4987,6 +5000,7 @@ function voltaHome(){
   if(state.playing)togglePlay();
   stopTuner();
   emCasa=true;
+  limpaEstadoDoModo();
   pintaCasa();
 }
 
