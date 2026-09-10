@@ -754,5 +754,10 @@
  "fam.countChords": {
   "one": "{n} аккорд",
   "other": "аккордов: {n}"
+ },
+ "ear.figures": "Фигуры",
+ "ear.on": {
+  "one": "{n} вкл.",
+  "other": "{n} вкл."
  }
 }

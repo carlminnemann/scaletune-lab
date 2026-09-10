@@ -738,5 +738,10 @@
  "fam.countChords": {
   "one": "{n} Akkord",
   "other": "{n} Akkorde"
+ },
+ "ear.figures": "Figuren",
+ "ear.on": {
+  "one": "{n} an",
+  "other": "{n} an"
  }
 }

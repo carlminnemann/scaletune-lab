@@ -446,7 +446,42 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .root-box .root-big{font-size:clamp(28px,7vh,44px);font-weight:300;line-height:1}
 .root-box .root-cap{font-size:11px;font-weight:600;text-transform:uppercase;
   letter-spacing:0.08em;opacity:.7}
-#fam-row,#pag-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+#fam-row,#pag-row,#ear-optbox-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+/* Ear training: what is in play above, the exercise at the foot next to the
+   button that runs it, and a page of options taking the screen when one is
+   open. */
+body.earx .scroll{display:flex;flex-direction:column;min-height:0}
+body.earx #ear-section{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+/* Last of everything in the list, so nothing — not even the timbre — comes
+   between the question and the button that asks the next one. */
+body.earx #ear-section{order:9}
+body.earx #ear-opts{flex:0 0 auto}
+body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
+body.earpag #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+body.earpag #ear-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+body.earpag #ear-page .btn-wrap{flex:1 1 auto;min-height:0;grid-template-columns:1fr 1fr!important;
+  gap:var(--s2)!important;grid-auto-rows:1fr;align-content:stretch;align-items:stretch}
+body.earpag #ear-page .btn-wrap>button{min-height:clamp(46px,8.5vh,72px);font-size:15px;
+  border-radius:13px;width:auto;height:auto;align-self:stretch}
+/* A small phone with long words: the boxes give a little so that what is in
+   play, the question and the answers all stay on one screen. Measured — six
+   families and four written bars were 25 and 80 pixels over on a 320x640 in
+   German and in Russian. */
+/* A page takes the screen — the timbre panel included, which is a setting like
+   any other and has its own box to be reached from. */
+body.earpag #sec-sound{display:none}
+@media(max-height:700px){
+  body.earx #ear-optbox-row .panel-box{min-height:44px;padding:7px 10px}
+  /* Two lines of reading is enough on a small screen; the box says what is on,
+     not everything that is on. */
+  body.earx #ear-optbox-row .panel-box .sub{display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden}
+  body.earx .ear-panel{padding:var(--s3)}
+  body.earx .ear-say{min-height:2.1em;font-size:14px;margin-bottom:var(--s2)}
+  body.earx #ear-answers.ritmo{gap:5px}
+  body.earx .ear-ritmo{max-height:30px}
+  body.earx .ear-head{margin-bottom:4px}
+}
 /* ---------- filling the screen ----------
    A grid of boxes that ends half way up reads as a list that was cut short. In
    these two states the column of boxes is the page, so it is given the height:
@@ -1635,7 +1670,14 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
      and waiting for an answer is the whole of it. The question is above and the
      answers under it, because that is the order a question is asked in. -->
 <div id="ear-section" style="display:none">
-  <div class="panel ear-panel">
+  <!-- What is in play, above; the exercise itself at the foot, next to the
+       button that runs it. A question and the thumb that answers it belong at
+       the same end of the screen. -->
+  <div id="ear-opts">
+    <div id="ear-optbox-row"></div>
+    <div id="ear-page" style="display:none"></div>
+  </div>
+  <div class="panel ear-panel" id="ear-panel">
     <div class="ear-head">
       <span class="ear-score" id="ear-score"></span>
       <button class="pick-btn ear-again" id="ear-again" type="button" onclick="earToca()"
@@ -1644,35 +1686,6 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
     <div class="ear-say" id="ear-say"></div>
     <div class="btn-wrap" id="ear-answers"></div>
   </div>
-  <details class="sec" id="sec-ear">
-    <summary><span id="ear-opt-title">What is in play</span><span class="sec-sum" id="sum-ear"></span></summary>
-    <div class="sec-body">
-      <div id="ear-opt-intervals">
-        <div class="btn-wrap" id="ear-pick"></div>
-        <div class="head" style="margin-top:var(--s3);margin-bottom:0">
-          <span class="group-label" data-t="ear.how">Played</span>
-          <span class="btn-wrap seg" id="ear-how-row" data-cols="fixed"></span></div>
-        <div class="head" style="margin-top:var(--s3);margin-bottom:0">
-          <span class="group-label" data-t="ear.from">From</span>
-          <span class="btn-wrap seg" id="ear-root-row" data-cols="fixed"></span></div>
-      </div>
-      <div id="ear-opt-scales" style="display:none">
-        <div class="btn-wrap" id="ear-scales"></div>
-      </div>
-      <div id="ear-opt-chords" style="display:none">
-        <div class="btn-wrap" id="ear-chords"></div>
-        <div class="head" style="margin-top:var(--s3);margin-bottom:0">
-          <span class="group-label" data-t="ear.how">Played</span>
-          <span class="btn-wrap seg" id="ear-chordhow-row" data-cols="fixed"></span></div>
-      </div>
-      <div id="ear-opt-rhythm" style="display:none">
-        <div class="btn-wrap" id="ear-figs"></div>
-        <div class="head" style="margin-top:var(--s3);margin-bottom:0">
-          <span class="group-label" data-t="tempo">Tempo</span>
-          <span class="btn-wrap seg" id="ear-bpm-row" data-cols="fixed"></span></div>
-      </div>
-    </div>
-  </details>
 </div>
 
   <details class="sec" id="sec-progress">
@@ -4854,7 +4867,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10g';
+const APP_VERSION='lab-2026-09-10h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4917,10 +4930,14 @@ function pintaCasa(){
      it is there the exercise's own panels are not. */
   document.body.classList.toggle('ouvido',
     !emCasa&&!pastaAberta&&state.mode==='ear'&&!state.ear.kind);
+  const noOuvido=!emCasa&&!pastaAberta&&state.mode==='ear'&&!!state.ear.kind;
+  document.body.classList.toggle('earx',noOuvido);
+  document.body.classList.toggle('earpag',noOuvido&&!!earPag);
   const n=document.getElementById('mode-back-name');
   /* The bar says where you are, and the arrow leaves it: in the drawer that is
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
+    :(state.mode==='ear'&&earPag)?earNomeDaPagina()
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
     :(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto]))?nomeDaSub()
     :(painelAberto&&paineisDoModo())?nomeDoPainel(painelAberto)
@@ -4959,6 +4976,8 @@ function entraModo(m){
    drone left running would be a sound with nothing on the screen to stop it. */
 function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
+  // inside a page of ear options, back is back to the exercise
+  if(state.mode==='ear'&&earPag){earFechaPagina();return;}
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
   // inside a page of a panel, back is back to that panel's front
@@ -5296,16 +5315,10 @@ function earKindLabel(k){
 const EAR_STEPS=[1,2,3,4,5,6,7,8,9,10,11,12];
 const EAR_LABEL={1:'m2',2:'M2',3:'m3',4:'M3',5:'P4',6:'TT',7:'P5',
                  8:'m6',9:'M6',10:'m7',11:'M7',12:'P8'};
-/* A curated set, not everything the app knows: the seven modes, the two
-   pentatonics, the two minors and the whole tone are what an ear is trained on.
-   The rest are shades of these and belong in the scale panel, not here. */
-const EAR_SCALES=[['gregorian','Ionian'],['gregorian','Dorian'],['gregorian','Phrygian'],
-  ['gregorian','Lydian'],['gregorian','Mixolydian'],['gregorian','Aeolian'],['gregorian','Locrian'],
-  ['pentatonic','Major Pentatonic'],['pentatonic','Minor Pentatonic'],
-  ['harmonic','Harmonic Minor'],['melodic','Melodic Minor'],['symmetric','Whole Tone']];
-const EAR_CHORDS=[['triad','Major'],['triad','Minor'],['triad','Augmented'],['triad','Diminished'],
-  ['seventh','Major 7'],['seventh','Minor 7'],['seventh','Dominant 7'],
-  ['seventh','Diminished 7'],['seventh','Half-Dim 7']];
+/* Everything the app knows, and not a shortlist: the families are pages and
+   each of them opens its own scales to be switched on. A name lives in more
+   than one family — the melodic minor is in its own and among the gregorian
+   modes — so the first family that has it is the one it is asked from. */
 /* One beat each, written as the fractions of it where a note begins. A rest is
    a beat with nothing in it — a figure like any other, and the one that makes a
    rhythm hard to hear. */
@@ -5324,8 +5337,17 @@ function earKind(){return state.ear.kind;}
 /* What is in play, per kind. An empty list is a question that cannot be asked,
    and the round says so rather than asking it. */
 function earOn(){return EAR_STEPS.filter(n=>state.ear.sel[n]);}
-function earScalesOn(){return EAR_SCALES.filter(x=>state.ear.scales[x[1]]);}
-function earChordsOn(){return EAR_CHORDS.filter(x=>state.ear.chords[x[1]]);}
+function earLigadas(tabela,escolhidas){
+  const out=[],vistos={};
+  Object.keys(tabela).forEach(function(g){
+    Object.keys(tabela[g]).forEach(function(n){
+      if(escolhidas[n]&&!vistos[n]){vistos[n]=1;out.push([g,n]);}
+    });
+  });
+  return out;
+}
+function earScalesOn(){return earLigadas(SCALES,state.ear.scales);}
+function earChordsOn(){return earLigadas(CHORDS,state.ear.chords);}
 function earFigsOn(){return EAR_FIG_ORDER.filter(f=>state.ear.figs[f]);}
 
 /* Where a question starts from. Fixed is the note the app is set to — the
@@ -5577,7 +5599,149 @@ function renderEar(){
   refreshSectionSummaries();
 }
 
-/* ---------- what is in play ---------- */
+/* ---------- what is in play, as pages of boxes ----------
+   The same law as everywhere else: a front of boxes, a page behind each. The
+   scales exercise offers every scale the app knows — the families are boxes,
+   and each family opens its own modes to be switched on or off. It is more
+   taps than a list of checkboxes and it is faster, because every one of them
+   is a target you can hit without looking. */
+let earPag=null;
+function famNome(g){
+  const d=document.querySelector('details.fam[data-fam="'+g+'"] summary span[data-t]');
+  return d?d.textContent.trim():g;
+}
+function earScaleFams(){return Object.keys(SCALES);}
+function earChordFams(){return Object.keys(CHORDS);}
+function earLigadasNaFam(g){
+  return Object.keys(SCALES[g]||{}).filter(function(n){return state.ear.scales[n];}).length;
+}
+function earLigadasNaFamAcorde(g){
+  return Object.keys(CHORDS[g]||{}).filter(function(n){return state.ear.chords[n];}).length;
+}
+function earPaginas(){
+  const k=earKind();
+  if(k==='intervals')return [
+    {k:'sel', nome:function(){return tr('ear.which','What is in play');},
+     diz:function(){return tr('ear.count',{one:'{n} interval',other:'{n} intervals'},{n:earOn().length});}},
+    {k:'how', nome:function(){return tr('ear.how','Played');},
+     diz:function(){return earComoDiz(state.ear.how);}},
+    {k:'from',nome:function(){return tr('ear.from','From');},
+     diz:function(){return state.ear.roam?tr('ear.roam','Anywhere'):tr('ear.fixed','One note');}}];
+  if(k==='scales')return earScaleFams().map(function(g){
+    return {k:'fam:'+g,nome:function(){return famNome(g);},
+            diz:function(){const n=earLigadasNaFam(g);
+              return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};});
+  if(k==='chords')return earChordFams().map(function(g){
+    return {k:'fam:'+g,nome:function(){return famNome(g);},
+            diz:function(){const n=earLigadasNaFamAcorde(g);
+              return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};})
+    .concat([{k:'how',nome:function(){return tr('ear.how','Played');},
+      diz:function(){return earComoDiz(state.ear.chordHow);}}]);
+  if(k==='rhythm')return [
+    {k:'figs',nome:function(){return tr('ear.figures','Figures');},
+     diz:function(){return earFigsOn().map(earFigLabel).join(' · ');}},
+    {k:'bpm', nome:function(){return tr('tempo','Tempo');},
+     diz:function(){return (state.ear.bpm||84)+' BPM';}}];
+  return [];
+}
+function earComoDiz(v){
+  return {up:tr('ear.up','Up'),down:tr('ear.down','Down'),updown:tr('ear.updown','Up or down'),
+          harmonic:tr('ear.together','Together'),block:tr('ear.together','Together'),
+          mix:tr('ear.mixed','Mixed')}[v]||v;
+}
+function earNomeDaPagina(){
+  const d=earPaginas().find(function(x){return x.k===earPag;});
+  return d?d.nome():'';
+}
+function earAbrePagina(k){earPag=k;buildEarOpts();renderEar();pintaCasa();}
+function earFechaPagina(){earPag=null;buildEarOpts();renderEar();pintaCasa();}
+/* The switches themselves, built into the one page container. Toggling starts
+   the round again: answering with a button that is no longer offered would be
+   answering a question that can no longer be asked. */
+function earMexeu(){earQ=null;buildEarOpts();renderEar();setPlayUI(false);}
+function earCaixasToggle(host,itens,ligado,mexe){
+  const w=document.createElement('div');
+  w.className='btn-wrap';
+  itens.forEach(function(it){
+    const b=document.createElement('button');
+    b.className='pick-btn'+(ligado(it)?' active':'');
+    b.textContent=it.label;
+    b.onclick=function(){mexe(it);};
+    w.appendChild(b);
+  });
+  host.appendChild(w);
+}
+function earCaixasSeg(host,itens,agora,escolhe){
+  const w=document.createElement('div');
+  w.className='btn-wrap';
+  itens.forEach(function(par){
+    const b=document.createElement('button');
+    b.className='pick-btn'+(agora===par[0]?' active':'');
+    b.textContent=par[1];
+    b.onclick=function(){escolhe(par[0]);};
+    w.appendChild(b);
+  });
+  host.appendChild(w);
+}
+function buildEarPage(){
+  const host=document.getElementById('ear-page');
+  if(!host)return;
+  host.innerHTML='';
+  const k=earKind();
+  if(!earPag)return;
+  if(earPag==='sel'){
+    earCaixasToggle(host,EAR_STEPS.map(function(n){return {n:n,label:EAR_LABEL[n]};}),
+      function(it){return state.ear.sel[it.n];},
+      function(it){state.ear.sel[it.n]=!state.ear.sel[it.n];earMexeu();});
+  } else if(earPag==='how'){
+    if(k==='chords')earCaixasSeg(host,
+      [['up',tr('ear.oneByOne','One by one')],['block',tr('ear.together','Together')],
+       ['mix',tr('ear.mixed','Mixed')]],state.ear.chordHow,
+      function(v){state.ear.chordHow=v;earMexeu();});
+    else earCaixasSeg(host,
+      [['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],
+       ['updown',tr('ear.updown','Up or down')],['harmonic',tr('ear.together','Together')],
+       ['mix',tr('ear.mixed','Mixed')]],state.ear.how,
+      function(v){state.ear.how=v;earMexeu();});
+  } else if(earPag==='from'){
+    earCaixasSeg(host,[[false,tr('ear.fixed','One note')],[true,tr('ear.roam','Anywhere')]],
+      !!state.ear.roam,function(v){state.ear.roam=v;earMexeu();});
+  } else if(earPag==='figs'){
+    earCaixasToggle(host,EAR_FIG_ORDER.map(function(f){return {f:f,label:earFigLabel(f)};}),
+      function(it){return state.ear.figs[it.f];},
+      function(it){state.ear.figs[it.f]=!state.ear.figs[it.f];earMexeu();});
+  } else if(earPag==='bpm'){
+    earCaixasSeg(host,EAR_BPMS.map(function(n){return [n,String(n)];}),state.ear.bpm||84,
+      function(v){state.ear.bpm=v;earMexeu();});
+  } else if(earPag.indexOf('fam:')===0){
+    const g=earPag.slice(4);
+    if(k==='chords'){
+      earCaixasToggle(host,Object.keys(CHORDS[g]||{}).map(function(n){return {n:n,label:chordLabel(n)};}),
+        function(it){return state.ear.chords[it.n];},
+        function(it){state.ear.chords[it.n]=!state.ear.chords[it.n];earMexeu();});
+    } else {
+      earCaixasToggle(host,Object.keys(SCALES[g]||{}).map(function(n){return {n:n,label:scaleLabel(n)};}),
+        function(it){return state.ear.scales[it.n];},
+        function(it){state.ear.scales[it.n]=!state.ear.scales[it.n];earMexeu();});
+    }
+  }
+}
+function buildEarOptRow(){
+  const row=document.getElementById('ear-optbox-row');
+  if(!row)return;
+  row.innerHTML='';
+  earPaginas().forEach(function(d){
+    const b=document.createElement('button');
+    b.className='panel-box';b.type='button';
+    const t=document.createElement('span');t.textContent=d.nome();
+    const u=document.createElement('span');u.className='sub';
+    let diz='';try{diz=d.diz?d.diz():'';}catch(e){}
+    u.textContent=diz;
+    b.appendChild(t);b.appendChild(u);
+    b.onclick=function(){earAbrePagina(d.k);};
+    row.appendChild(b);
+  });
+}
 function buildEarRow(){
   const row=document.getElementById('ear-row');
   if(!row)return;
@@ -5592,114 +5756,32 @@ function buildEarRow(){
 }
 function earEscolhe(k){
   state.ear.kind=k;
+  earPag=null;
   earZera();
   buildEarOpts();renderEar();pintaCasa();setPlayUI(false);
 }
 function earVoltaMenu(){
-  state.ear.kind=null;
+  state.ear.kind=null;earPag=null;
   earZera();stopAllAudio();
   renderEar();pintaCasa();setPlayUI(false);
 }
-function earToggle(obj,chave,fn){
-  obj[chave]=!obj[chave];
-  /* Answering with a button that is no longer offered would be answering a
-     question that can no longer be asked, so the round starts again. */
-  earQ=null;
-  fn();renderEar();setPlayUI(false);
-}
 function buildEarOpts(){
-  const k=earKind();
-  [['ear-opt-intervals','intervals'],['ear-opt-scales','scales'],
-   ['ear-opt-chords','chords'],['ear-opt-rhythm','rhythm']].forEach(function(par){
-    const el=document.getElementById(par[0]);
-    if(el)el.style.display=(k===par[1])?'':'none';
-  });
-  const t=document.getElementById('ear-opt-title');
-  if(t)t.textContent=k?earKindLabel(k):tr('ear.which','What is in play');
-  buildEarPick();buildEarHowRow();buildEarRootRow();
-  buildEarScales();buildEarChords();buildEarChordHow();
-  buildEarFigs();buildEarBpm();
-}
-function botoesToggle(row,itens,ligado,carrega){
-  if(!row)return;
-  row.innerHTML='';
-  itens.forEach(function(it){
-    const b=document.createElement('button');
-    b.className='pick-btn'+(ligado(it)?' active':'');
-    b.textContent=it.label;
-    b.onclick=function(){carrega(it);};
-    row.appendChild(b);
-  });
-  gridify(row);
-}
-function buildEarPick(){
-  botoesToggle(document.getElementById('ear-pick'),
-    EAR_STEPS.map(function(n){return {n:n,label:EAR_LABEL[n]};}),
-    function(it){return state.ear.sel[it.n];},
-    function(it){earToggle(state.ear.sel,it.n,buildEarPick);});
-}
-function buildEarScales(){
-  botoesToggle(document.getElementById('ear-scales'),
-    EAR_SCALES.map(function(x){return {n:x[1],label:scaleLabel(x[1])};}),
-    function(it){return state.ear.scales[it.n];},
-    function(it){earToggle(state.ear.scales,it.n,buildEarScales);});
-}
-function buildEarChords(){
-  botoesToggle(document.getElementById('ear-chords'),
-    EAR_CHORDS.map(function(x){return {n:x[1],label:chordLabel(x[1])};}),
-    function(it){return state.ear.chords[it.n];},
-    function(it){earToggle(state.ear.chords,it.n,buildEarChords);});
+  const row=document.getElementById('ear-optbox-row');
+  const page=document.getElementById('ear-page');
+  if(row)row.style.display=earPag?'none':'';
+  if(page)page.style.display=earPag?'':'none';
+  const painel=document.getElementById('ear-panel');
+  // a page takes the screen, the exercise included
+  if(painel)painel.style.display=earPag?'none':'';
+  if(!earPag)buildEarOptRow();
+  buildEarPage();
 }
 function earFigLabel(f){
   return {'4':tr('ear.f.quarter','Quarters'),'8':tr('ear.f.eighth','Eighths'),
           '3':tr('ear.f.triplet','Triplets'),'16':tr('ear.f.sixteenth','Sixteenths'),
           'd':tr('ear.f.dotted','Dotted'),'r':tr('ear.f.rest','Rests')}[f]||f;
 }
-function buildEarFigs(){
-  botoesToggle(document.getElementById('ear-figs'),
-    EAR_FIG_ORDER.map(function(f){return {f:f,label:earFigLabel(f)};}),
-    function(it){return state.ear.figs[it.f];},
-    function(it){earToggle(state.ear.figs,it.f,buildEarFigs);});
-}
-function segRow(id,itens,agora,escolhe){
-  const row=document.getElementById(id);
-  if(!row)return;
-  row.innerHTML='';
-  itens.forEach(function(par){
-    const b=document.createElement('button');
-    b.className='pick-btn'+(agora===par[0]?' active':'');
-    b.textContent=par[1];
-    b.onclick=function(){escolhe(par[0]);};
-    row.appendChild(b);
-  });
-  gridify(row);
-}
-function buildEarHowRow(){
-  segRow('ear-how-row',
-    [['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],
-     ['updown',tr('ear.updown','Up or down')],
-     ['harmonic',tr('ear.together','Together')],['mix',tr('ear.mixed','Mixed')]],
-    state.ear.how,
-    function(v){state.ear.how=v;buildEarHowRow();refreshSectionSummaries();});
-}
-function buildEarChordHow(){
-  segRow('ear-chordhow-row',
-    [['up',tr('ear.oneByOne','One by one')],['block',tr('ear.together','Together')],
-     ['mix',tr('ear.mixed','Mixed')]],
-    state.ear.chordHow,
-    function(v){state.ear.chordHow=v;buildEarChordHow();refreshSectionSummaries();});
-}
-function buildEarRootRow(){
-  segRow('ear-root-row',
-    [[false,tr('ear.fixed','One note')],[true,tr('ear.roam','Anywhere')]],
-    !!state.ear.roam,
-    function(v){state.ear.roam=v;buildEarRootRow();refreshSectionSummaries();});
-}
 const EAR_BPMS=[60,72,84,100,120];
-function buildEarBpm(){
-  segRow('ear-bpm-row',EAR_BPMS.map(function(n){return [n,String(n)];}),state.ear.bpm||84,
-    function(v){state.ear.bpm=v;buildEarBpm();refreshSectionSummaries();});
-}
 /* One button does the whole loop: it starts, it plays again while you are
    thinking, and it asks the next one once you have answered. */
 function earBotao(){
@@ -9923,15 +10005,6 @@ const SECTIONS=[
   {id:'sec-freerange',sum:'sum-freerange',group:'range',
    text:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.freeSpan})+' · '+
         dirLabel(state.freeDirection)},
-  {id:'sec-ear',      sum:'sum-ear',
-   text:()=>{
-     const n=earOn().length;
-     if(!n)return tr('ear.noneShort','none chosen');
-     const como={up:tr('ear.up','Up'),down:tr('ear.down','Down'),
-                 updown:tr('ear.updown','Up or down'),
-                 harmonic:tr('ear.together','Together'),mix:tr('ear.mixed','Mixed')}[state.ear.how];
-     return tr('ear.count',{one:'{n} interval',other:'{n} intervals'},{n})+' · '+como.toLowerCase();
-   }},
   {id:'sec-sound',    sum:'sum-sound',
    text:()=>{
      const t=TIMBRES.find(x=>x.k===state.timbre);
@@ -10732,7 +10805,7 @@ document.addEventListener('keydown',e=>{
 const HELP_FOR={
   'sec-exercises':'help-exercises',
   'sec-scales':'help-scales','sec-range':'help-range','sec-progress':'help-progress',
-  'sec-freenotes':'help-free','sec-freerange':'help-range','sec-ear':'help-ear',
+  'sec-freenotes':'help-free','sec-freerange':'help-range',
   'metro-section':'help-metro','metro-more':'help-metro-run',
   'sec-rhythm':'help-phrasing','sec-sound':'help-timbre',
 };

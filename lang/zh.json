@@ -723,5 +723,10 @@
  "fam.countChords": {
   "one": "{n} 个",
   "other": "{n} 个"
+ },
+ "ear.figures": "节奏型",
+ "ear.on": {
+  "one": "已选 {n}",
+  "other": "已选 {n}"
  }
 }
