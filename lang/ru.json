@@ -768,5 +768,6 @@
  "tuner.a4Down": "На герц ниже",
  "tuner.a4Up": "На герц выше",
  "tuner.cents": "{n} центов",
- "tuner.farOff": "далеко"
+ "tuner.farOff": "далеко",
+ "beats.only": "Только доли"
 }

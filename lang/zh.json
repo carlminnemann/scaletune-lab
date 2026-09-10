@@ -737,5 +737,6 @@
  "tuner.a4Down": "低一赫兹",
  "tuner.a4Up": "高一赫兹",
  "tuner.cents": "{n} 音分",
- "tuner.farOff": "相差很远"
+ "tuner.farOff": "相差很远",
+ "beats.only": "只看拍子"
 }

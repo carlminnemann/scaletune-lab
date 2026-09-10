@@ -446,13 +446,26 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
   border:1px solid var(--border2);border-radius:14px;background:var(--bg2);
   color:var(--text);font-size:clamp(15px,2.3vh,19px);font-weight:500;line-height:1.2;
   cursor:pointer;touch-action:manipulation}
-/* The name, in the middle, and nothing else. The italic line under it said what
-   was chosen inside, and six of those turned a page of choices back into a page
-   of reading. The value is one tap away and written in full on the page the box
-   opens; what the front of a panel has to say is which box to press. It is
-   still there for a screen reader and for a long press — as the box's label,
-   not as ink on the screen. */
-.panel-box .sub{display:none}
+/* The name, in the middle, and under it the value — but only where the value is
+   not what the app opened with. Six italic lines on an untouched screen turned a
+   page of choices back into a page of reading; no line at all meant an hour's
+   work left no trace anywhere until each box was opened again. A box says
+   nothing while it holds the default and says what it holds once it does not. */
+/* Two grounds, two inks: on a marked box the line sits on the mode's fill, and
+   on a plain one — the ear's boxes, which always say what is in play — it sits
+   on the panel. One colour for both was near-white on cream. */
+.panel-box .sub{display:block;font-size:11px;font-style:italic;color:var(--text3);
+  font-weight:400;line-height:1.25;margin-top:3px;
+  overflow-wrap:anywhere;max-width:100%}
+.panel-box.tem .sub{color:var(--mode-fg);opacity:.85}
+/* On a short screen the line says what it can in one line rather than pushing a
+   grid of boxes into scrolling. */
+@media(max-height:700px){
+  .panel-box .sub{font-size:10px;margin-top:1px;display:-webkit-box;
+    -webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  body.paginas #sig-block .beats-hint{display:none}
+  body.paginas #tempo-block .head{margin-bottom:2px}
+}
 /* Wordless, and it answers the one thing the value line was really for: this is
    the family the scale being played lives in. */
 .panel-box.tem{border-color:var(--mode);background:var(--mode-bg);color:var(--mode-fg)}
@@ -625,7 +638,32 @@ body.painel .sec-body>div[id$="-line"]>.btn-wrap>button{min-height:clamp(46px,8.
 /* The pulse is not one of the panel's blocks: it belongs to the transport, so it
    stays whether the boxes or a page are on the screen. */
 body.paginas .sec-body>*:not(#pag-row):not(.panel-clear):not(.pagina-aberta):not(#pulse-wrap){display:none!important}
-body.paginas .sec-body>.pagina-aberta{display:block!important}
+/* min-content, or the page is a flex child that has been squeezed and its
+   contents hang below it with nothing able to scroll to them: the pattern grid
+   at two bars was laid out 330 pixels under the bottom of the screen and the
+   scrolling area was reporting nothing to scroll. It claims the height it needs
+   and the screen scrolls to it. */
+body.paginas .sec-body>.pagina-aberta{display:block!important;min-height:min-content}
+/* And the chain above it has to let go: every level of the panel is a flex child
+   with min-height:0, which is what lets a grid of boxes share out the screen —
+   and what let a page taller than the screen be squeezed to nothing with its
+   contents hanging below, unreachable, while the scrolling area reported
+   nothing to scroll. With a page open the levels claim their content instead,
+   and a page that does not fit scrolls, as a page should. */
+body.painel.sub details.sec,
+body.painel.sub details.sec>.sec-body,
+body.painel.sub details.sec::details-content,
+body.painel.sub #pitch-section,body.painel.sub #free-section{min-height:min-content}
+/* A page is one question. What will play next, and the clear for the whole
+   mode, belong to the mode and were taking 142 pixels off the top of every page
+   in Scale — enough on a small phone to push the tempo into scrolling. They
+   stay on the mode's own screens. */
+body.painel.sub #rotation-panel,body.painel.sub .mode-reset{display:none!important}
+/* A page is one question, and a fold inside it asks it twice: the pattern, the
+   mixer and the subdivision each opened onto a bar with their own name on it
+   that had to be tapped again. The bar above the page already says which page
+   this is. */
+body.paginas .pagina-aberta .pat-head{display:none}
 body.paginas .sec-body>.pagina-aberta.mgroup{margin-bottom:0}
 
 /* A page of choices takes the screen: two columns for words, three for the
@@ -1443,6 +1481,41 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 .beat-dot.poly{border-radius:6px}
 .beat-dot.poly.active-beat{background:var(--brand);border-color:var(--brand)}
 .beat-dot.poly.acc-low.active-beat{background:var(--mode);border-color:var(--mode)}
+/* ---------- the pattern, on its own page ----------
+   Written when it was a fold at the bottom of a long panel, it opens with the
+   list of saved patterns, the loop length and two rows of settings, and the grid
+   — the thing you came to write in — was the seventh item down and off the
+   screen. On a page the writing surface comes first: the level you are writing
+   at, which bar, the grid, and what to clear or start from. Everything that is
+   asked once and left alone goes under it. Order, not a rewrite of the markup:
+   the same elements, read in the order the hand needs them. */
+body.paginas #pat-body{display:flex;flex-direction:column}
+body.paginas #pat-body>*{order:20}
+body.paginas #pat-level-line{order:1}
+body.paginas #pat-bar-row{order:2}
+body.paginas #pat-body>.pat-scroll{order:3}
+body.paginas #pat-body>.step-row{order:4}
+body.paginas #pat-info{order:5}
+body.paginas #pat-time-line{order:6}
+body.paginas #pat-loop-line{order:7}
+body.paginas #pat-copy-line{order:8}
+body.paginas #pat-mine-head{order:9}
+body.paginas #pat-list{order:10}
+body.paginas #pat-body>.ex-new{order:11}
+body.paginas #pat-mine-info{order:12}
+/* ---------- the polyrhythm, on its own page ----------
+   Two numbers against each other is the whole question, and they were set in
+   two fifteen-pixel fields on a line with a caption. They are the size of an
+   answer here, centred, with the length of the cycle under them and the two
+   rows of pulses given room to be told apart. */
+body.sub #poly-block .step-row{justify-content:center;align-items:center;
+  gap:var(--s3);flex-wrap:wrap;margin:var(--s3) 0 var(--s4)}
+body.sub #poly-block .step-row .sig-select{font-size:clamp(24px,5.5vh,40px);
+  font-weight:300;padding:4px 10px;min-width:2.4em;text-align:center}
+body.sub #poly-block .step-row .step-unit{font-size:15px;color:var(--text3)}
+body.sub #poly-block #poly-label{flex-basis:100%;text-align:center;margin-top:2px}
+body.sub #poly-block #poly-row-a{margin-bottom:var(--s2)}
+body.sub #poly-block #poly-row-b{margin-bottom:var(--s3)}
 .beats-row.carries{position:relative}
 .beats-row.carries::after{content:'♪';position:absolute;left:-2px;top:50%;transform:translateY(-50%);
   font-size:12px;color:var(--brand)}
@@ -1452,13 +1525,22 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
    lights and swells rather than merely changing colour, and the tempo written
    quietly underneath — the one number worth reading at arm's length from a
    stand. The accent keeps the app's red and the plain beats its yellow. */
+/* Only beats is a screen, not a strip: everything else goes, including the
+   tempo written under the circles — what is asked for is the circles.
+   The light a beat throws needs somewhere to fall, and the scrolling area cuts
+   what leaves its box, so the room is taken here as padding and the circles are
+   worked out inside it. */
 #pulse-wrap{display:none}
-/* The light a beat throws needs somewhere to fall: the scrolling area cuts what
-   leaves its box, and the first circle's halo was being clipped at the left
-   edge. The room is taken here, so the circles are worked out inside it. */
-body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:var(--s2);flex:0 0 auto;padding:8px 18px;
-  margin:0 0 var(--s2);min-height:clamp(64px,16vh,140px)}
+body.bolinhas .scroll>*:not(#metro-section){display:none!important}
+body.bolinhas #metro-section{display:flex!important;flex-direction:column;
+  flex:1 1 auto;min-height:0;border:0;background:none;margin:0}
+body.bolinhas #metro-section>.sec-body>*:not(#pulse-wrap){display:none!important}
+body.bolinhas #metro-section>.sec-body{display:flex;flex-direction:column;
+  flex:1 1 auto;min-height:0;padding:0}
+body.bolinhas #pulse-wrap{display:flex!important;flex-direction:column;
+  align-items:center;justify-content:center;gap:var(--s4);flex:1 1 auto;
+  padding:8px 20px}
+body.bolinhas .pulse-bpm{display:none}
 .pulse-bpm{font-size:12px;color:var(--text3);letter-spacing:0.06em;
   font-variant-numeric:tabular-nums}
 /* Stretched across what holds it, or a grid in a centred column shrinks to its
@@ -1970,6 +2052,10 @@ body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
          The label carries the key now — it was on the head, and translating a
          head replaces everything inside it, this button included. -->
     <div class="head" style="margin-bottom:var(--s2)"><span class="section-label" data-t="bar">Bar</span>
+      <!-- The circles, and nothing else, on the whole screen: what you look at
+           while you play rather than what you press. -->
+      <button class="poly-switch" id="only-beats" type="button" onclick="abreBolinhas()"
+              data-t="beats.only">Only beats</button>
       <button class="poly-switch" id="poly-switch" type="button" onclick="togglePoly()"
               data-t="poly.short">Poly</button></div>
     <div class="beats-row" id="beats-row"></div>
@@ -2011,7 +2097,7 @@ body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
            list that mixes the two makes you read to tell them apart. Picking one
            loads it into the pattern you are editing and switches the
            accompaniment to Custom, which is where it plays. -->
-      <div class="head" style="margin-top:var(--s3);margin-bottom:var(--s2)">
+      <div class="head" id="pat-mine-head" style="margin-top:var(--s3);margin-bottom:var(--s2)">
         <span class="section-label" data-t="pat.mine">My patterns</span>
         <span id="pat-del-mode"></span></div>
       <div class="ex-list" id="pat-list"></div>
@@ -2021,7 +2107,7 @@ body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
         <button class="pick-btn ex-save" id="pat-save" onclick="savePatternAs()"></button>
       </div>
       <div class="info-line" id="pat-mine-info" style="margin-bottom:var(--s3)"></div>
-      <div class="head" style="margin-top:var(--s3)">
+      <div class="head" id="pat-loop-line" style="margin-top:var(--s3)">
         <span class="sig-fields">
           <span class="sig-unit" data-t="loop">loop</span>
           <select class="sig-select" id="pat-bars" data-ta="aria.patBars" aria-label="How many bars loop"></select>
@@ -2031,10 +2117,10 @@ body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
       <!-- One choice, not two. Which of the two patterns you are writing is
            also which one sounds: there is no state where you are looking at one
            and hearing the other. -->
-      <div class="head" style="margin-top:var(--s2);margin-bottom:var(--s2)">
+      <div class="head" id="pat-time-line" style="margin-top:var(--s2);margin-bottom:var(--s2)">
         <span class="section-label" data-t="pat.which">Time</span>
         <span class="btn-wrap seg" id="pat-grid-row" data-cols="fixed"></span></div>
-      <div class="head" style="margin-top:var(--s2);margin-bottom:var(--s2)">
+      <div class="head" id="pat-level-line" style="margin-top:var(--s2);margin-bottom:var(--s2)">
         <span class="section-label" data-t="level">Level</span>
         <span class="btn-wrap seg" id="pat-pen-row" data-cols="fixed"></span></div>
       <div id="pat-bar-row" class="btn-wrap seg" data-cols="fixed" style="margin-bottom:var(--s2)"></div>
@@ -5050,7 +5136,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10l';
+const APP_VERSION='lab-2026-09-10m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5118,6 +5204,7 @@ function pintaCasa(){
   document.body.classList.toggle('earpag',noOuvido&&!!earPag);
   /* The tuner is one reading and two things it is measured against, so it has
      the same two states as everything else: the reading, and a page. */
+  document.body.classList.toggle('bolinhas',soBolinhas&&!emCasa&&!pastaAberta);
   const noAfinador=!emCasa&&!pastaAberta&&state.mode==='tuner';
   document.body.classList.toggle('afina',noAfinador);
   document.body.classList.toggle('afinapag',noAfinador&&!!tunerPag);
@@ -5125,6 +5212,7 @@ function pintaCasa(){
   /* The bar says where you are, and the arrow leaves it: in the drawer that is
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
+    :soBolinhas?tr('beats.only','Only beats')
     :(state.mode==='tuner'&&tunerPag)?tunerNomeDaPagina()
     :(state.mode==='ear'&&earPag)?earNomeDaPagina()
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
@@ -5176,7 +5264,9 @@ function limpaEstadoDoModo(){
   painelAberto=null;subPag=null;
   if(typeof earPag!=='undefined')earPag=null;
   if(typeof tunerPag!=='undefined')tunerPag=null;
-  document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag','afina','afinapag');
+  if(typeof soBolinhas!=='undefined')soBolinhas=false;
+  document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag',
+    'afina','afinapag','bolinhas');
   document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
 }
 function voltaHome(){
@@ -5185,6 +5275,8 @@ function voltaHome(){
   if(state.mode==='ear'&&earPag){earFechaPagina();return;}
   // and inside one of the tuner's, back is back to the reading
   if(state.mode==='tuner'&&tunerPag){tunerFecha();return;}
+  // out of the circles, back to the page they were opened from
+  if(soBolinhas){fechaBolinhas();return;}
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
   // inside a page of a panel, back is back to that panel's front
@@ -5339,74 +5431,136 @@ document.addEventListener('animationend',e=>{
    panel has is written here and nowhere else: a name, the block it shows, what
    the box says underneath, and when the question exists at all. Everything is
    built exactly as it always was — this decides only what is looked at. */
+/* ---------- what has been changed, and what it was changed to ----------
+   A box says its name alone while it holds what the app opened with. Move
+   anything inside it and the box says so: it wears the mode's colour and writes
+   the value underneath. So a screen of boxes is clean when nothing has been
+   touched, and after an hour's work it is the list of what was touched — which
+   is the question "what did I change?" answered without opening anything.
+
+   The comparison is against the same snapshot Clear this mode puts back, so a
+   box stops being marked exactly when a clear would do nothing to it. */
+const fresco=()=>METRO_FRESH||{};
+const frescoP=()=>((METRO_FRESH||{}).p||{});
+const frescoG=()=>METRO_FRESH_G||{};
+const dif =(...ks)=>()=>ks.some(k=>!igual(state[k],fresco()[k]));
+const difP=(...ks)=>()=>ks.some(k=>!igual(state.practice[k],frescoP()[k]));
+const difG=(...ks)=>()=>ks.some(k=>!igual(state[k],frescoG()[k]));
+const ou=(...fs)=>()=>fs.some(f=>f());
+/* Two of the folds inside the metronome already write a line of their own for
+   when they are closed. A box asks the same question, so it reads the same
+   answer rather than growing a second copy of it that can drift. */
+function resumoDe(id){
+  const el=document.getElementById(id);
+  return el?el.textContent.replace(/^·\s*/,'').trim():'';
+}
+/* The same words their own buttons wear. */
+function tempoModeLabel(){
+  const k=state.practice.tempoMode;
+  return k==='up'?tr('dir.up','Up'):k==='down'?tr('dir.down','Down')
+        :k==='ramp'?tr('speed.rampMode','Ramp'):tr('common.off','Off');
+}
+function gapModeLabel(){
+  const k=state.practice.gapMode;
+  return k==='light'?tr('gap.light','Light'):k==='normal'?tr('gap.normal','Normal')
+        :k==='heavy'?tr('gap.heavy','Heavy'):tr('common.off','Off');
+}
 const PAGINAS={
   'sec-range':[
     {k:'oct',   bloco:'oct-block',      nome:()=>tr('octaves','Octaves'),
+     mexeu:dif('span','spanWanted'),
      diz:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.span})},
     {k:'dir',   bloco:'dir-block',      nome:()=>tr('direction','Direction'),
+     mexeu:dif('direction'),
      diz:()=>dirLabel(state.direction)},
     {k:'oct0',  bloco:'startoct-block', nome:()=>tr('start-octave','Start Octave'),
+     mexeu:dif('rootOct','rootOctWanted'),
      diz:()=>String(state.rootOct)},
     {k:'deg',   bloco:'startdeg-block',
      nome:()=>(playingKind()==='chord'?tr('sec.inversion','Inversion'):tr('start-on','Start On')),
+     /* There is nothing to start on until something has been chosen to play:
+        the box opened onto an empty screen. */
+     quando:()=>!!activeDegrees(),mexeu:dif('startDeg'),
      diz:()=>{const d=activeDegrees();return d?String(state.startDeg+1):'';}},
     {k:'top',   bloco:'arptop-line',    nome:()=>tr('arp.top','Top note'),
-     quando:()=>playingKind()==='chord',
+     quando:()=>playingKind()==='chord',mexeu:dif('arpTop'),
      diz:()=>state.arpTop?tr('arp.withTop','Come home'):tr('arp.noTop','Stop on the chord')},
     {k:'turn',  bloco:'turn-line',      nome:()=>tr('turn.note','Turning note'),
-     quando:()=>turnsBothWays(state.direction),
+     quando:()=>turnsBothWays(state.direction),mexeu:dif('repeatTurn'),
      diz:()=>state.repeatTurn?tr('turn.twice','Twice'):tr('turn.once','Once')},
   ],
   'sec-progress':[
     {k:'pat',   bloco:'seqpat-block',   nome:()=>tr('seq.pattern','Pattern'),
-     quando:()=>state.mode==='scale',fica:true,
+     quando:()=>state.mode==='scale',fica:true,mexeu:dif('seqPattern','seqCustom'),
      diz:()=>lab('seqpat',state.seqPattern,state.seqPattern)},
     {k:'tour',  bloco:'modestour-block',nome:()=>tr('modes.tourLabel','The run'),
-     quando:()=>modesRunOn()&&modesSnake()},
+     quando:()=>modesRunOn()&&modesSnake(),mexeu:difP('modesTour')},
     {k:'root',  bloco:'rootmove-block', nome:()=>tr('root-movement','Root Movement'),
+     mexeu:difP('rootMove'),
      diz:()=>lab('rootmove',state.practice.rootMove,state.practice.rootMove)},
     {k:'both',  bloco:'bothways-line',  nome:()=>tr('updown.means','Up-Down means'),
-     quando:()=>passesAlternate()&&!modesRunOn(),
+     quando:()=>passesAlternate()&&!modesRunOn(),mexeu:dif('bothWays'),
      diz:()=>state.bothWays?tr('updown.each','Each both ways'):tr('updown.alternate','Alternate')},
     {k:'rep',   bloco:'repeat-block',   nome:()=>tr('repeat','Repeat'),
+     mexeu:difP('repeat'),
      diz:()=>runsOnce()?tr('sum.once','one round'):tr('repeat.loop','Loop')},
   ],
   /* The metronome: ten things it can do, each a page. What is not there is not
      hidden, it is absent — the bar under a polyrhythm, the accompaniment
      outside Metro, the dropout where there is no pulse to drop out of. */
   'metro-section':[
-    {k:'tempo', bloco:'tempo-block',   nome:()=>tr('tempo','Tempo'),fica:true,
-     diz:()=>tr('sum.bpm','{n} BPM',{n:state.bpm})},
-    {k:'bar',   bloco:'sig-block',     nome:()=>tr('bar','Bar'),fica:true,
-     quando:()=>!state.poly.on,
-     diz:()=>tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig})},
+    /* The tempo and the bar are one page. They were two, and the circles — the
+       only thing on the metronome you look at rather than press — were behind
+       the second of them, which is a page you open to set the accents and close
+       again. Tempo, bar length, the circles and the click's own sound are what
+       a metronome is. */
+    {k:'tempo', blocos:['tempo-block','sig-block'],nome:()=>tr('tempo','Tempo'),fica:true,
+     /* accentsTouched, not the accents themselves: the default downbeat differs
+        between Metro and the note modes, so comparing the array marked the box
+        the moment the mode was entered. */
+     mexeu:dif('bpm','clickVol','clickSound','sig','accentsTouched'),
+     diz:()=>tr('sum.bpm','{n} BPM',{n:state.bpm})+' · '
+            +tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig})},
     {k:'sub',   bloco:'subdiv-block',  nome:()=>tr('subdivision','Subdivision'),fica:true,
      quando:()=>!(state.poly.on||(grooveOn()&&pulseOnly())),
+     mexeu:ou(dif('subdiv','clickFollowsFigure'),difP('useSubdivList','subdivList','subdivDir')),
      diz:()=>subdivLabel(currentSubdiv())},
     {k:'acc',   bloco:'groove-block',  nome:()=>tr('accompaniment','Accompaniment'),fica:true,
      quando:()=>grooveAllowed()&&!state.poly.on,
+     mexeu:difG('groove','kit','density','balladHat'),
      diz:()=>state.groove==='click'?tr('groove.click','Click'):grooveLabel(state.groove)},
     {k:'pat',   bloco:'pattern-block', nome:()=>tr('pattern','Pattern'),fica:true,
-     quando:()=>grooveAllowed()&&!state.poly.on},
+     quando:()=>grooveAllowed()&&!state.poly.on,
+     mexeu:difG('custom'),diz:()=>resumoDe('pat-sum')},
     {k:'mix',   bloco:'mixer-block',   nome:()=>tr('mixer','Mixer'),fica:true,
-     quando:()=>grooveAllowed()&&!state.poly.on},
+     quando:()=>grooveAllowed()&&!state.poly.on,
+     mexeu:difG('mix'),diz:()=>resumoDe('mix-sum')},
     {k:'poly',  bloco:'poly-block',    nome:()=>tr('polyrhythm','Polyrhythm'),fica:true,
+     mexeu:dif('poly','polyVol'),
      diz:()=>state.poly.on?state.poly.a+' : '+state.poly.b:tr('common.off','Off')},
     {k:'speed', bloco:'speed-block',   nome:()=>tr('tempo-change','Tempo Change'),fica:true,
-     diz:()=>state.practice.tempoMode==='off'?tr('common.off','Off'):''},
+     /* rampFrom is not a setting: it is where the ramp starts from, written by
+        every change of tempo, and it was marking this box whenever the tempo
+        moved. */
+     mexeu:difP('tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes'),
+     diz:()=>tempoModeLabel()},
     {k:'count', bloco:'count-block',   nome:()=>tr('count-in','Count In'),fica:true,
-     quando:()=>state.mode!=='drone',
+     quando:()=>state.mode!=='drone',mexeu:dif('countBars','countWhen'),
      diz:()=>state.countBars?tr('sum.bars',{one:'{n} bar',other:'{n} bars'},{n:state.countBars}):tr('common.off','Off')},
     {k:'gap',   bloco:'gap-block',     nome:()=>tr('gap.title','Dropout'),fica:true,
      quando:()=>state.mode==='metro'||state.mode==='drone',
-     diz:()=>state.practice.gapMode==='off'?tr('common.off','Off'):''},
+     mexeu:difP('gapMode','gapMinutes','gapKeepOne'),
+     diz:()=>gapModeLabel()},
     {k:'pass',  bloco:'pass-block',    nome:()=>tr('advance-every','Advance Every'),fica:true,
-     quando:()=>pulseOnly()&&!state.poly.on},
+     quando:()=>pulseOnly()&&!state.poly.on,mexeu:difP('passCount','passUnit'),
+     diz:()=>passLabel()},
   ],
   'sec-rhythm':[
     {k:'len',   bloco:'notelen-block',  nome:()=>tr('note-length','Note Length'),
+     mexeu:dif('noteLen'),
      diz:()=>{const n=NOTE_LENS.find(x=>x.k===state.noteLen);return n?lab('notelen',n.k,n.label):'';}},
     {k:'align', bloco:'align-block',    nome:()=>tr('phrase-alignment','Phrase Alignment'),
+     mexeu:dif('alignPasses'),
      diz:()=>state.alignPasses?tr('align.restartEach','Restart each round'):tr('align.drift','Let it drift')},
   ],
 };
@@ -5457,13 +5611,39 @@ function arrumaPaginas(){
   document.body.classList.add('paginas');
   [...body.children].forEach(c=>c.classList.remove('pagina-aberta'));
   if(naFrente){buildPagRow();pintaClears();return;}
-  const bloco=document.getElementById(pag.bloco);
-  if(bloco){
+  /* A page is usually one block, and sometimes two that answer one question —
+     the tempo and the bar are the metronome. */
+  (pag.blocos||[pag.bloco]).forEach(id=>{
+    const bloco=document.getElementById(id);
+    if(!bloco)return;
     let el=bloco;
     while(el&&el.parentElement!==body)el=el.parentElement;
-    if(el)el.classList.add('pagina-aberta');
-  }
+    if(el){
+      el.classList.add('pagina-aberta');
+      abreDobras(el);
+    }
+  });
   document.body.classList.add('sub');
+  /* The circles are sized from the room they are in, and the room has just
+     changed: on a page they are bigger than in a panel, and the class that says
+     so is put on after they were last laid out. */
+  layoutAllBeats();
+}
+/* The three folds inside the metronome — the pattern, the mixer and the
+   subdivision — were written when the metronome was one long panel and folding
+   was how it stayed short. A page is one question now: whatever folds inside the
+   page being opened is opened with it, and its own bar is taken off the screen
+   by CSS. */
+const DOBRAS=[
+  ['pat-head','pat-body',()=>{buildPatternEditor();patInfo();}],
+  ['mix-head','mix-body',null],
+  ['subdiv-head','subdiv-body',null],
+];
+function abreDobras(el){
+  DOBRAS.forEach(([h,b,depois])=>{
+    const head=document.getElementById(h);
+    if(head&&el&&el.contains(head)&&!foldOpen(b))setFold(h,b,true,depois);
+  });
 }
 function buildPagRow(){
   const row=document.getElementById('pag-row');
@@ -5475,11 +5655,16 @@ function buildPagRow(){
     b.className='panel-box';b.type='button';
     const nome=soTexto(d.nome());
     const t=document.createElement('span');t.textContent=nome;
-    /* What is set inside is not printed on the box any more; it is still what
-       the box is called, for a screen reader and for a long press. */
     let diz='';try{diz=soTexto(d.diz?d.diz():'');}catch(e){}
     b.setAttribute('aria-label',diz?nome+' — '+diz:nome);
     b.appendChild(t);
+    /* Untouched, the box is its name alone. Moved, it says so — the mode's
+       colour, and underneath it what it was moved to. */
+    let mexeu=false;try{mexeu=!!(d.mexeu&&d.mexeu());}catch(e){}
+    if(mexeu){
+      b.classList.add('tem');
+      if(diz){const u=document.createElement('span');u.className='sub';u.textContent=diz;b.appendChild(u);}
+    }
     b.onclick=()=>abreSub(d.k);
     row.appendChild(b);
   });
@@ -5516,6 +5701,29 @@ function nomeDoPainel(id){
   const t=d&&d.querySelector(':scope>summary>span[data-t],:scope>summary>span:first-child');
   return t?t.textContent.trim():id;
 }
+/* Which panels have been moved from how the app opens. A panel is marked when
+   any of the fields it owns is: the same lists its own Clear reads, so a box
+   stops being marked exactly when its clear would have nothing left to do.
+   The two the metronome keeps outside those lists — the written pattern and the
+   mixer — are asked for by name. */
+const SOM_FRESH={drone:'strings',outro:'piano-real',volume:0.7};
+const PAINEL_MEXEU={
+  'sec-range':()=>painelMexido('range'),
+  'sec-freerange':()=>painelMexido('freerange'),
+  'sec-progress':()=>painelMexido('progress'),
+  'sec-rhythm':()=>painelMexido('phrasing'),
+  'metro-section':()=>['tempo','count','speed','gap','subdiv','poly','accomp'].some(painelMexido)
+                      ||difG('custom','mix')(),
+  'sec-scales':()=>!!(state.mode==='arpeggio'?state.chordName:state.scaleName),
+  'sec-freenotes':()=>Object.keys(state.freeSelected||{}).length>0,
+  'sec-sound':()=>state.timbre!==(state.mode==='drone'?SOM_FRESH.drone:SOM_FRESH.outro)
+                  ||state.volume!==SOM_FRESH.volume,
+};
+function painelMexeu(id){
+  const f=PAINEL_MEXEU[id];
+  if(!f)return false;
+  try{return !!f();}catch(e){return false;}
+}
 function resumoDoPainel(id){
   const s=SECTIONS.find(x=>x.id===id);
   if(!s)return '';
@@ -5538,6 +5746,12 @@ function buildPanelRow(){
     const resumo=soTexto(resumoDoPainel(id));
     b.setAttribute('aria-label',resumo?nome+' — '+resumo:nome);
     b.appendChild(t);
+    /* A panel holding anything that has been moved says so from the front of the
+       mode, and says what — the same line its own fold used to carry. */
+    if(painelMexeu(id)){
+      b.classList.add('tem');
+      if(resumo){const u=document.createElement('span');u.className='sub';u.textContent=resumo;b.appendChild(u);}
+    }
     b.onclick=()=>abrePainel(id);
     row.appendChild(b);
   });
@@ -10228,7 +10442,22 @@ function temPulso(){
   if(state.mode==='drone')return !!state.metroInDrone;
   return state.mode!=='tuner'&&state.mode!=='ear';
 }
-function pulsoLigado(){return !!state.playing&&temPulso();}
+/* Only beats: the circles alone, on the whole screen. Asked for from the tempo
+   page, and it stands whether the metronome is running or not — you set it up,
+   you press Start, and there is nothing else to look at. */
+let soBolinhas=false;
+function abreBolinhas(){
+  soBolinhas=true;
+  renderPulse();pintaCasa();
+  const sc=document.getElementById('scroll-area');
+  if(sc)sc.scrollTop=0;
+}
+function fechaBolinhas(){
+  if(!soBolinhas)return;
+  soBolinhas=false;
+  renderPulse();pintaCasa();
+}
+function pulsoLigado(){return soBolinhas&&temPulso();}
 function pulsoDots(row,n,acc,quadrado){
   row.innerHTML='';
   for(let i=0;i<n;i++){
@@ -10242,7 +10471,7 @@ function pulsoDots(row,n,acc,quadrado){
 function renderPulse(){
   const wrap=document.getElementById('pulse-wrap');
   if(!wrap)return;
-  document.body.classList.toggle('tocando',pulsoLigado());
+  document.body.classList.toggle('bolinhas',pulsoLigado());
   if(!pulsoLigado())return;
   const uma=document.getElementById('pulse-row');
   const a=document.getElementById('pulse-poly-a'),b=document.getElementById('pulse-poly-b');
@@ -10447,6 +10676,13 @@ const DOT_MAX=28,DOT_MIN=20,DOT_GAP=8;
    the size, and they give way later — four beats across a phone come out at 64,
    and only sixteen against sixteen fall back to the tapping size. */
 const PULSE_MAX=64,PULSE_MIN=22;
+/* On the screen that is nothing but circles they take what the width gives, and
+   the circles on a page — where they are tapped as well as watched — are half
+   way between that and the size they are in a panel. */
+const PULSE_SO=120;
+/* On a page the circles are bigger than in a panel — they are watched there as
+   well as tapped — but not on a short screen, where the page has to fit. */
+const dotDaPagina=()=>(innerHeight>700?44:32);
 function layoutBeats(row){
   if(!row)return;
   const n=row.children.length;
@@ -10457,7 +10693,10 @@ function layoutBeats(row){
      throw would have been handed straight back to the circles. */
   const w=pulso?row.clientWidth:(row.parentElement?row.parentElement.clientWidth:0);
   if(!w)return;
-  const MAX=pulso?PULSE_MAX:DOT_MAX,MIN=pulso?PULSE_MIN:DOT_MIN;
+  const so=document.body.classList.contains('bolinhas');
+  const naPagina=!pulso&&row.closest&&row.closest('.pagina-aberta');
+  const MAX=pulso?(so?PULSE_SO:PULSE_MAX):(naPagina?dotDaPagina():DOT_MAX);
+  const MIN=pulso?PULSE_MIN:DOT_MIN;
   let cols=n,rows=1;
   while(cols>1&&(w-(cols-1)*DOT_GAP)/cols<MIN){rows++;cols=Math.ceil(n/rows);}
   const size=Math.max(MIN,Math.min(MAX,Math.floor((w-(cols-1)*DOT_GAP)/cols)));
@@ -11222,7 +11461,9 @@ const HELP_INLINE={
   '#tempo-block .section-label':'help-metro',
   '#poly-block .section-label':'help-poly',
   '#groove-block .section-label':'help-acc',
-  '#pat-head .section-label':'help-pattern',
+  /* The pattern's own bar is off the screen inside a page, so its mark rides
+     the line that says what the pattern is doing. */
+  '#pat-info':'help-pattern',
   '#mix-head .section-label':'help-acc',
   '#subdiv-head .section-label':'help-metro',
   /* The tuner's settings are boxes now, and a mark inside a grid of boxes would

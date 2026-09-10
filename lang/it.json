@@ -752,5 +752,6 @@
  "tuner.a4Down": "Un hertz più basso",
  "tuner.a4Up": "Un hertz più alto",
  "tuner.cents": "{n} cent",
- "tuner.farOff": "molto lontano"
+ "tuner.farOff": "molto lontano",
+ "beats.only": "Solo i movimenti"
 }
