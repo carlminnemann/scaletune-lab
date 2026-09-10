@@ -459,7 +459,7 @@ body.earx #ear-opts{flex:0 0 auto}
 body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
 body.earpag #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 body.earpag #ear-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-body.earpag #ear-page .btn-wrap{flex:1 1 auto;min-height:0;grid-template-columns:1fr 1fr!important;
+body.earpag #ear-page .btn-wrap{flex:1 1 auto;min-height:min-content;grid-template-columns:1fr 1fr!important;
   gap:var(--s2)!important;grid-auto-rows:1fr;align-content:stretch;align-items:stretch}
 body.earpag #ear-page .btn-wrap>button{min-height:clamp(46px,8.5vh,72px);font-size:15px;
   border-radius:13px;width:auto;height:auto;align-self:stretch}
@@ -471,6 +471,9 @@ body.earpag #ear-page .btn-wrap>button{min-height:clamp(46px,8.5vh,72px);font-si
    any other and has its own box to be reached from. */
 body.earpag #sec-sound{display:none}
 @media(max-height:700px){
+  /* Eleven boxes on a small screen: they give what they can before the list
+     gives up and scrolls. */
+  body.painel #pag-row .panel-box,body.caixas #panel-row .panel-box{min-height:40px;padding:6px 10px}
   body.earx #ear-optbox-row .panel-box{min-height:44px;padding:7px 10px}
   /* Two lines of reading is enough on a small screen; the box says what is on,
      not everything that is on. */
@@ -490,7 +493,7 @@ body.earpag #sec-sound{display:none}
    on the modes, carried down two levels. */
 body.caixas .scroll,body.sub .scroll{display:flex;flex-direction:column;min-height:0}
 body.caixas .scroll>*,body.sub .scroll>*{flex:0 0 auto}
-body.caixas #panel-row{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+body.caixas #panel-row{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
 body.sub #pitch-section,body.sub #sec-scales,body.sub #sec-scales>.sec-body,
 body.sub #scale-lists,body.sub #arp-lists,body.sub details.fam{display:flex;
   flex-direction:column;flex:1 1 auto;min-height:0}
@@ -505,7 +508,7 @@ body.sub #sec-scales::details-content,body.sub details.fam::details-content{
   display:flex;flex-direction:column;flex:1 1 auto;min-height:0;height:auto}
 body.sub #root-cap-line,body.sub #pitch-info,body.sub #pitch-clear,
 body.sub #blue-line,body.sub #blue-info{flex:0 0 auto}
-body.sub #sec-scales .btn-wrap{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+body.sub #sec-scales .btn-wrap{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
 /* The other panels' fronts and pages, filling the same way. */
 body.painel .scroll,body.painel #pitch-section,body.painel #free-section,
 body.painel details.sec,body.painel details.sec>.sec-body{display:flex;
@@ -514,18 +517,24 @@ body.painel details.sec::details-content{display:flex;flex-direction:column;
   flex:1 1 auto;min-height:0;height:auto}
 body.painel .scroll>*{flex:0 0 auto}
 body.painel #pitch-section,body.painel #free-section{flex:1 1 auto}
-body.painel #pag-row{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+body.painel #pag-row{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
 body.painel .sec-body>div[id$="-block"],body.painel .sec-body>div[id$="-line"]{
   display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
 body.painel .sec-body>div[id$="-block"]>.group-label,
 body.painel .sec-body>div[id$="-line"]>.group-label{flex:0 0 auto}
 body.painel .sec-body>div[id$="-block"]>.btn-wrap,
-body.painel .sec-body>div[id$="-line"]>.btn-wrap{flex:1 1 auto;min-height:0;
+body.painel .sec-body>div[id$="-line"]>.btn-wrap{flex:1 1 auto;min-height:min-content;
   grid-template-columns:1fr 1fr!important;gap:var(--s2)!important;
   grid-auto-rows:1fr;align-content:stretch;align-items:stretch}
 body.painel .sec-body>div[id$="-block"]>.btn-wrap>button,
 body.painel .sec-body>div[id$="-line"]>.btn-wrap>button{min-height:clamp(46px,8.5vh,72px);
   font-size:15px;border-radius:13px;width:auto;height:auto;align-self:stretch}
+
+/* Which block of a page-driven panel is on the screen. Written as a rule so
+   that nothing a builder does to style.display can undo it. */
+body.paginas .sec-body>*:not(#pag-row):not(.panel-clear):not(.pagina-aberta){display:none!important}
+body.paginas .sec-body>.pagina-aberta{display:block!important}
+body.paginas .sec-body>.pagina-aberta.mgroup{margin-bottom:0}
 
 /* A page of choices takes the screen: two columns for words, three for the
    twelve notes, and every box the same height. */
@@ -2826,33 +2835,20 @@ const METRO_MORE=['count-block','gap-block','speed-block','subdiv-block','pass-b
    the metronome folds, and a panel called "More" standing alone under a closed
    Metronome would be more of nothing — so there it is nested inside, the last
    thing in the metronome's own body, and folds away with it. */
+/* Everything the metronome can do lives in the metronome, and each of them is
+   a page reached from a box. "More" was a fold that held nine of them and it is
+   gone: a drawer inside a panel is what this whole redesign is against. */
 function splitMetro(active){
   const more=document.getElementById('metro-more');
   const sec=document.getElementById('metro-section');
   const main=sec&&sec.querySelector('.metro-body');
-  const body=document.getElementById('metro-more-body');
-  if(!more||!main||!body||!sec)return;
-  const nest=state.mode!=='metro';
-  /* The polyrhythm is not one of these any more: it is reached by the switch
-     beside the bar, and its panel stands in the metronome itself — visible
-     when it is on, absent when it is off. It used to live in More and come
-     forward when switched on, which meant a panel that moved about on its own. */
-  METRO_MORE.forEach(id=>{
+  if(!more||!main||!sec)return;
+  METRO_MORE.concat(['poly-block']).forEach(id=>{
     const el=document.getElementById(id);
-    if(!el)return;
-    if(el.parentNode!==body)body.appendChild(el);
+    if(el&&el.parentNode!==main)main.appendChild(el);
   });
-  /* And it belongs where it was written, in the metronome's own body, after
-     whatever More is doing with the rest. */
-  const pb=document.getElementById('poly-block');
-  if(pb&&pb.parentNode!==main)main.appendChild(pb);
-  /* Nested, it is a fold inside a panel and has to look like one — and it must
-     not answer to details.sec, which is how the layout counts what a card is. */
-  more.className=nest?'mfold':'sec';
-  if(nest){ if(more.parentNode!==main||more.nextSibling)main.appendChild(more); }
-  else if(sec.nextSibling!==more)sec.after(more);
-  more.style.display=active?'':'none';
-  if(!active)more.open=false;
+  more.style.display='none';
+  more.open=false;
   spreadPanelsSoon();
 }
 /* ---------- the metronome that goes away ----------
@@ -4867,7 +4863,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10h';
+const APP_VERSION='lab-2026-09-10i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4940,6 +4936,7 @@ function pintaCasa(){
     :(state.mode==='ear'&&earPag)?earNomeDaPagina()
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
     :(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto]))?nomeDaSub()
+    :(painelAberto&&state.mode==='metro')?modeLabel(state.mode)
     :(painelAberto&&paineisDoModo())?nomeDoPainel(painelAberto)
     :modeLabel(state.mode);
   const sec=document.getElementById('sec-exercises');
@@ -4967,6 +4964,9 @@ function entraModo(m){
   /* Nothing is remembered between visits, the score included: coming into Ear
      is starting a round, not resuming one. */
   if(m==='ear'){earZera();state.ear.kind=null;}
+  /* Metro is the metronome, so it opens on the metronome's boxes rather than on
+     a menu with one box in it. */
+  if(m==='metro')painelAberto='metro-section';
   setMode(m);
   const sc=document.getElementById('scroll-area');
   if(sc)sc.scrollTop=0;
@@ -5139,6 +5139,38 @@ const PAGINAS={
     {k:'rep',   bloco:'repeat-block',   nome:()=>tr('repeat','Repeat'),
      diz:()=>runsOnce()?tr('sum.once','one round'):tr('repeat.loop','Loop')},
   ],
+  /* The metronome: ten things it can do, each a page. What is not there is not
+     hidden, it is absent — the bar under a polyrhythm, the accompaniment
+     outside Metro, the dropout where there is no pulse to drop out of. */
+  'metro-section':[
+    {k:'tempo', bloco:'tempo-block',   nome:()=>tr('tempo','Tempo'),fica:true,
+     diz:()=>tr('sum.bpm','{n} BPM',{n:state.bpm})},
+    {k:'bar',   bloco:'sig-block',     nome:()=>tr('bar','Bar'),fica:true,
+     quando:()=>!state.poly.on,
+     diz:()=>tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig})},
+    {k:'sub',   bloco:'subdiv-block',  nome:()=>tr('subdivision','Subdivision'),fica:true,
+     quando:()=>!(state.poly.on||(grooveOn()&&pulseOnly())),
+     diz:()=>subdivLabel(currentSubdiv())},
+    {k:'acc',   bloco:'groove-block',  nome:()=>tr('accompaniment','Accompaniment'),fica:true,
+     quando:()=>grooveAllowed()&&!state.poly.on,
+     diz:()=>state.groove==='click'?tr('groove.click','Click'):grooveLabel(state.groove)},
+    {k:'pat',   bloco:'pattern-block', nome:()=>tr('pattern','Pattern'),fica:true,
+     quando:()=>grooveAllowed()&&!state.poly.on},
+    {k:'mix',   bloco:'mixer-block',   nome:()=>tr('mixer','Mixer'),fica:true,
+     quando:()=>grooveAllowed()&&!state.poly.on},
+    {k:'poly',  bloco:'poly-block',    nome:()=>tr('polyrhythm','Polyrhythm'),fica:true,
+     diz:()=>state.poly.on?state.poly.a+' : '+state.poly.b:tr('common.off','Off')},
+    {k:'speed', bloco:'speed-block',   nome:()=>tr('tempo-change','Tempo Change'),fica:true,
+     diz:()=>state.practice.tempoMode==='off'?tr('common.off','Off'):''},
+    {k:'count', bloco:'count-block',   nome:()=>tr('count-in','Count In'),fica:true,
+     quando:()=>state.mode!=='drone',
+     diz:()=>state.countBars?tr('sum.bars',{one:'{n} bar',other:'{n} bars'},{n:state.countBars}):tr('common.off','Off')},
+    {k:'gap',   bloco:'gap-block',     nome:()=>tr('gap.title','Dropout'),fica:true,
+     quando:()=>state.mode==='metro'||state.mode==='drone',
+     diz:()=>state.practice.gapMode==='off'?tr('common.off','Off'):''},
+    {k:'pass',  bloco:'pass-block',    nome:()=>tr('advance-every','Advance Every'),fica:true,
+     quando:()=>pulseOnly()&&!state.poly.on},
+  ],
   'sec-rhythm':[
     {k:'len',   bloco:'notelen-block',  nome:()=>tr('note-length','Note Length'),
      diz:()=>{const n=NOTE_LENS.find(x=>x.k===state.noteLen);return n?lab('notelen',n.k,n.label):'';}},
@@ -5161,25 +5193,31 @@ function nomeDaPagina(){
 function arrumaPaginas(){
   const defs=PAGINAS[painelAberto];
   const row=document.getElementById('pag-row');
-  if(!defs){if(row)row.style.display='none';return;}
+  if(!defs){
+    if(row)row.style.display='none';
+    document.body.classList.remove('paginas');
+    document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
+    return;
+  }
   const body=document.querySelector('#'+painelAberto+'>.sec-body');
   if(!body||!row)return;
   if(row.parentNode!==body)body.insertBefore(row,body.firstChild);
   const pag=paginasDoPainel().find(d=>d.k===subPag);
   const naFrente=!pag;
   row.style.display=naFrente?'':'none';
-  [...body.children].forEach(c=>{
-    if(c===row)return;
-    /* The clear belongs to the whole panel, so it stays on the front with the
-       boxes rather than hiding inside one of them. */
-    if(c.classList.contains('panel-clear')){c.style.display=naFrente?'':'none';return;}
-    c.style.display='none';
-  });
+  /* What is on the screen is said in CSS and not by writing style.display on
+     every block: half a dozen builders write those the moment anything changes,
+     and this was losing the race with them — the metronome's Advance Every sat
+     under the boxes because buildPassRow put it back. The rule wins; the class
+     says which block the rule lets through. */
+  document.body.classList.add('paginas');
+  [...body.children].forEach(c=>c.classList.remove('pagina-aberta'));
   if(naFrente){buildPagRow();pintaClears();return;}
   const bloco=document.getElementById(pag.bloco);
   if(bloco){
     let el=bloco;
-    while(el&&el!==body){el.style.display='';el=el.parentElement;}
+    while(el&&el.parentElement!==body)el=el.parentElement;
+    if(el)el.classList.add('pagina-aberta');
   }
   document.body.classList.add('sub');
 }
@@ -5264,7 +5302,7 @@ function arrumaPaineis(){
   const menu=!!ids&&!painelAberto&&!pastaAberta;
   if(row)row.style.display=(menu&&!emCasa)?'':'none';
   document.body.classList.toggle('caixas',!!(menu&&!emCasa&&ids));
-  document.body.classList.toggle('painel',!!ids&&!!painelAberto&&!pastaAberta);
+  document.body.classList.toggle('painel',!!painelAberto&&!pastaAberta);
   if(!ids)return;
   ids.forEach(id=>{
     const d=document.getElementById(id);
@@ -9851,10 +9889,10 @@ function updateSupersededControls(){
      table of figures that rotates them — change nothing anybody can hear. Only
      where the metronome is the thing playing: in the note modes the figure is
      what the notes are made of. */
-  /* Off, the polyrhythm has nothing to show and the switch beside the bar is
-     the whole of it. On, the panel is there with its two numbers. */
+  /* Its visibility belongs to the pages now: it is a box on the front of the
+     metronome and a page behind it, on or off. */
   const pblock=document.getElementById('poly-block');
-  if(pblock)pblock.style.display=(on&&state.mode!=='tuner')?'':'none';
+  if(pblock&&!PAGINAS['metro-section'])pblock.style.display=(on&&state.mode!=='tuner')?'':'none';
   const sob=on||(grooveOn()&&pulseOnly());
   const sb=document.getElementById('subdiv-block');
   if(sb)sb.style.display=sob?'none':'';
@@ -9885,6 +9923,7 @@ function updateSupersededControls(){
      asked again here, where every panel's visibility is decided. */
   buildBothWaysRow();
   pintaPolySwitch();
+  arrumaPaginas();      // the pages have the last word on what is on the screen
   // and in Metro the pulses take the place the bar has just left
   splitMetro(state.mode!=='tuner');
   /* Which panels are on the screen has just been decided, and the marks sit on

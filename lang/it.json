@@ -743,5 +743,9 @@
  "ear.on": {
   "one": "{n} attiva",
   "other": "{n} attive"
+ },
+ "sum.bars": {
+  "one": "{n} battuta",
+  "other": "{n} battute"
  }
 }

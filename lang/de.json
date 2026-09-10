@@ -743,5 +743,9 @@
  "ear.on": {
   "one": "{n} an",
   "other": "{n} an"
+ },
+ "sum.bars": {
+  "one": "{n} Takt",
+  "other": "{n} Takte"
  }
 }

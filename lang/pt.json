@@ -743,5 +743,9 @@
  "ear.on": {
   "one": "{n} ligada",
   "other": "{n} ligadas"
+ },
+ "sum.bars": {
+  "one": "{n} compasso",
+  "other": "{n} compassos"
  }
 }

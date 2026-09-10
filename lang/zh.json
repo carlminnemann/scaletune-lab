@@ -728,5 +728,9 @@
  "ear.on": {
   "one": "已选 {n}",
   "other": "已选 {n}"
+ },
+ "sum.bars": {
+  "one": "{n} 小节",
+  "other": "{n} 小节"
  }
 }

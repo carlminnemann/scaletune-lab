@@ -743,5 +743,9 @@
  "ear.on": {
   "one": "{n} activée",
   "other": "{n} activées"
+ },
+ "sum.bars": {
+  "one": "{n} mesure",
+  "other": "{n} mesures"
  }
 }
