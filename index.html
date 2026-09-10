@@ -99,6 +99,10 @@
   --lift-sh:0 1px 2px rgba(0,0,0,.38),0 5px 12px rgba(0,0,0,.26);
   --lift-in:0 3px 9px rgba(0,0,0,.42) inset;
   --toque:rgba(255,255,255,.34);
+  /* The tuner reads at arm's length while both hands are busy, so its two
+     answers are the app's own red and green taken up in brightness until they
+     carry across a room. Nothing else wears these. */
+  --afina-mal:#ff5f52;--afina-bem:#57d98d;
 }
 /* Accent colours are darkened for light mode: the same hue that reads as a
    highlight on black becomes unreadable as text on a pale tint. */
@@ -144,6 +148,9 @@
      it read as the quiet one and not as another shade of the green. */
   --hit1:#868680;--hit2:var(--green);--hit3:var(--stop);
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
+  /* On paper the same two have to go the other way to stay bright against a
+     warm ground: saturated rather than pale. */
+  --afina-mal:#d92b1f;--afina-bem:#1c8f52;
   /* On paper the relief is the other way round in weight: the highlight has to
      be strong enough to read on a warm ground, and the shadows soft, or the
      boxes look printed on top of the page rather than raised out of it. */
@@ -227,6 +234,11 @@ h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS'
 /* The capitals are a proportion of the name, not a size of their own, so
    shrinking the name keeps its shape instead of flattening it. */
 h1.wordmark .cap{font-size:1.65em;color:var(--brand)}
+/* Everywhere but on the home screen the name is the way back to it. */
+body:not(.home) h1.wordmark{cursor:pointer;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;transition:opacity .12s}
+body:not(.home) h1.wordmark:active{opacity:.65}
+h1.wordmark:focus-visible{outline:2px solid var(--text3);outline-offset:4px;border-radius:6px}
 /* Which of the two this is. Small, set apart, and in the colour the app uses
    for something switched on — a tester should never have to wonder whether the
    thing in their hand is the app or the workbench. */
@@ -480,7 +492,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
    a glow from the middle does not belong to a touch that happened in the
    corner. Nothing here is a new colour — it is the same greys with a direction
    for the light. */
-.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn{
+.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn{
   position:relative;overflow:hidden;
   /* Measured in pixels and not in percentages: a box that grows to fill a
      screen is 250 tall, and a highlight given as a percentage of that is a wash
@@ -491,7 +503,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
   box-shadow:var(--lift-sh);
   transition:transform .11s ease,box-shadow .11s ease,border-color .11s ease}
 .panel-box:active,.root-box:active,.mode-btn:active,.pick-btn:active,
-.tonic-btn:active,.theme-btn:active{
+.tonic-btn:active,.theme-btn:active,.note-btn:active{
   transform:translateY(1px) scale(.988);box-shadow:var(--lift-in)}
 .panel-box:active,.root-box:active{border-color:var(--mode)}
 /* The settings are drawn rather than filled, on purpose — they are the quietest
@@ -510,8 +522,15 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
   to{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 @media(prefers-reduced-motion:reduce){
   .acende::after{display:none}
-  .panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn{transition:none}
+  .panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn{transition:none}
 }
+/* The notes of the drone and of Free are a grid of divs rather than of buttons,
+   for the octave stepper inside each one — so they are named here as well, or
+   they would be the only things on a page that do not light under the finger.
+   And on a page they fill it, like every other grid of choices. */
+body.painel .sec-body>.note-grid{flex:1 1 auto;min-height:min-content;
+  grid-auto-rows:1fr;align-content:stretch;margin-bottom:var(--s3)}
+body.painel .sec-body>.legend{flex:0 0 auto;justify-content:center;text-align:center}
 /* An odd one at the end of a two-column grid sat in the left column with a hole
    beside it, which reads as a row that failed to fill rather than as a choice.
    It goes to the middle at the size of the others. Full width is a statement,
@@ -934,7 +953,7 @@ details.sec[open] .sec-sum{display:none}
   font-variant-numeric:tabular-nums}
 /* In tune, the number says so in the same colour the note and the needle wear —
    three things agreeing is what makes it readable without being read. */
-.tuner-cents.in-tune{color:var(--green-hi)}
+.tuner-cents.in-tune{color:var(--afina-bem)}
 /* the bar: fifty cents either side, with the in-tune zone marked */
 .tuner-bar{position:relative;height:clamp(26px,6vh,52px);margin-top:var(--s3);
   border-radius:var(--r);background:var(--bg3);overflow:hidden}
@@ -944,10 +963,14 @@ details.sec[open] .sec-sum{display:none}
 /* A three-pixel hair was the whole reading, and it was the thinnest thing on the
    screen. It is a bar now, wide enough to see moving, and in tune it lights the
    way a beat does. */
+/* Red while it is not there, green when it is, both bright enough to be read
+   from the stand — the needle is the answer, so it is the answer's colour and
+   not the ink of everything else. */
 .tuner-needle{position:absolute;top:3px;bottom:3px;width:9px;border-radius:4px;
-  background:var(--text);left:50%;transform:translateX(-50%);
+  background:var(--afina-mal);box-shadow:0 0 12px 1px var(--afina-mal);
+  left:50%;transform:translateX(-50%);
   transition:left 90ms linear,background-color 120ms,box-shadow 120ms}
-.tuner-needle.in-tune{background:var(--green);box-shadow:0 0 14px 2px var(--green)}
+.tuner-needle.in-tune{background:var(--afina-bem);box-shadow:0 0 16px 3px var(--afina-bem)}
 .tuner-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);
   margin-top:4px;letter-spacing:.06em}
 /* ---------- the tuner's own screen ----------
@@ -1649,7 +1672,12 @@ body.bolinhas .pulse-bpm{display:none}
     <button class="theme-btn" id="undo-btn" type="button" onclick="desfazer()"
             data-ta="aria.undo" aria-label="Undo the last thing you did">↺</button>
   </span>
-  <h1 class="wordmark"><span class="cap">S</span>cale<span class="cap tuck">T</span>une<span class="lab-mark">lab</span></h1>
+  <!-- The name is the way out. Back walks one level at a time, which is right
+       for a page inside a panel and wrong when you are four levels in and want
+       the six modes: tapping the name goes there from anywhere. -->
+  <h1 class="wordmark" id="wordmark" role="button" tabindex="0"
+      onclick="casaJa()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();casaJa();}"
+      data-ta="aria.home" aria-label="Home"><span class="cap">S</span>cale<span class="cap tuck">T</span>une<span class="lab-mark">lab</span></h1>
   <span class="head-btns">
     <!-- Where the saved exercises live. A drawer is not a setting of the mode,
          so it stopped being a panel among the panels and became a place you go.
@@ -1770,16 +1798,21 @@ body.bolinhas .pulse-bpm{display:none}
   <div id="tuner-page" style="display:none"></div>
 </div>
 
-<div id="drone-section">
-  <div class="section-label" data-t="notes">Notes</div>
-  <div class="legend" data-t="tap-add-or-remove-a">
-    <span>tap — add or remove a note</span>
-    <span>+/− — octave</span>
-    <span>several notes sound together</span>
+<!-- The drone's notes, built like every other panel: a box on the mode's front
+     that opens onto the twelve. It was the last screen in the app still shaped
+     the old way — a label, a grid and two folds under it. -->
+<details class="sec" id="drone-section">
+  <summary><span data-t="notes">Notes</span><span class="sec-sum" id="sum-drone"></span></summary>
+  <div class="sec-body">
+    <div class="legend" data-t="tap-add-or-remove-a">
+      <span>tap — add or remove a note</span>
+      <span>+/− — octave</span>
+      <span>several notes sound together</span>
+    </div>
+    <div class="note-grid free-grid" id="drone-grid"></div>
+    <button class="clear-btn" id="drone-clear" onclick="clearDrone()" data-t="clear">✕ Clear</button>
   </div>
-  <div class="note-grid free-grid" id="drone-grid"></div>
-  <button class="clear-btn" id="drone-clear" onclick="clearDrone()" style="margin-bottom:1.25rem" data-t="clear">✕ Clear</button>
-</div>
+</details>
 
 <!-- ============ SCALE / ARPEGGIO ============ -->
 <div id="pitch-section" style="display:none">
@@ -5136,7 +5169,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10m';
+const APP_VERSION='lab-2026-09-10n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5268,6 +5301,19 @@ function limpaEstadoDoModo(){
   document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag',
     'afina','afinapag','bolinhas');
   document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
+}
+/* Home from anywhere, in one tap on the name — where Back walks one level at a
+   time. Whatever was open closes, and whatever was playing stops, because
+   arriving at the six modes with a metronome still running is arriving
+   somewhere you did not ask for. */
+function casaJa(){
+  if(emCasa)return;
+  if(state.playing)togglePlay();
+  stopTuner();
+  pastaAberta=false;
+  emCasa=true;
+  limpaEstadoDoModo();
+  pintaCasa();
 }
 function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
@@ -5406,7 +5452,7 @@ document.addEventListener('click',e=>{
    rebuilt constantly — every family, every page, every option box — and a light
    that had to be wired on would be lost each time one was. The point of contact
    is written onto the button as two percentages and the animation is CSS's. */
-const ACENDE='.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn';
+const ACENDE='.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn';
 document.addEventListener('pointerdown',e=>{
   const b=e.target&&e.target.closest&&e.target.closest(ACENDE);
   if(!b||b.disabled)return;
@@ -5521,6 +5567,12 @@ const PAGINAS={
      mexeu:dif('bpm','clickVol','clickSound','sig','accentsTouched'),
      diz:()=>tr('sum.bpm','{n} BPM',{n:state.bpm})+' · '
             +tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig})},
+    /* In Drone the click is asked for rather than assumed, and with the panel in
+       boxes that question needed a box: it lives in the metronome's own block
+       and would otherwise have been hidden with everything else. */
+    {k:'ondrone',bloco:'metro-on-block',nome:()=>tr('over-the-drone','Over the drone'),fica:true,
+     quando:()=>state.mode==='drone',mexeu:dif('metroInDrone'),
+     diz:()=>state.metroInDrone?tr('common.on','On'):tr('common.off','Off')},
     {k:'sub',   bloco:'subdiv-block',  nome:()=>tr('subdivision','Subdivision'),fica:true,
      quando:()=>!(state.poly.on||(grooveOn()&&pulseOnly())),
      mexeu:ou(dif('subdiv','clickFollowsFigure'),difP('useSubdivList','subdivList','subdivDir')),
@@ -5678,6 +5730,9 @@ const PAINEIS_POR_MODO={
   scale:['sec-scales','sec-range','sec-progress','metro-section','sec-rhythm','sec-sound'],
   arpeggio:['sec-scales','sec-range','sec-progress','metro-section','sec-rhythm','sec-sound'],
   free:['sec-freenotes','sec-freerange','sec-progress','metro-section','sec-rhythm','sec-sound'],
+  /* Three, which is a choice — the notes being held, the click over them, and
+     the voice they are held in. */
+  drone:['drone-section','metro-section','sec-sound'],
 };
 function paineisDoModo(){return PAINEIS_POR_MODO[state.mode]||null;}
 function temMenuDePaineis(){return !!paineisDoModo()&&!pastaAberta&&!emCasa;}
@@ -5716,6 +5771,7 @@ const PAINEL_MEXEU={
                       ||difG('custom','mix')(),
   'sec-scales':()=>!!(state.mode==='arpeggio'?state.chordName:state.scaleName),
   'sec-freenotes':()=>Object.keys(state.freeSelected||{}).length>0,
+  'drone-section':()=>Object.keys(state.droneSelected||{}).length>0,
   'sec-sound':()=>state.timbre!==(state.mode==='drone'?SOM_FRESH.drone:SOM_FRESH.outro)
                   ||state.volume!==SOM_FRESH.volume,
 };
@@ -10558,6 +10614,14 @@ const SECTIONS=[
   // Pattern reads here now, where it is set
   // Free's Range section shares a group with the Scale one: folding either
   // folds both, so the layout does not change under you when switching mode.
+  /* The drone's notes read the way Free's do: the notes themselves, which is
+     what you want to see from the front of the mode. */
+  {id:'drone-section',sum:'sum-drone',group:'notes',
+   text:()=>{
+     const ks=Object.keys(state.droneSelected||{});
+     if(!ks.length)return tr('sum.noneChosen','none chosen');
+     return ks.map(pc=>semitone(pc,state.droneSelected[pc])).sort((a,b)=>a-b).map(nameOf).join(' ');
+   }},
   {id:'sec-freenotes',sum:'sum-freenotes',group:'notes',
    text:()=>{
      const root=bareName(NOTES.indexOf(state.freeRoot||state.root));
@@ -11182,11 +11246,15 @@ function drawStrobe(errHz,inTune){
   const cs=getComputedStyle(document.documentElement);
   g.clearRect(0,0,w,h);
   const bars=12,bw=w/bars;
-  g.fillStyle=(inTune?cs.getPropertyValue('--green'):cs.getPropertyValue('--text2')).trim();
+  /* The stripes under the needle are the fine reading, so they say the same
+     thing it does: the bright green the moment it is in tune, and the quiet ink
+     of the page while it is not — the red is the needle's alone, or the whole
+     panel shouts. */
+  g.fillStyle=(inTune?cs.getPropertyValue('--afina-bem'):cs.getPropertyValue('--text2')).trim();
   const off=((strobePhase%1)+1)%1;
   for(let i=0;i<=bars;i++){
     const x=((i+off)%(bars+1))*bw;
-    g.globalAlpha=inTune?0.85:0.5;
+    g.globalAlpha=inTune?0.95:0.5;
     g.fillRect(x,6,bw*0.5,h-12);
   }
   g.globalAlpha=1;

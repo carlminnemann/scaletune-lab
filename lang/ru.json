@@ -769,5 +769,6 @@
  "tuner.a4Up": "На герц выше",
  "tuner.cents": "{n} центов",
  "tuner.farOff": "далеко",
- "beats.only": "Только доли"
+ "beats.only": "Только доли",
+ "aria.home": "Главная"
 }

@@ -753,5 +753,6 @@
  "tuner.a4Up": "Un hertz plus haut",
  "tuner.cents": "{n} cents",
  "tuner.farOff": "très loin",
- "beats.only": "Seulement les temps"
+ "beats.only": "Seulement les temps",
+ "aria.home": "Accueil"
 }
