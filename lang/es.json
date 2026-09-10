@@ -747,5 +747,10 @@
  "sum.bars": {
   "one": "{n} compás",
   "other": "{n} compases"
- }
+ },
+ "tuner.tempKey": "Construido en",
+ "tuner.a4Down": "Un hercio más bajo",
+ "tuner.a4Up": "Un hercio más alto",
+ "tuner.cents": "{n} cents",
+ "tuner.farOff": "muy lejos"
 }

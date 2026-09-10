@@ -885,23 +885,70 @@ details.sec[open] .sec-sum{display:none}
    has to be seen whole, and it was 92px too tall on a 700px screen */
 .tuner-panel{padding:var(--s3);text-align:center}
 .tuner-read{min-height:56px;display:flex;flex-direction:column;justify-content:center}
-.tuner-note{font-size:46px;font-weight:200;line-height:1;letter-spacing:-.02em;
-  font-variant-numeric:tabular-nums}
-.tuner-note .oct{font-size:20px;color:var(--text3);margin-left:2px}
+/* The note is read from a stand, at arm's length, while both hands are on the
+   instrument: it takes the size the screen can give it rather than a fixed 46px
+   with half a screen left empty underneath. */
+.tuner-note{font-size:clamp(46px,15vh,136px);font-weight:200;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tuner-note .oct{font-size:.42em;color:var(--text3);margin-left:2px}
 .tuner-note.in-tune{color:var(--green-hi)}
-.tuner-cents{font-size:12px;color:var(--text3);margin-top:4px;font-variant-numeric:tabular-nums}
+.tuner-cents{font-size:clamp(13px,2.2vh,19px);color:var(--text3);margin-top:6px;
+  font-variant-numeric:tabular-nums}
+/* In tune, the number says so in the same colour the note and the needle wear —
+   three things agreeing is what makes it readable without being read. */
+.tuner-cents.in-tune{color:var(--green-hi)}
 /* the bar: fifty cents either side, with the in-tune zone marked */
-.tuner-bar{position:relative;height:26px;margin-top:var(--s2);border-radius:var(--r);
-  background:var(--bg3);overflow:hidden}
+.tuner-bar{position:relative;height:clamp(26px,6vh,52px);margin-top:var(--s3);
+  border-radius:var(--r);background:var(--bg3);overflow:hidden}
 .tuner-zone{position:absolute;left:48%;width:4%;top:0;bottom:0;background:var(--green-bg);opacity:.55}
 .tuner-ticks{position:absolute;inset:0;
   background:repeating-linear-gradient(to right,var(--border2) 0 1px,transparent 1px 10%)}
-.tuner-needle{position:absolute;top:3px;bottom:3px;width:3px;border-radius:2px;
+/* A three-pixel hair was the whole reading, and it was the thinnest thing on the
+   screen. It is a bar now, wide enough to see moving, and in tune it lights the
+   way a beat does. */
+.tuner-needle{position:absolute;top:3px;bottom:3px;width:9px;border-radius:4px;
   background:var(--text);left:50%;transform:translateX(-50%);
-  transition:left 90ms linear,background-color 120ms}
-.tuner-needle.in-tune{background:var(--green)}
+  transition:left 90ms linear,background-color 120ms,box-shadow 120ms}
+.tuner-needle.in-tune{background:var(--green);box-shadow:0 0 14px 2px var(--green)}
 .tuner-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);
   margin-top:4px;letter-spacing:.06em}
+/* ---------- the tuner's own screen ----------
+   The reading takes what there is, the two boxes sit under it, and a page of
+   choices takes the screen from both — the same law as everywhere else. */
+body.afina .scroll{display:flex;flex-direction:column;min-height:0}
+body.afina .scroll>*{flex:0 0 auto}
+body.afina #tuner-section{display:flex!important;flex-direction:column;flex:1 1 auto;min-height:0}
+body.afina .tuner-panel{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center}
+.tuner-boxes{display:none}
+body.afina .tuner-boxes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);
+  flex:0 0 auto;margin-top:var(--s3)}
+body.afinapag .tuner-panel,body.afinapag .tuner-boxes{display:none!important}
+body.afinapag #tuner-page{display:flex!important;flex-direction:column;flex:1 1 auto;
+  min-height:0;gap:var(--s3)}
+#tuner-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);
+  flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
+#tuner-page .btn-wrap.notas{grid-template-columns:repeat(3,1fr)}
+#tuner-page .btn-wrap>button{min-height:clamp(44px,8vh,72px);font-size:15px;
+  border-radius:13px;width:auto;height:auto}
+#tuner-page .btn-wrap>button:last-child:nth-child(odd){grid-column:1 / -1;
+  justify-self:center;width:calc(50% - var(--s2)/2)}
+/* The twelve notes a temperament can be built on come under the five names of
+   the temperaments, and on a 640-tall phone the two grids at the same height
+   were 21px too many. The twelve are the smaller question, so they give. */
+#tuner-page .btn-wrap.notas>button{min-height:clamp(38px,6vh,64px)}
+#tuner-page .tuner-devs{flex:0 0 auto}
+#tuner-page .section-label{flex:0 0 auto;margin-bottom:0}
+/* The reference is a number you nudge as often as you pick it: the value stands
+   at the top with a step either side of it, and the settings luthiers and
+   orchestras actually use are underneath. */
+.tuner-a4-now{display:flex;align-items:center;justify-content:center;gap:var(--s3);
+  flex:0 0 auto}
+.tuner-a4-now .val{font-size:clamp(34px,8vh,64px);font-weight:300;line-height:1;
+  font-variant-numeric:tabular-nums;min-width:3.4em}
+.tuner-a4-now .val small{font-size:.35em;color:var(--text3);margin-left:6px}
+.tuner-a4-now button{width:clamp(48px,10vh,68px);height:clamp(48px,10vh,68px);
+  border-radius:50%;font-size:26px;font-weight:300;border:1px solid var(--border2);
+  background:var(--bg2);color:var(--text);cursor:pointer;touch-action:manipulation}
 /* the strobe: stripes that stand still when the pitch is right, and drift in the
    direction of the error. Reads finer than any needle, and needs no numbers. */
 .tuner-strobe{display:block;width:100%;height:32px;margin-top:var(--s2);
@@ -1456,10 +1503,13 @@ body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
    it can rather than scroll. */
 @media(max-height:680px){
   .tuner-read{min-height:44px}
-  .tuner-note{font-size:38px}
-  .tuner-note .oct{font-size:17px}
+  /* The reading no longer shares the screen with a panel of settings — they are
+     two boxes and a page of their own — so the note goes on growing with the
+     screen here instead of dropping to a fixed 38px and leaving the room empty.
+     The floor is what it always was. */
+  .tuner-note{font-size:clamp(38px,13vh,96px)}
   .tuner-strobe{height:24px}
-  .tuner-bar{height:22px}
+  .tuner-bar{height:clamp(22px,5vh,40px)}
   .tuner-panel{padding:var(--s2) var(--s3)}
 }
 
@@ -1630,22 +1680,12 @@ body.tocando #pulse-wrap{display:flex;flex-direction:column;align-items:center;
     <div class="tuner-hz" id="tuner-hz">listening for a note</div>
   </div>
 
-  <div class="panel">
-    <div class="head"><span class="group-label" data-t="reference-a4">Reference A4</span>
-      <span class="sig-fields">
-        <select class="sig-select active" id="tuner-a4" data-ta="aria.a4" aria-label="Reference pitch for A4"></select>
-        <span class="sig-unit" data-t="hz">Hz</span>
-      </span></div>
-    <!-- one line, because a temperament and the key it is built on are one
-         choice, and two lines of it pushed the tuner into scrolling -->
-    <div class="head"><span class="group-label" data-t="temperament">Temperament</span>
-      <span class="sig-fields">
-        <select class="sig-select active" id="tuner-temp" data-ta="aria.temp" aria-label="Temperament"></select>
-        <select class="sig-select active" id="tuner-key" data-ta="aria.tempKey" aria-label="Key the temperament is built on"
-                style="display:none"></select>
-      </span></div>
-    <div class="info-line tuner-devs" id="tuner-temp-info"></div>
-  </div>
+  <!-- What the tuner measures against — the reference and the temperament — is
+       two boxes under the reading, each opening a page of its own. A tuner is
+       read, not set: while a note is being tuned neither of them is on the
+       screen, and the reading has all of it. -->
+  <div class="tuner-boxes" id="tuner-box-row"></div>
+  <div id="tuner-page" style="display:none"></div>
 </div>
 
 <div id="drone-section">
@@ -5010,7 +5050,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10k';
+const APP_VERSION='lab-2026-09-10l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5076,10 +5116,16 @@ function pintaCasa(){
   const noOuvido=!emCasa&&!pastaAberta&&state.mode==='ear'&&!!state.ear.kind;
   document.body.classList.toggle('earx',noOuvido);
   document.body.classList.toggle('earpag',noOuvido&&!!earPag);
+  /* The tuner is one reading and two things it is measured against, so it has
+     the same two states as everything else: the reading, and a page. */
+  const noAfinador=!emCasa&&!pastaAberta&&state.mode==='tuner';
+  document.body.classList.toggle('afina',noAfinador);
+  document.body.classList.toggle('afinapag',noAfinador&&!!tunerPag);
   const n=document.getElementById('mode-back-name');
   /* The bar says where you are, and the arrow leaves it: in the drawer that is
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
+    :(state.mode==='tuner'&&tunerPag)?tunerNomeDaPagina()
     :(state.mode==='ear'&&earPag)?earNomeDaPagina()
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
     :(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto]))?nomeDaSub()
@@ -5129,13 +5175,16 @@ function entraModo(m){
 function limpaEstadoDoModo(){
   painelAberto=null;subPag=null;
   if(typeof earPag!=='undefined')earPag=null;
-  document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag');
+  if(typeof tunerPag!=='undefined')tunerPag=null;
+  document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag','afina','afinapag');
   document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
 }
 function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
   // inside a page of ear options, back is back to the exercise
   if(state.mode==='ear'&&earPag){earFechaPagina();return;}
+  // and inside one of the tuner's, back is back to the reading
+  if(state.mode==='tuner'&&tunerPag){tunerFecha();return;}
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
   // inside a page of a panel, back is back to that panel's front
@@ -10840,7 +10889,7 @@ function renderTuner(f){
   if(!noteEl)return;
   if(f===null){
     noteEl.textContent='—';noteEl.classList.remove('in-tune');
-    centsEl.textContent='';
+    centsEl.textContent='';centsEl.classList.remove('in-tune');
     hzEl.textContent=micStream?tr('tuner.listening','listening for a note'):tr('tuner.press','press Listen');
     needle.style.left='50%';needle.classList.remove('in-tune');
     drawStrobe(0,false);
@@ -10855,8 +10904,11 @@ function renderTuner(f){
   const inTune=Math.abs(cents)<2;
   noteEl.innerHTML=noteNameOfMidi(midi)+'<span class="oct">'+(Math.floor(midi/12)-1)+'</span>';
   noteEl.classList.toggle('in-tune',inTune);
-  centsEl.textContent=(cents>0?'+':'')+cents.toFixed(1)+' cents'+
-    (Math.abs(cents)>50?'  ·  a long way off':'');
+  /* The line under the note is the second thing read on this screen and it was
+     the one piece of the tuner still speaking English in every language. */
+  centsEl.textContent=tr('tuner.cents','{n} cents',{n:(cents>0?'+':'')+cents.toFixed(1)})+
+    (Math.abs(cents)>50?'  ·  '+tr('tuner.farOff','a long way off'):'');
+  centsEl.classList.toggle('in-tune',inTune);
   hzEl.textContent=tr('tuner.hzLine','{heard} Hz   ·   {wanted} Hz wanted',
     {heard:f.toFixed(2),wanted:target.toFixed(2)});
   needle.style.left=(50+tuneSmooth)+'%';
@@ -10946,59 +10998,111 @@ function tempOffset(midi){
   return dev[((((midi%12)+12)%12-key)%12+12)%12];
 }
 
-const TUNER_A4=[];for(let h=415;h<=466;h++)TUNER_A4.push(h);
+/* The whole range a tuner is ever asked for, reachable a hertz at a time, and
+   the settings that are actually asked for as a tap. Two selects were the last
+   drop-downs in the app's own screens: a menu is a list you read, and this is a
+   number you know the value of before you look. */
+const TUNER_A4_MIN=415,TUNER_A4_MAX=466;
+const TUNER_A4_COMUNS=[415,430,432,435,438,440,441,442,443,444,445,446];
+let tunerPag=null;
+const TUNER_PAGS=[
+  {k:'a4',  nome:()=>tr('reference-a4','Reference A4'),diz:()=>a4()+' Hz'},
+  {k:'temp',nome:()=>tr('temperament','Temperament'),
+   diz:()=>{const t=TEMPERAMENTS.find(x=>x.k===(state.tunerTemp||'equal'))||TEMPERAMENTS[0];
+            return lab('temp',t.k,t.label);}},
+];
+function tunerNomeDaPagina(){
+  const d=TUNER_PAGS.find(x=>x.k===tunerPag);
+  return d?soTexto(d.nome()):'';
+}
+function tunerAbre(k){
+  tunerPag=k;
+  buildTunerControls();pintaCasa();
+  const sc=document.getElementById('scroll-area');
+  if(sc)sc.scrollTop=0;
+}
+function tunerFecha(){
+  if(!tunerPag)return;
+  tunerPag=null;
+  buildTunerControls();pintaCasa();
+}
+function setA4(h){
+  state.tunerA4=Math.max(TUNER_A4_MIN,Math.min(TUNER_A4_MAX,Math.round(h)));
+  buildTunerControls();
+}
+function tunerBotao(host,label,ligado,acao,klass){
+  const b=document.createElement('button');
+  b.className=(klass||'pick-btn')+(ligado?' active':'');
+  b.type='button';b.textContent=label;b.onclick=acao;
+  host.appendChild(b);
+  return b;
+}
+function buildTunerA4(host){
+  const linha=document.createElement('div');linha.className='tuner-a4-now';
+  const menos=document.createElement('button');menos.type='button';menos.textContent='−';
+  menos.setAttribute('aria-label',tr('tuner.a4Down','One hertz lower'));
+  menos.onclick=()=>setA4(a4()-1);
+  const val=document.createElement('div');val.className='val';
+  val.innerHTML=a4()+'<small>'+tr('hz','Hz')+'</small>';
+  const mais=document.createElement('button');mais.type='button';mais.textContent='+';
+  mais.setAttribute('aria-label',tr('tuner.a4Up','One hertz higher'));
+  mais.onclick=()=>setA4(a4()+1);
+  linha.appendChild(menos);linha.appendChild(val);linha.appendChild(mais);
+  host.appendChild(linha);
+  const grid=document.createElement('div');grid.className='btn-wrap notas';
+  TUNER_A4_COMUNS.forEach(h=>tunerBotao(grid,String(h),a4()===h,()=>setA4(h)));
+  host.appendChild(grid);
+}
+function buildTunerTemp(host){
+  const grid=document.createElement('div');grid.className='btn-wrap';
+  TEMPERAMENTS.forEach(x=>tunerBotao(grid,lab('temp',x.k,x.label),
+    (state.tunerTemp||'equal')===x.k,()=>{state.tunerTemp=x.k;buildTunerControls();}));
+  host.appendChild(grid);
+  // the key means nothing to equal temperament, where every note is the same
+  if((state.tunerTemp||'equal')==='equal')return;
+  const rot=document.createElement('div');rot.className='section-label';
+  rot.textContent=tr('tuner.tempKey','Built on');
+  host.appendChild(rot);
+  const keys=document.createElement('div');keys.className='btn-wrap notas';
+  tunerNames().forEach((n,i)=>tunerBotao(keys,n,(state.tunerKey||0)===i,
+    ()=>{state.tunerKey=i;buildTunerControls();}));
+  host.appendChild(keys);
+  // say what it does, in the notes it does it to
+  const parts=[];
+  for(let pc=0;pc<12;pc++){
+    const o=tempOffset(pc);
+    if(Math.abs(o)>=0.5)parts.push(tunerNames()[pc]+' '+(o>0?'+':'')+o.toFixed(0));
+  }
+  const info=document.createElement('div');
+  info.className='info-line tuner-devs';info.id='tuner-temp-info';
+  // the words cost a line of their own on a phone; the signs say cents
+  info.textContent=parts.join('  ');
+  info.title=tr('tuner.centsFromEqual','cents away from equal temperament');
+  host.appendChild(info);
+}
 function buildTunerControls(){
-  const a4sel=document.getElementById('tuner-a4');
-  if(!a4sel)return;
-  if(!a4sel.options.length){
-    TUNER_A4.forEach(h=>a4sel.appendChild(new Option(h,h)));
-    a4sel.addEventListener('change',()=>{state.tunerA4=parseInt(a4sel.value,10)||440;});
-  }
-  a4sel.value=String(a4());
-
-  const tsel=document.getElementById('tuner-temp');
-  const ksel=document.getElementById('tuner-key');
-  /* The temperaments are named and the keys are notes, and a note is named
-     differently in a different language — and by the note-naming setting, which
-     moves on its own. Both are rebuilt whenever either has changed. */
-  const seloT=LANG+'|'+state.noteNames;
-  if(tsel&&(!tsel.options.length||tsel.dataset.selo!==seloT)){
-    const liga=!tsel.options.length;
-    const tT=tsel.value,tK=ksel?ksel.value:null;
-    tsel.innerHTML='';tsel.dataset.selo=seloT;
-    TEMPERAMENTS.forEach(x=>tsel.appendChild(new Option(lab('temp',x.k,x.label),x.k)));
-    if(tT)tsel.value=tT;
-    if(liga)tsel.addEventListener('change',()=>{state.tunerTemp=tsel.value;buildTunerControls();});
-    if(ksel){
-      ksel.innerHTML='';
-      tunerNames().forEach((n,i)=>ksel.appendChild(new Option(n,i)));
-      if(tK)ksel.value=tK;
-      if(liga)ksel.addEventListener('change',()=>{state.tunerKey=parseInt(ksel.value,10)||0;buildTunerControls();});
-    }
-  }
-  if(tsel){
-    tsel.value=state.tunerTemp||'equal';
-    ksel.value=String(state.tunerKey||0);
-    // the key means nothing to equal temperament, where every note is the same
-    ksel.style.display=(tsel.value==='equal')?'none':'';
-    const info=document.getElementById('tuner-temp-info');
-    if(tsel.value==='equal')info.textContent='';
-    else{
-      // say what it does, in the notes it does it to
-      const parts=[];
-      for(let pc=0;pc<12;pc++){
-        const o=tempOffset(pc);
-        if(Math.abs(o)>=0.5)parts.push(tunerNames()[pc]+' '+(o>0?'+':'')+o.toFixed(0));
-      }
-      // the words cost a line of their own on a phone; the signs say cents
-      info.textContent=parts.length?parts.join('  '):'';
-      info.title=tr('tuner.centsFromEqual','cents away from equal temperament');
-    }
-    // the deviations line changes the panel's height, so the room has to be
-    // shared out again — without this the spread stayed as it was for equal
-    // temperament and pushed the taller panel into scrolling
-    spreadPanelsSoon();
-  }
+  const row=document.getElementById('tuner-box-row');
+  const page=document.getElementById('tuner-page');
+  if(!row||!page)return;
+  row.innerHTML='';
+  TUNER_PAGS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='panel-box';b.type='button';
+    const nome=soTexto(d.nome());
+    const t=document.createElement('span');t.textContent=nome;
+    let diz='';try{diz=soTexto(d.diz());}catch(e){}
+    b.setAttribute('aria-label',diz?nome+' — '+diz:nome);
+    b.appendChild(t);
+    b.onclick=()=>tunerAbre(d.k);
+    row.appendChild(b);
+  });
+  page.innerHTML='';
+  page.style.display=tunerPag?'':'none';
+  if(tunerPag==='a4')buildTunerA4(page);
+  else if(tunerPag==='temp')buildTunerTemp(page);
+  /* The temperament's deviations are a line that comes and goes, so the room has
+     to be shared out again — without this the spread stayed as it was. */
+  spreadPanelsSoon();
 }
 /* ---------- undo ----------
    One step back, wherever you were. Not built control by control — every button
@@ -11121,7 +11225,10 @@ const HELP_INLINE={
   '#pat-head .section-label':'help-pattern',
   '#mix-head .section-label':'help-acc',
   '#subdiv-head .section-label':'help-metro',
-  '#tuner-section .panel:not(.tuner-panel) .head .group-label':'help-tuner',
+  /* The tuner's settings are boxes now, and a mark inside a grid of boxes would
+     be a cell of its own. It rides the line under the reading instead — which is
+     what the guide's entry is about. */
+  '#tuner-hz':'help-tuner',
 };
 let helpMarks=false;
 function toggleHelpMarks(){helpMarks=!helpMarks;paintHelpMarks();}

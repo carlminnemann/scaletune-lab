@@ -747,5 +747,10 @@
  "sum.bars": {
   "one": "{n} battuta",
   "other": "{n} battute"
- }
+ },
+ "tuner.tempKey": "Costruito su",
+ "tuner.a4Down": "Un hertz più basso",
+ "tuner.a4Up": "Un hertz più alto",
+ "tuner.cents": "{n} cent",
+ "tuner.farOff": "molto lontano"
 }

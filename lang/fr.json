@@ -747,5 +747,10 @@
  "sum.bars": {
   "one": "{n} mesure",
   "other": "{n} mesures"
- }
+ },
+ "tuner.tempKey": "Construit sur",
+ "tuner.a4Down": "Un hertz plus bas",
+ "tuner.a4Up": "Un hertz plus haut",
+ "tuner.cents": "{n} cents",
+ "tuner.farOff": "très loin"
 }

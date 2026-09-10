@@ -747,5 +747,10 @@
  "sum.bars": {
   "one": "{n} Takt",
   "other": "{n} Takte"
- }
+ },
+ "tuner.tempKey": "Gebaut auf",
+ "tuner.a4Down": "Ein Hertz tiefer",
+ "tuner.a4Up": "Ein Hertz höher",
+ "tuner.cents": "{n} Cent",
+ "tuner.farOff": "weit daneben"
 }

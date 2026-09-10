@@ -763,5 +763,10 @@
  "sum.bars": {
   "one": "{n} такт",
   "other": "тактов: {n}"
- }
+ },
+ "tuner.tempKey": "Построен на",
+ "tuner.a4Down": "На герц ниже",
+ "tuner.a4Up": "На герц выше",
+ "tuner.cents": "{n} центов",
+ "tuner.farOff": "далеко"
 }
