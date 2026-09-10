@@ -715,5 +715,13 @@
  "ear.f.dotted": "附点",
  "ear.f.rest": "休止符",
  "h.ear.kinds": "四种题型，各有各的画面：音程、音阶、和弦、节奏。顶端的名字带你回到这个清单。",
- "ear.kinds.k": "题型"
+ "ear.kinds.k": "题型",
+ "fam.count": {
+  "one": "{n} 个",
+  "other": "{n} 个"
+ },
+ "fam.countChords": {
+  "one": "{n} 个",
+  "other": "{n} 个"
+ }
 }

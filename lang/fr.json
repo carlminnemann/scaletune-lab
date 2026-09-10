@@ -730,5 +730,13 @@
  "ear.f.dotted": "Pointées",
  "ear.f.rest": "Silences",
  "h.ear.kinds": "Quatre sortes de question, chacune avec son écran : intervalles, gammes, accords et rythme. Le nom en haut ramène à cette liste.",
- "ear.kinds.k": "Les sortes"
+ "ear.kinds.k": "Les sortes",
+ "fam.count": {
+  "one": "{n} gamme",
+  "other": "{n} gammes"
+ },
+ "fam.countChords": {
+  "one": "{n} accord",
+  "other": "{n} accords"
+ }
 }

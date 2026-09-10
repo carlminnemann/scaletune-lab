@@ -730,5 +730,13 @@
  "ear.f.dotted": "Puntate",
  "ear.f.rest": "Pause",
  "h.ear.kinds": "Quattro tipi di domanda, ognuno con il suo schermo: intervalli, scale, accordi e ritmo. Il nome in alto riporta a questo elenco.",
- "ear.kinds.k": "I tipi"
+ "ear.kinds.k": "I tipi",
+ "fam.count": {
+  "one": "{n} scala",
+  "other": "{n} scale"
+ },
+ "fam.countChords": {
+  "one": "{n} accordo",
+  "other": "{n} accordi"
+ }
 }

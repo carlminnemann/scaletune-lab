@@ -730,5 +730,13 @@
  "ear.f.dotted": "Punktiert",
  "ear.f.rest": "Pausen",
  "h.ear.kinds": "Vier Arten von Frage, jede mit eigenem Bildschirm: Intervalle, Tonleitern, Akkorde und Rhythmus. Der Name oben führt zurück zu dieser Liste.",
- "ear.kinds.k": "Die Arten"
+ "ear.kinds.k": "Die Arten",
+ "fam.count": {
+  "one": "{n} Tonleiter",
+  "other": "{n} Tonleitern"
+ },
+ "fam.countChords": {
+  "one": "{n} Akkord",
+  "other": "{n} Akkorde"
+ }
 }

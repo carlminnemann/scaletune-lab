@@ -730,5 +730,13 @@
  "ear.f.dotted": "Pontuadas",
  "ear.f.rest": "Pausas",
  "h.ear.kinds": "Quatro tipos de pergunta, cada um com o seu ecrã: intervalos, escalas, acordes e ritmo. O nome no topo traz-te de volta a esta lista.",
- "ear.kinds.k": "Os tipos"
+ "ear.kinds.k": "Os tipos",
+ "fam.count": {
+  "one": "{n} escala",
+  "other": "{n} escalas"
+ },
+ "fam.countChords": {
+  "one": "{n} acorde",
+  "other": "{n} acordes"
+ }
 }

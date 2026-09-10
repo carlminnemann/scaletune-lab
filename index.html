@@ -423,16 +423,68 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
    be worth choosing between: a menu of two boxes is not a menu, so Drone, Metro
    and the tuner keep what they had. */
 #panel-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-bottom:var(--s3)}
-#panel-row .panel-box{display:flex;flex-direction:column;justify-content:center;gap:3px;
-  min-height:clamp(58px,11vh,86px);padding:10px 12px;text-align:left;
+/* The box, wherever it is used: a mode's panels, a panel's families, anything
+   that opens a page of its own. */
+.panel-box{display:flex;flex-direction:column;justify-content:center;gap:3px;
+  min-height:clamp(58px,11vh,86px);padding:10px 12px;text-align:left;width:100%;
   border:1px solid var(--border2);border-radius:13px;background:var(--bg2);
   color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;
   touch-action:manipulation;transition:all .15s}
-#panel-row .panel-box .sub{font-size:11px;font-style:italic;color:var(--text3);
+.panel-box .sub{font-size:11px;font-style:italic;color:var(--text3);
   font-weight:400;line-height:1.25;overflow-wrap:anywhere}
-#panel-row .panel-box:active{border-color:var(--mode)}
+.panel-box:active{border-color:var(--mode)}
 /* Inside a panel, its own title is the bar at the top, so the fold's summary
    would say it twice. */
+/* ---------- inside a panel, pages rather than folds ----------
+   A fold under your thumb is a small target and a page that grows; a box that
+   opens a page of its own is neither. The note everything is built on gets the
+   size it deserves, and the families under it are boxes like all the others. */
+.root-box{display:flex;align-items:baseline;justify-content:center;gap:10px;width:100%;
+  min-height:clamp(64px,12vh,96px);margin-bottom:var(--s3);padding:8px 14px;
+  border:1px solid var(--mode);border-radius:14px;background:var(--mode-bg);
+  color:var(--mode-fg);cursor:pointer;touch-action:manipulation}
+.root-box .root-big{font-size:clamp(28px,7vh,44px);font-weight:300;line-height:1}
+.root-box .root-cap{font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.08em;opacity:.7}
+#fam-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+/* ---------- filling the screen ----------
+   A grid of boxes that ends half way up reads as a list that was cut short. In
+   these two states the column of boxes is the page, so it is given the height:
+   the scrolling area becomes a column, whatever holds the boxes grows into it,
+   and the rows share what there is. It is the same trick the home screen uses
+   on the modes, carried down two levels. */
+body.caixas .scroll,body.sub .scroll{display:flex;flex-direction:column;min-height:0}
+body.caixas .scroll>*,body.sub .scroll>*{flex:0 0 auto}
+body.caixas #panel-row{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+body.sub #pitch-section,body.sub #sec-scales,body.sub #sec-scales>.sec-body,
+body.sub #scale-lists,body.sub #arp-lists,body.sub details.fam{display:flex;
+  flex-direction:column;flex:1 1 auto;min-height:0}
+/* The labels and the line under them keep their own height; the boxes take
+   what is left. Written this way round because a blanket "everything else does
+   not grow" is a rule that wins against the one thing that should. */
+/* A modern browser wraps what is inside a <details> in a box of its own —
+   ::details-content — and that box, not the panel body, is the flex child. The
+   chain stopped there: everything above and below it stretched and the boxes
+   stayed the height of their text. */
+body.sub #sec-scales::details-content,body.sub details.fam::details-content{
+  display:flex;flex-direction:column;flex:1 1 auto;min-height:0;height:auto}
+body.sub #root-cap-line,body.sub #pitch-info,body.sub #pitch-clear,
+body.sub #blue-line,body.sub #blue-info{flex:0 0 auto}
+body.sub #sec-scales .btn-wrap{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+
+/* A page of choices takes the screen: two columns for words, three for the
+   twelve notes, and every box the same height. */
+body.sub .btn-wrap{grid-template-columns:1fr 1fr!important;gap:var(--s2)!important}
+body.sub .btn-wrap{align-items:stretch}
+/* Every button in the row, whatever it is called — the twelve notes are
+   tonic-btn and the scales are pick-btn, and on a page of choices they are the
+   same thing. */
+body.sub .btn-wrap>button{min-height:clamp(46px,8.5vh,72px);font-size:15px;
+  border-radius:13px;width:auto;height:auto;align-self:stretch}
+body.sub.notas .btn-wrap{grid-template-columns:repeat(3,1fr)!important}
+body.sub details.fam>summary{display:none}
+body.sub details.fam{border:0;background:none;margin:0}
+
 /* Single or Study list governs every panel, so it belongs with the boxes and
    not inside one of them. */
 body.painel #listmode-row,body.painel #listlink-row{display:none}
@@ -1428,7 +1480,15 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <details class="sec" id="sec-scales">
     <summary><span id="sec-scales-title">Scales</span><span class="sec-sum" id="sum-scales"></span></summary>
     <div class="sec-body">
-      <div class="group-label" data-t="sec.root">Root</div>
+      <!-- The front of this panel: the note everything is built on, big, and the
+           families under it. Each of them opens a page of its own rather than
+           unfolding under your thumb. -->
+      <button class="root-box" id="root-box" type="button" onclick="abreSub('root')">
+        <span class="root-big" id="root-big">C</span>
+        <span class="root-cap" data-t="sec.root">Root</span>
+      </button>
+      <div id="fam-row"></div>
+      <div class="group-label" id="root-cap-line" data-t="sec.root" style="display:none">Root</div>
       <div class="btn-wrap" id="root-row" style="margin-bottom:var(--s4)"></div>
       <div id="scale-lists">
         <details class="fam" data-fam="gregorian">
@@ -4757,7 +4817,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10e';
+const APP_VERSION='lab-2026-09-10f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4825,6 +4885,7 @@ function pintaCasa(){
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
+    :(subPag&&painelAberto==='sec-scales')?nomeDaSub()
     :(painelAberto&&paineisDoModo())?nomeDoPainel(painelAberto)
     :modeLabel(state.mode);
   const sec=document.getElementById('sec-exercises');
@@ -4863,6 +4924,8 @@ function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
+  // inside a page of a panel, back is back to that panel's front
+  if(subPag&&painelAberto==='sec-scales'){fechaSub();return;}
   // and inside a panel, back is back to the mode's boxes
   if(painelAberto&&paineisDoModo()){fechaPainel();return;}
   if(state.playing)togglePlay();
@@ -4877,6 +4940,97 @@ function voltaHome(){
    the header takes you there, the whole screen is the drawer, and the bar at
    the top brings you back to the mode you were in. */
 let pastaAberta=false;
+/* ---------- a page inside a panel ----------
+   The root, and each family of scales or chords, is a page of its own: you tap
+   a box and the page it opens replaces what you were looking at. Nothing folds
+   and nothing scrolls, which on a phone is the difference between a target and
+   a guess. */
+let subPag=null;
+function abreSub(k){
+  subPag=k;
+  arrumaEscalas();pintaCasa();
+  const sc=document.getElementById('scroll-area');
+  if(sc)sc.scrollTop=0;
+}
+function fechaSub(){
+  if(!subPag)return;
+  subPag=null;
+  arrumaEscalas();pintaCasa();
+}
+function nomeDaSub(){
+  if(subPag==='root')return tr('sec.root','Root');
+  const d=document.querySelector('details.fam[data-fam="'+subPag+'"]');
+  const t=d&&d.querySelector('summary>span[data-t]');
+  return t?t.textContent.trim():'';
+}
+/* What is on the screen inside the Scales panel: its front, the twelve notes,
+   or one family. Everything is built as it always was — this only decides what
+   is looked at. */
+function arrumaEscalas(){
+  const dentro=(painelAberto==='sec-scales');
+  if(!dentro&&subPag)subPag=null;
+  const mostra=(id,v)=>{const e=document.getElementById(id);if(e)e.style.display=v?'':'none';};
+  const naFrente=dentro&&!subPag;
+  mostra('root-box',naFrente);
+  mostra('fam-row',naFrente);
+  mostra('root-cap-line',dentro&&subPag==='root');
+  mostra('root-row',dentro&&subPag==='root');
+  const listas=state.mode==='arpeggio'?'arp-lists':'scale-lists';
+  ['scale-lists','arp-lists'].forEach(id=>mostra(id,dentro&&!!subPag&&subPag!=='root'&&id===listas));
+  document.querySelectorAll('details.fam').forEach(d=>{
+    const minha=d.dataset.fam===subPag;
+    d.style.display=minha?'':'none';
+    d.open=minha;
+  });
+  const info=document.getElementById('pitch-info');
+  if(info)info.style.display=(dentro&&!subPag)?'':'none';
+  document.body.classList.toggle('sub',dentro&&!!subPag);
+  document.body.classList.toggle('notas',dentro&&subPag==='root');
+  if(naFrente)buildFamRow();
+  const big=document.getElementById('root-big');
+  if(big)big.textContent=bareName(NOTES.indexOf(state.root));
+}
+/* One box per family, saying what is chosen inside it — so the front of the
+   panel answers "which scale is this?" without opening anything. */
+function buildFamRow(){
+  const row=document.getElementById('fam-row');
+  if(!row)return;
+  row.innerHTML='';
+  const arp=state.mode==='arpeggio';
+  const grupo=arp?'arp-lists':'scale-lists';
+  document.querySelectorAll('#'+grupo+' details.fam').forEach(d=>{
+    const fam=d.dataset.fam;
+    const t=d.querySelector('summary>span[data-t]');
+    const b=document.createElement('button');
+    b.className='panel-box';b.type='button';
+    const nome=document.createElement('span');
+    nome.textContent=t?t.textContent.trim():fam;
+    const sub=document.createElement('span');sub.className='sub';
+    const escolhida=arp
+      ?(state.chordGroup===fam?chordLabel(state.chordName):'')
+      :(state.scaleGroup===fam?scaleLabel(state.scaleName):'');
+    const quantas=d.querySelectorAll('.btn-wrap .pick-btn').length;
+    sub.textContent=escolhida||(arp
+      ? tr('fam.countChords',{one:'{n} chord',other:'{n} chords'},{n:quantas})
+      : tr('fam.count',{one:'{n} scale',other:'{n} scales'},{n:quantas}));
+    b.appendChild(nome);b.appendChild(sub);
+    b.onclick=()=>abreSub(fam);
+    row.appendChild(b);
+  });
+}
+/* Choosing puts you back where you chose from — unless a study list is being
+   built, where the whole point is to tap several. */
+document.addEventListener('click',e=>{
+  if(!subPag)return;
+  /* Any button on the page, whatever it is called: the twelve notes are
+     tonic-btn and the scales are pick-btn, and both are choices. */
+  const b=e.target&&e.target.closest&&e.target.closest('button');
+  if(!b)return;
+  if(!b.closest('#root-row')&&!b.closest('details.fam'))return;
+  if(b.closest('details.fam')&&useListOn())return;
+  setTimeout(fechaSub,0);
+},true);
+
 /* Which panel of the mode is on the screen, or nothing for the boxes. Only
    modes with enough panels to be worth choosing between have the boxes at all;
    the rest show what they always showed. */
@@ -4938,6 +5092,7 @@ function arrumaPaineis(){
   const row=document.getElementById('panel-row');
   const menu=!!ids&&!painelAberto&&!pastaAberta;
   if(row)row.style.display=(menu&&!emCasa)?'':'none';
+  document.body.classList.toggle('caixas',!!(menu&&!emCasa&&ids));
   document.body.classList.toggle('painel',!!ids&&!!painelAberto&&!pastaAberta);
   if(!ids)return;
   ids.forEach(id=>{
@@ -4949,6 +5104,7 @@ function arrumaPaineis(){
   const div=document.getElementById('metro-divider');
   if(div&&ids)div.style.display='none';
   if(menu)buildPanelRow();
+  arrumaEscalas();
 }
 function abrePasta(){
   if(emCasa)return;

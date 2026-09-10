@@ -730,5 +730,13 @@
  "ear.f.dotted": "Con puntillo",
  "ear.f.rest": "Silencios",
  "h.ear.kinds": "Cuatro tipos de pregunta, cada uno con su pantalla: intervalos, escalas, acordes y ritmo. El nombre de arriba te devuelve a esta lista.",
- "ear.kinds.k": "Los tipos"
+ "ear.kinds.k": "Los tipos",
+ "fam.count": {
+  "one": "{n} escala",
+  "other": "{n} escalas"
+ },
+ "fam.countChords": {
+  "one": "{n} acorde",
+  "other": "{n} acordes"
+ }
 }
