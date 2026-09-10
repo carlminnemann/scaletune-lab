@@ -287,9 +287,15 @@ body.home .current-note,body.home .current-freq{display:none}
 /* By id, not by class: Single / Study list borrows .mode-row to be shaped like
    the modes, and hiding the class hid it too — which is how the study list
    vanished from Scale and Arpeggio. */
-body.home #mode-row,body.ouvido #ear-row{grid-template-columns:1fr;grid-auto-rows:1fr;
+/* Two columns of three, and the ear across the foot of them: seven boxes read
+   as two columns and a conclusion, where seven in a line read as a list. The
+   kinds inside Ear keep the single column — four is not enough to need two. */
+body.home #mode-row{grid-template-columns:1fr 1fr}
+body.home #btn-mode-ear{grid-column:1 / -1}
+body.home #mode-row,body.ouvido #ear-row{grid-auto-rows:1fr;
   gap:clamp(7px,1.9vh,15px);flex:1 1 auto;min-height:0;
-  width:min(88%,360px);margin:0 auto clamp(10px,2.5vh,22px)}
+  width:min(92%,420px);margin:0 auto clamp(8px,2vh,18px)}
+body.ouvido #ear-row{grid-template-columns:1fr}
 body.home #mode-row .mode-btn,body.ouvido #ear-row .mode-btn{height:auto;min-height:clamp(42px,8vh,66px);
   font-size:clamp(14px,2.2vh,18px);border-radius:13px;padding:0 10px}
 /* The list of kinds is only there while none is chosen, and while it is there
@@ -303,8 +309,10 @@ body.ouvido .current-note,body.ouvido .current-freq{display:none}
    takes the width of the column and the shape of the rows above it, and stays
    quieter than them by being drawn rather than filled. */
 .home-foot{flex:0 0 auto;display:flex;justify-content:center;
-  padding:0 0 clamp(6px,2vh,18px);width:min(88%,360px);margin:0 auto}
-.home-foot .theme-btn{width:100%;height:auto;min-height:clamp(34px,5.5vh,46px);
+  padding:0 0 clamp(6px,2vh,18px);width:min(92%,420px);margin:0 auto}
+/* The same box as the seven above it, drawn rather than filled so it stays the
+   quieter thing on the screen. */
+.home-foot .theme-btn{width:100%;height:auto;min-height:clamp(42px,8vh,66px);
   border-radius:13px;background:transparent;border-color:var(--border2);
   color:var(--text);font-size:17px}
 /* Drawn, not typed: the ⚙ character renders as a blue emoji on some systems,
@@ -408,6 +416,29 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .ear-tres{fill:currentColor;font-size:9px;font-style:italic}
 #ear-answers .pick-btn.certo{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
 #ear-answers .pick-btn.errado{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
+/* ---------- a mode's panels, as boxes ----------
+   Six folds stacked one on another is a page to scroll; six boxes are a choice
+   to make. Tapping one gives it the screen and takes the rest away, and the
+   name at the top brings the boxes back. Only where there are enough of them to
+   be worth choosing between: a menu of two boxes is not a menu, so Drone, Metro
+   and the tuner keep what they had. */
+#panel-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-bottom:var(--s3)}
+#panel-row .panel-box{display:flex;flex-direction:column;justify-content:center;gap:3px;
+  min-height:clamp(58px,11vh,86px);padding:10px 12px;text-align:left;
+  border:1px solid var(--border2);border-radius:13px;background:var(--bg2);
+  color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;
+  touch-action:manipulation;transition:all .15s}
+#panel-row .panel-box .sub{font-size:11px;font-style:italic;color:var(--text3);
+  font-weight:400;line-height:1.25;overflow-wrap:anywhere}
+#panel-row .panel-box:active{border-color:var(--mode)}
+/* Inside a panel, its own title is the bar at the top, so the fold's summary
+   would say it twice. */
+/* Single or Study list governs every panel, so it belongs with the boxes and
+   not inside one of them. */
+body.painel #listmode-row,body.painel #listlink-row{display:none}
+body.painel details.sec>summary{display:none}
+body.painel details.sec{border:0;background:none;margin:0}
+body.painel details.sec .sec-body{padding:0}
 .mode-bar{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin:0 0 var(--s3)}
 .mode-back{display:flex;align-items:center;gap:7px;width:auto;
   margin:0;padding:4px 2px;border:0;background:none;cursor:pointer;
@@ -1273,7 +1304,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <button class="mode-btn" id="btn-mode-free" onclick="entraModo('free')" data-t="free">Free</button>
   <button class="mode-btn" id="btn-mode-tuner" onclick="entraModo('tuner')" data-t="tuner">Tuner</button>
   <button class="mode-btn" id="btn-mode-metro" onclick="entraModo('metro')" data-t="metro">♩ Metro</button>
-  <button class="mode-btn" id="btn-mode-ear" onclick="entraModo('ear')" data-t="ear">Ear</button>
+  <button class="mode-btn" id="btn-mode-ear" onclick="entraModo('ear')" data-t="ear">Ear training</button>
 </div>
 
 <!-- The way back to the six. It says which mode you are in, so it is a label as
@@ -1336,6 +1367,9 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 <div class="head" id="listlink-row" style="display:none;margin-top:var(--s2)">
   <span class="section-label" data-t="list.link">Study list</span>
   <span class="btn-wrap seg" id="listlink-seg" data-cols="fixed"></span></div>
+
+<!-- One box per panel of this mode, in place of the panels themselves. -->
+<div id="panel-row" style="display:none"></div>
 
 <!-- ============ DRONE ============ -->
 <!-- The tuner. Its own mode because it is the only thing that listens rather
@@ -4723,7 +4757,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10d';
+const APP_VERSION='lab-2026-09-10e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4791,6 +4825,7 @@ function pintaCasa(){
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
+    :(painelAberto&&paineisDoModo())?nomeDoPainel(painelAberto)
     :modeLabel(state.mode);
   const sec=document.getElementById('sec-exercises');
   if(sec)sec.style.display=(pastaAberta&&state.mode!=='tuner')?'':'none';
@@ -4801,6 +4836,11 @@ function pintaCasa(){
     f.style.display=(state.mode==='tuner'||state.mode==='ear')?'none':'';
     f.classList.toggle('vazia',exercisesDoModo().length===0&&pastasDoModo().length===0);
   }
+  arrumaPaineis();
+  /* The header is not the same shape in every screen — the home screen gives
+     the name the whole width, a mode gives it what is left between the buttons
+     — so what fits has to be measured again on each of them. */
+  fitWordmark();
   paintHelpMarks();      // the marks hang on panels, and the panels just moved
   refreshSectionSummaries();
   spreadPanelsSoon();
@@ -4808,6 +4848,7 @@ function pintaCasa(){
 function entraModo(m){
   emCasa=false;
   pastaAberta=false;
+  painelAberto=null;      // a mode opens on its boxes, never inside one
   /* Nothing is remembered between visits, the score included: coming into Ear
      is starting a round, not resuming one. */
   if(m==='ear'){earZera();state.ear.kind=null;}
@@ -4822,6 +4863,8 @@ function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
+  // and inside a panel, back is back to the mode's boxes
+  if(painelAberto&&paineisDoModo()){fechaPainel();return;}
   if(state.playing)togglePlay();
   stopTuner();
   emCasa=true;
@@ -4834,6 +4877,79 @@ function voltaHome(){
    the header takes you there, the whole screen is the drawer, and the bar at
    the top brings you back to the mode you were in. */
 let pastaAberta=false;
+/* Which panel of the mode is on the screen, or nothing for the boxes. Only
+   modes with enough panels to be worth choosing between have the boxes at all;
+   the rest show what they always showed. */
+let painelAberto=null;
+const PAINEIS_POR_MODO={
+  scale:['sec-scales','sec-range','sec-progress','metro-section','sec-rhythm','sec-sound'],
+  arpeggio:['sec-scales','sec-range','sec-progress','metro-section','sec-rhythm','sec-sound'],
+  free:['sec-freenotes','sec-freerange','sec-progress','metro-section','sec-rhythm','sec-sound'],
+};
+function paineisDoModo(){return PAINEIS_POR_MODO[state.mode]||null;}
+function temMenuDePaineis(){return !!paineisDoModo()&&!pastaAberta&&!emCasa;}
+function abrePainel(id){
+  painelAberto=id;
+  const d=document.getElementById(id);
+  if(d){d.open=true;}
+  pintaCasa();
+  const sc=document.getElementById('scroll-area');
+  if(sc)sc.scrollTop=0;
+}
+function fechaPainel(){
+  painelAberto=null;
+  pintaCasa();
+}
+/* The title of a panel is the title on its own summary — one place, so a box
+   and the bar above the panel it opens can never disagree. */
+function nomeDoPainel(id){
+  const d=document.getElementById(id);
+  const t=d&&d.querySelector(':scope>summary>span[data-t],:scope>summary>span:first-child');
+  return t?t.textContent.trim():id;
+}
+function resumoDoPainel(id){
+  const s=SECTIONS.find(x=>x.id===id);
+  if(!s)return '';
+  try{return s.text();}catch(e){return '';}
+}
+function buildPanelRow(){
+  const row=document.getElementById('panel-row');
+  if(!row)return;
+  const ids=paineisDoModo();
+  row.innerHTML='';
+  if(!ids)return;
+  ids.forEach(id=>{
+    const d=document.getElementById(id);
+    if(!d||d.dataset.foraDoModo==='1')return;
+    const b=document.createElement('button');
+    b.className='panel-box';
+    b.type='button';
+    const t=document.createElement('span');t.textContent=nomeDoPainel(id);
+    const u=document.createElement('span');u.className='sub';u.textContent=resumoDoPainel(id);
+    b.appendChild(t);b.appendChild(u);
+    b.onclick=()=>abrePainel(id);
+    row.appendChild(b);
+  });
+}
+/* Which sections are on the screen: all of them as before where a mode has no
+   boxes, the chosen one alone where it has. */
+function arrumaPaineis(){
+  const ids=paineisDoModo();
+  const row=document.getElementById('panel-row');
+  const menu=!!ids&&!painelAberto&&!pastaAberta;
+  if(row)row.style.display=(menu&&!emCasa)?'':'none';
+  document.body.classList.toggle('painel',!!ids&&!!painelAberto&&!pastaAberta);
+  if(!ids)return;
+  ids.forEach(id=>{
+    const d=document.getElementById(id);
+    if(!d)return;
+    d.style.display=(painelAberto===id&&!pastaAberta)?'':'none';
+    if(painelAberto!==id)d.open=false;
+  });
+  const div=document.getElementById('metro-divider');
+  if(div&&ids)div.style.display='none';
+  if(menu)buildPanelRow();
+}
 function abrePasta(){
   if(emCasa)return;
   if(state.playing)togglePlay();
@@ -5399,6 +5515,10 @@ function setMode(m){
   exPath=[];exMoving=null;
   if(apagaEx||apagaPat){apagaEx=false;apagaPat=false;}
   buildExercises();buildPatternList();
+  /* And after every one of those decisions about what this mode has, the boxes:
+     they stand in for the panels, so they are chosen last, once the panels are
+     known. */
+  arrumaPaineis();
   /* Last, not with the rest: half these panels are shown or hidden after
      updateSupersededControls has run, so marks painted there missed whichever
      ones had not appeared yet — Practice Progressions and Phrasing had none on
@@ -9568,6 +9688,7 @@ function refreshSectionSummaries(){
      of it is answered in the same breath, which is the only way these keep up
      with every panel that can change them. */
   pintaClears();
+  if(!painelAberto&&paineisDoModo()&&!emCasa)buildPanelRow();
   buildBothWaysRow();
   buildTurnRow('turn-line','turn-row',()=>state.direction);
   buildTurnRow('free-turn-line','free-turn-row',()=>state.freeDirection);
@@ -10370,7 +10491,12 @@ function paintHelpMarks(){
   for(const sel in HELP_INLINE){
     const el=document.querySelector(sel);
     if(!heVisivel(el))continue;
-    const sec=HELP_INLINE[sel];
+    /* Inside a panel its summary is gone — the bar at the top says what this is
+       — and the mark rode on that summary. So there the mark rides on the bar,
+       and opens the page for the panel you are looking at rather than the one
+       about the modes. */
+    let sec=HELP_INLINE[sel];
+    if(sel==='#mode-back'&&painelAberto&&HELP_FOR[painelAberto])sec=HELP_FOR[painelAberto];
     if(feitas.has(sec))continue;
     feitas.add(sec);
     const nome=sel.indexOf('#tuner')===0?tr('tuner','Tuner'):el.textContent;
