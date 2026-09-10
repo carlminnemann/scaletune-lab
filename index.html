@@ -1962,7 +1962,7 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 
   <div class="help-sec" id="help-ear"><h3 data-t="ear">Ear</h3><dl>
     <dt data-t="ear.which">Intervals</dt><dd data-t="h.ear.which">Which ones can come up. Tap to add or take one away; the answers you are offered are exactly these, so a short list is an easier round.</dd>
-    <dt data-t="ear.how">Played</dt><dd data-t="h.ear.how">The two notes one after the other, upwards or downwards, or both together. <em>Mixed</em> chooses for each question.</dd>
+    <dt data-t="ear.how">Played</dt><dd data-t="h.ear.how">The two notes one after the other, upwards or downwards, or both together. <em>Up or down</em> keeps them apart and hides only which way they go; <em>Mixed</em> adds them sounding together.</dd>
     <dt data-t="ear.from">From</dt><dd data-t="h.ear.from"><em>One note</em> always sets off from the note the app is on, which trains the interval against a key you know. <em>Anywhere</em> picks a starting note of its own — harder, and the more honest test.</dd>
     <dt data-t="ear.round.k">The round</dt><dd data-t="h.ear.round">The button under the screen starts, plays it again while you think, and asks the next one once you have answered. The ♪ beside the score repeats it at any time, answer given or not. The count is this round's; leaving the mode starts a new one.</dd>
   </dl></div>
@@ -4678,7 +4678,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10b';
+const APP_VERSION='lab-2026-09-10c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4832,7 +4832,12 @@ function earNova(){
   const teto=semitone('C',6);
   while(base+semis>teto)base-=12;
   let how=state.ear.how;
+  /* Two kinds of mixture, because they train different things. Up or down keeps
+     the two notes apart and only hides which way they go — which is the whole
+     difficulty of a melodic interval. Mixed adds them sounding together, which
+     is a different ear again. */
   if(how==='mix')how=['up','down','harmonic'][Math.floor(Math.random()*3)];
+  else if(how==='updown')how=Math.random()<0.5?'up':'down';
   earQ={semis,base,how,answered:false,right:false,said:0};
   renderEar();
   setPlayUI(false);      // the button becomes "play it again" while you think
@@ -4934,6 +4939,7 @@ function buildEarHowRow(){
   if(!row)return;
   row.innerHTML='';
   [['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],
+   ['updown',tr('ear.updown','Up or down')],
    ['harmonic',tr('ear.together','Together')],['mix',tr('ear.mixed','Mixed')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.ear.how===k?' active':'');
@@ -9173,6 +9179,7 @@ const SECTIONS=[
      const n=earOn().length;
      if(!n)return tr('ear.noneShort','none chosen');
      const como={up:tr('ear.up','Up'),down:tr('ear.down','Down'),
+                 updown:tr('ear.updown','Up or down'),
                  harmonic:tr('ear.together','Together'),mix:tr('ear.mixed','Mixed')}[state.ear.how];
      return tr('ear.count',{one:'{n} interval',other:'{n} intervals'},{n})+' · '+como.toLowerCase();
    }},

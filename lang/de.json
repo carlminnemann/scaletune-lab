@@ -713,7 +713,8 @@
  "ear.next": "Nächstes",
  "ear.round.k": "Die Runde",
  "h.ear.which": "Welche vorkommen können. Tippen fügt hinzu oder nimmt weg; angeboten werden genau diese Antworten, eine kurze Liste ist also eine leichtere Runde.",
- "h.ear.how": "Die zwei Töne nacheinander, aufwärts oder abwärts, oder beide zugleich. <em>Gemischt</em> entscheidet bei jeder Frage neu.",
+ "h.ear.how": "Die zwei Töne nacheinander, aufwärts oder abwärts, oder beide zugleich. <em>Aufwärts oder abwärts</em> hält sie getrennt und verbirgt nur die Richtung; <em>Gemischt</em> nimmt beide zugleich dazu.",
  "h.ear.from": "<em>Ein Ton</em> geht immer von dem Ton aus, auf dem die App steht — das übt das Intervall in einer Tonart, die du kennst. <em>Beliebiger Ton</em> sucht sich einen eigenen: schwerer, und die ehrlichere Probe.",
- "h.ear.round": "Der Knopf unten startet, spielt nochmal, während du überlegst, und stellt nach der Antwort die nächste Frage. Das ♪ neben dem Stand wiederholt jederzeit. Gezählt wird diese Runde; das Verlassen des Modus beginnt eine neue."
+ "h.ear.round": "Der Knopf unten startet, spielt nochmal, während du überlegst, und stellt nach der Antwort die nächste Frage. Das ♪ neben dem Stand wiederholt jederzeit. Gezählt wird diese Runde; das Verlassen des Modus beginnt eine neue.",
+ "ear.updown": "Aufwärts oder abwärts"
 }

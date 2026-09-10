@@ -713,7 +713,8 @@
  "ear.next": "Il prossimo",
  "ear.round.k": "Il giro",
  "h.ear.which": "Quali possono uscire. Tocca per aggiungere o togliere; le risposte offerte sono esattamente queste, quindi un elenco corto è un giro più facile.",
- "h.ear.how": "Le due note una dopo l'altra, in salita o in discesa, oppure insieme. <em>Misto</em> sceglie a ogni domanda.",
+ "h.ear.how": "Le due note una dopo l'altra, in salita o in discesa, oppure insieme. <em>In salita o in discesa</em> le tiene separate e nasconde solo il verso; <em>Misto</em> aggiunge le due insieme.",
  "h.ear.from": "<em>Una nota</em> parte sempre dalla nota su cui è l'app, il che allena l'intervallo contro una tonalità che conosci. <em>Nota qualsiasi</em> ne sceglie una sua: più difficile, e la prova più onesta.",
- "h.ear.round": "Il pulsante in basso comincia, risuona mentre pensi e fa la domanda successiva dopo la risposta. Il ♪ accanto al punteggio ripete quando vuoi. Il conto è di questo giro; uscire dal modo ne comincia un altro."
+ "h.ear.round": "Il pulsante in basso comincia, risuona mentre pensi e fa la domanda successiva dopo la risposta. Il ♪ accanto al punteggio ripete quando vuoi. Il conto è di questo giro; uscire dal modo ne comincia un altro.",
+ "ear.updown": "In salita o in discesa"
 }

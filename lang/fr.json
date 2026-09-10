@@ -713,7 +713,8 @@
  "ear.next": "Suivant",
  "ear.round.k": "La série",
  "h.ear.which": "Ceux qui peuvent tomber. Touchez pour en ajouter ou en retirer ; les réponses proposées sont exactement celles-là, donc une liste courte fait une série plus facile.",
- "h.ear.how": "Les deux notes l'une après l'autre, en montant ou en descendant, ou les deux ensemble. <em>Mélangé</em> choisit à chaque question.",
+ "h.ear.how": "Les deux notes l'une après l'autre, en montant ou en descendant, ou les deux ensemble. <em>En montant ou en descendant</em> les garde séparées et ne cache que le sens ; <em>Mélangé</em> ajoute les deux ensemble.",
  "h.ear.from": "<em>Une note</em> part toujours de la note où se trouve l'app, ce qui travaille l'intervalle dans une tonalité connue. <em>N'importe quelle note</em> en choisit une : plus difficile, et le test le plus honnête.",
- "h.ear.round": "Le bouton du bas commence, rejoue pendant que vous réfléchissez, et pose la question suivante une fois répondu. Le ♪ à côté du score rejoue quand vous voulez. Le compte est celui de cette série ; quitter le mode en commence une autre."
+ "h.ear.round": "Le bouton du bas commence, rejoue pendant que vous réfléchissez, et pose la question suivante une fois répondu. Le ♪ à côté du score rejoue quand vous voulez. Le compte est celui de cette série ; quitter le mode en commence une autre.",
+ "ear.updown": "En montant ou en descendant"
 }

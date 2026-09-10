@@ -713,7 +713,8 @@
  "ear.next": "Siguiente",
  "ear.round.k": "La ronda",
  "h.ear.which": "Cuáles pueden salir. Toca para añadir o quitar; las respuestas que se ofrecen son exactamente estas, así que una lista corta es una ronda más fácil.",
- "h.ear.how": "Las dos notas una tras otra, subiendo o bajando, o las dos a la vez. <em>Mezclado</em> elige en cada pregunta.",
+ "h.ear.how": "Las dos notas una tras otra, subiendo o bajando, o las dos a la vez. <em>Subiendo o bajando</em> las mantiene separadas y solo esconde el sentido; <em>Mezclado</em> añade las dos juntas.",
  "h.ear.from": "<em>Una nota</em> parte siempre de la nota en la que está la app, lo que entrena el intervalo contra una tonalidad conocida. <em>Cualquier nota</em> elige una nota de partida propia: más difícil, y la prueba más honesta.",
- "h.ear.round": "El botón de abajo empieza, repite mientras piensas y hace la siguiente pregunta cuando has respondido. El ♪ junto al marcador repite cuando quieras. La cuenta es de esta ronda; salir del modo empieza otra."
+ "h.ear.round": "El botón de abajo empieza, repite mientras piensas y hace la siguiente pregunta cuando has respondido. El ♪ junto al marcador repite cuando quieras. La cuenta es de esta ronda; salir del modo empieza otra.",
+ "ear.updown": "Subiendo o bajando"
 }
