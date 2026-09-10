@@ -477,6 +477,11 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
     -webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
   body.paginas #sig-block .beats-hint{display:none}
   body.paginas #tempo-block .head{margin-bottom:2px}
+  /* On a short screen a polyrhythm brings a second row of pulses and its own
+     numbers onto the tempo page: the fader gives way first, being the one thing
+     there that the number above it and Tap already do. */
+  body.compoly.sub #bpm-slider{display:none}
+  body.compoly.sub .tempo-now{margin-bottom:var(--s2)}
 }
 /* Wordless, and it answers the one thing the value line was really for: this is
    the family the scale being played lives in. */
@@ -1539,6 +1544,67 @@ body.paginas #pat-mine-head{order:9}
 body.paginas #pat-list{order:10}
 body.paginas #pat-body>.ex-new{order:11}
 body.paginas #pat-mine-info{order:12}
+/* ---------- the tempo page ----------
+   The number is what the page is for, so it is the size of one: centred, large,
+   and still the field you tap to type into. Under it, immediately, the circles
+   — they are the star of this page and they were below a rule at the foot of
+   it, where the eye had to go looking for them. Everything that sets the tempo
+   rather than reads it lives below them, which leaves the room the polyrhythm's
+   own controls open into without anything moving. */
+.tempo-now{display:flex;flex-direction:column;align-items:center;
+  margin-bottom:var(--s3)}
+.tempo-now .bpm-big{font-size:clamp(52px,12vh,104px);line-height:1;width:100%;
+  text-align:center;margin:0}
+.tempo-now .bpm-label{margin:2px 0 0}
+.tap-line{display:flex;justify-content:center;margin-bottom:var(--s3)}
+.tap-line .tap-btn{min-width:min(70%,240px);height:44px;font-size:14px}
+/* The bar length sits with the circles it counts, not up beside the number. */
+body.sub #sig-block>.head{justify-content:center;gap:var(--s2);margin-bottom:var(--s3)}
+body.sub #sig-block>.head .sig-unit{margin:0}
+/* The two pills, centred under whichever rows are on the screen. */
+#beats-only-line{display:flex;justify-content:center;gap:var(--s2);
+  margin:var(--s2) 0 var(--s3)}
+#beats-only-line .poly-switch{margin-left:0;padding:5px 14px;font-size:12px}
+/* On this page the polyrhythm has no title of its own — the switch above it is
+   the title — and its two rows come first, where the circles they replace were,
+   with the numbers and the rest opening underneath. */
+body.sub #poly-block>.head{display:none}
+body.sub #poly-block{display:flex;flex-direction:column}
+body.sub #poly-controls{display:flex;flex-direction:column}
+/* Compact on this page: the numbers share it with the tempo above them and the
+   click below, so they are an answer rather than a headline. */
+body.sub #poly-block .step-row{margin:var(--s1) 0 var(--s2)}
+/* Two rows of pulses where there was one is forty-four pixels the page did not
+   have. The line telling you to tap a pulse is the first thing to go: it is the
+   same gesture as the bar's, learnt once. */
+body.sub #poly-controls .beats-hint{display:none}
+/* And the number gives a little of its size back — it is still the biggest
+   thing on the page. */
+body.compoly .tempo-now .bpm-big{font-size:clamp(44px,9vh,78px)}
+body.compoly .tap-line{margin-bottom:var(--s2)}
+body.compoly #beats-only-line{margin:var(--s1) 0 var(--s2)}
+body.sub #poly-row-a,body.sub #poly-row-b{margin-bottom:var(--s1)}
+body.sub #poly-block .step-row .sig-select{font-size:clamp(22px,4.6vh,34px)}
+body.sub #poly-controls .clear-btn,body.sub #poly-block>.panel-clear{margin-top:var(--s2)}
+body.sub #poly-row-a{order:1}
+body.sub #poly-row-b{order:2}
+body.sub #poly-controls .beats-hint{order:3}
+body.sub #poly-controls .step-row{order:4}
+body.sub #polynotes-block{order:5}
+body.sub #polyacc-clear{order:6}
+/* The four blocks of the tempo page are one page, not four groups: the rules
+   between them cut the number off from the circles that answer it, and cost the
+   eighteen pixels that were making the page scroll. */
+body.paginas.sub #tempo-block,body.paginas.sub #sig-block,
+body.paginas.sub #poly-block,body.paginas.sub #beats-only-line,
+body.paginas.sub #click-block{border-top:0;padding-top:0;padding-bottom:0}
+body.paginas.sub #tempo-block{padding-top:var(--s2)}
+/* Which block goes where on the tempo page: the reading, the circles, the
+   switches, then everything that sets it. */
+body.paginas.sub #tempo-block{order:1}
+body.paginas.sub #sig-block,body.paginas.sub #poly-block{order:2}
+body.paginas.sub #beats-only-line{order:3}
+body.paginas.sub #click-block{order:4}
 /* ---------- the polyrhythm, on its own page ----------
    Two numbers against each other is the whole question, and they were set in
    two fifteen-pixel fields on a line with a caption. They are the size of an
@@ -2053,27 +2119,48 @@ body.bolinhas .pulse-bpm{display:none}
   <!-- Five named groups instead of one undivided box. The tempo, the bar and the
        figure were sharing a single space with nothing between them, which is what
        made the panel hard to read. -->
+  <!-- The tempo, and nothing else in the way of it: the number is the biggest
+       thing on the page and the circles come straight under it, because they are
+       what you look at while it runs. Everything that sets the tempo rather than
+       reads it — tap, the fader, the click's own level and sound — is below
+       them, which is also where the polyrhythm's own controls open. -->
   <div class="mgroup" id="tempo-block">
-    <!-- The bar length rides the label line, where every other group keeps its
-         controls. Tap tempo sits against the number instead: it is a way of
-         setting that number, so it belongs beside it and not up in the title. -->
-    <div class="head"><span class="section-label" data-t="tempo">Tempo</span></div>
-    <!-- Three across: the number you read, the button you hit, the bar length.
-         The three are different kinds of thing and were sharing two lines. -->
-    <div class="tempo-3">
-      <div class="t3-cell t3-left">
-        <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="60" data-ta="aria.bpm" aria-label="Beats per minute">
-        <span class="bpm-label" data-t="bpm">BPM</span>
-      </div>
-      <div class="t3-cell t3-mid">
-        <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
-      </div>
-      <div class="t3-cell t3-right">
-        <span class="sig-fields">
-          <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
-        </span>
-        <span class="sig-unit" data-t="beats">beats</span>
-      </div>
+    <div class="tempo-now">
+      <input class="bpm-big" id="bpm-display" type="number" inputmode="numeric" min="10" max="300" step="1" value="60" data-ta="aria.bpm" aria-label="Beats per minute">
+      <span class="bpm-label" data-t="bpm">BPM</span>
+    </div>
+  </div>
+
+  <div class="mgroup" id="sig-block">
+    <!-- The polyrhythm sits with the bar it replaces: two pulses instead of
+         four beats is the same question the circles below it answer. Its own
+         panel appears when this is on, and is not there at all when it is off.
+         The label carries the key now — it was on the head, and translating a
+         head replaces everything inside it, this button included. -->
+    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label" data-t="bar">Bar</span>
+      <span class="sig-fields">
+        <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
+      </span>
+      <span class="sig-unit" data-t="beats">beats</span></div>
+    <div class="beats-row" id="beats-row"></div>
+    <div class="beats-hint" data-t="tap-a-beat-accent-it">tap a beat: accent it, then silence it</div>
+    <!-- where every other Clear in the app sits: under its panel, on the left -->
+    <button class="clear-btn" id="accents-clear" onclick="clearAccents()" data-t="clear-4">✕ Clear</button>
+  </div>
+
+  <!-- Under the circles, whichever circles those are: the screen that is only
+       them, and the switch that turns them into two layers. -->
+  <div class="mgroup" id="beats-only-line">
+    <button class="poly-switch" id="only-beats" type="button" onclick="abreBolinhas()"
+            data-t="beats.only">Only beats</button>
+    <button class="poly-switch" id="poly-switch" type="button" onclick="togglePoly()"
+            data-t="poly.short">Poly</button>
+  </div>
+
+  <!-- What sets the tempo, under what reads it. -->
+  <div class="mgroup" id="click-block">
+    <div class="tap-line">
+      <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
     </div>
     <input type="range" id="bpm-slider" min="10" max="300" step="1" value="60" style="width:100%" oninput="updateBPM(this.value)">
     <!-- the click's own level belongs with the click and needs no group of its
@@ -2089,25 +2176,6 @@ body.bolinhas .pulse-bpm{display:none}
       <span class="section-label" data-t="click.sound">Sound</span>
       <span class="btn-wrap seg" id="clicksound-row" data-cols="fixed"></span></div>
     <button class="clear-btn panel-clear" data-panel="tempo" onclick="limpaPainel('tempo')">✕ Clear</button>
-  </div>
-
-  <div class="mgroup" id="sig-block">
-    <!-- The polyrhythm sits with the bar it replaces: two pulses instead of
-         four beats is the same question the circles below it answer. Its own
-         panel appears when this is on, and is not there at all when it is off.
-         The label carries the key now — it was on the head, and translating a
-         head replaces everything inside it, this button included. -->
-    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label" data-t="bar">Bar</span>
-      <!-- The circles, and nothing else, on the whole screen: what you look at
-           while you play rather than what you press. -->
-      <button class="poly-switch" id="only-beats" type="button" onclick="abreBolinhas()"
-              data-t="beats.only">Only beats</button>
-      <button class="poly-switch" id="poly-switch" type="button" onclick="togglePoly()"
-              data-t="poly.short">Poly</button></div>
-    <div class="beats-row" id="beats-row"></div>
-    <div class="beats-hint" data-t="tap-a-beat-accent-it">tap a beat: accent it, then silence it</div>
-    <!-- where every other Clear in the app sits: under its panel, on the left -->
-    <button class="clear-btn" id="accents-clear" onclick="clearAccents()" data-t="clear-4">✕ Clear</button>
   </div>
 
   <div class="mgroup" id="groove-block">
@@ -5182,7 +5250,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10o';
+const APP_VERSION='lab-2026-09-10p';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5573,13 +5641,17 @@ const PAGINAS={
        the second of them, which is a page you open to set the accents and close
        again. Tempo, bar length, the circles and the click's own sound are what
        a metronome is. */
-    {k:'tempo', blocos:['tempo-block','sig-block'],nome:()=>tr('tempo','Tempo'),fica:true,
+    {k:'tempo', blocos:()=>state.poly.on
+       ?['tempo-block','poly-block','beats-only-line','click-block']
+       :['tempo-block','sig-block','beats-only-line','click-block'],
+     nome:()=>tr('tempo','Tempo'),fica:true,
      /* accentsTouched, not the accents themselves: the default downbeat differs
         between Metro and the note modes, so comparing the array marked the box
         the moment the mode was entered. */
-     mexeu:dif('bpm','clickVol','clickSound','sig','accentsTouched'),
+     mexeu:ou(dif('bpm','clickVol','clickSound','sig','accentsTouched'),dif('poly','polyVol')),
      diz:()=>tr('sum.bpm','{n} BPM',{n:state.bpm})+' · '
-            +tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig})},
+            +(state.poly.on?tr('sum.against','{a} against {b}',{a:state.poly.a,b:state.poly.b})
+                           :tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig}))},
     /* In Drone the click is asked for rather than assumed, and with the panel in
        boxes that question needed a box: it lives in the metronome's own block
        and would otherwise have been hidden with everything else. */
@@ -5600,9 +5672,6 @@ const PAGINAS={
     {k:'mix',   bloco:'mixer-block',   nome:()=>tr('mixer','Mixer'),fica:true,
      quando:()=>grooveAllowed()&&!state.poly.on,
      mexeu:difG('mix'),diz:()=>resumoDe('mix-sum')},
-    {k:'poly',  bloco:'poly-block',    nome:()=>tr('polyrhythm','Polyrhythm'),fica:true,
-     mexeu:dif('poly','polyVol'),
-     diz:()=>state.poly.on?state.poly.a+' : '+state.poly.b:tr('common.off','Off')},
     {k:'speed', bloco:'speed-block',   nome:()=>tr('tempo-change','Tempo Change'),fica:true,
      /* rampFrom is not a setting: it is where the ramp starts from, written by
         every change of tempo, and it was marking this box whenever the tempo
@@ -5678,7 +5747,8 @@ function arrumaPaginas(){
   if(naFrente){buildPagRow();pintaClears();return;}
   /* A page is usually one block, and sometimes two that answer one question —
      the tempo and the bar are the metronome. */
-  (pag.blocos||[pag.bloco]).forEach(id=>{
+  const blocos=typeof pag.blocos==='function'?pag.blocos():(pag.blocos||[pag.bloco]);
+  blocos.forEach(id=>{
     const bloco=document.getElementById(id);
     if(!bloco)return;
     let el=bloco;
@@ -7317,8 +7387,13 @@ function pintaClears(){
     if(b)b.style.display=(cond||b.classList.contains('armed'))?'':'none';
   };
   const acentosMexidos=(state.accents||[]).some((a,i)=>a!==defaultAccent(i));
-  const polyMexidos=(state.poly.accA||[]).some(a=>a!=='high')||
-                    (state.poly.accB||[]).some(a=>a!=='high');
+  /* Both layers begin on the accent by design — the cross-rhythm only reads if
+     you can hear where each cycle starts — so measuring them against plain made
+     Clear accents appear before anything had been touched. Measured against how
+     they open, as the bar's own accents are. */
+  const polyPadrao=i=>(i===0?'low':'high');
+  const polyMexidos=(state.poly.accA||[]).some((a,i)=>a!==polyPadrao(i))||
+                    (state.poly.accB||[]).some((a,i)=>a!==polyPadrao(i));
   const mixMexido=MIX_VOICES.some(([k])=>Math.abs((state.mix[k]||1)-1)>0.01);
   mostra('drone-clear',Object.keys(state.droneSelected||{}).length>0);
   mostra('pitch-clear',!!(state.scaleName||state.chordName)||activeList().length>0);
@@ -10343,6 +10418,10 @@ function togglePoly(){
   buildPolyModeRow();updatePracticeInfo();refreshSectionSummaries();restartIfPlaying();
 }
 function pintaPolySwitch(){
+  /* The tempo page holds the polyrhythm now, and two rows of pulses take room
+     one row did not: the page says which of the two it is showing, and gives a
+     little where it has to. */
+  document.body.classList.toggle('compoly',!!state.poly.on);
   const b=document.getElementById('poly-switch');
   if(!b)return;
   // wherever the polyrhythm itself is available, which is everywhere but the tuner
@@ -10796,6 +10875,13 @@ function centreMetro(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
   sc.classList.remove('centred',...FIT_TIERS);
+  /* The tiers were written when Metro was one screen holding everything it
+     could do, and they gave its airiness back a step at a time rather than
+     scroll. A panel of boxes and a page behind each of them is built to fit by
+     construction, and the tightening was fighting it: the tempo page's number
+     is sized from the screen, and .scroll.tighter put it back to 32px. Where
+     there are pages there is nothing to tighten. */
+  if(document.body.classList.contains('paginas'))return;
   const over=()=>sc.scrollHeight>sc.clientHeight+1;
   for(const tier of FIT_TIERS){
     if(!over())break;
