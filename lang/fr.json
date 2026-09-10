@@ -688,7 +688,7 @@
  "poly.short": "Poly",
  "ear": "Oreille",
  "aria.earAgain": "Rejouer",
- "ear.which": "Intervalles",
+ "ear.which": "Ce qui est en jeu",
  "ear.how": "Joué",
  "ear.from": "À partir de",
  "ear.up": "En montant",
@@ -703,7 +703,7 @@
  "ear.right": "Juste",
  "ear.wrong": "C'était",
  "ear.yousaid": "vous avez dit {s}",
- "ear.none": "Choisissez au moins un intervalle.",
+ "ear.none": "Choisissez-en au moins un.",
  "ear.noneShort": "aucun choisi",
  "ear.count": {
   "one": "{n} intervalle",
@@ -716,5 +716,19 @@
  "h.ear.how": "Les deux notes l'une après l'autre, en montant ou en descendant, ou les deux ensemble. <em>En montant ou en descendant</em> les garde séparées et ne cache que le sens ; <em>Mélangé</em> ajoute les deux ensemble.",
  "h.ear.from": "<em>Une note</em> part toujours de la note où se trouve l'app, ce qui travaille l'intervalle dans une tonalité connue. <em>N'importe quelle note</em> en choisit une : plus difficile, et le test le plus honnête.",
  "h.ear.round": "Le bouton du bas commence, rejoue pendant que vous réfléchissez, et pose la question suivante une fois répondu. Le ♪ à côté du score rejoue quand vous voulez. Le compte est celui de cette série ; quitter le mode en commence une autre.",
- "ear.updown": "En montant ou en descendant"
+ "ear.updown": "En montant ou en descendant",
+ "ear.k.intervals": "Intervalles",
+ "ear.k.scales": "Gammes",
+ "ear.k.chords": "Accords",
+ "ear.k.rhythm": "Rythme",
+ "ear.oneByOne": "Une à une",
+ "ear.wrongPlain": "Ce n'était pas celle-là — la bonne est marquée.",
+ "ear.f.quarter": "Noires",
+ "ear.f.eighth": "Croches",
+ "ear.f.triplet": "Triolets",
+ "ear.f.sixteenth": "Doubles croches",
+ "ear.f.dotted": "Pointées",
+ "ear.f.rest": "Silences",
+ "h.ear.kinds": "Quatre sortes de question, chacune avec son écran : intervalles, gammes, accords et rythme. Le nom en haut ramène à cette liste.",
+ "ear.kinds.k": "Les sortes"
 }

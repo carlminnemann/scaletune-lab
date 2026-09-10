@@ -688,7 +688,7 @@
  "poly.short": "Poly",
  "ear": "Gehör",
  "aria.earAgain": "Nochmal spielen",
- "ear.which": "Intervalle",
+ "ear.which": "Was im Spiel ist",
  "ear.how": "Gespielt",
  "ear.from": "Von",
  "ear.up": "Aufwärts",
@@ -703,7 +703,7 @@
  "ear.right": "Richtig",
  "ear.wrong": "Es war",
  "ear.yousaid": "du sagtest {s}",
- "ear.none": "Wähle mindestens ein Intervall.",
+ "ear.none": "Wähle mindestens eines.",
  "ear.noneShort": "keines gewählt",
  "ear.count": {
   "one": "{n} Intervall",
@@ -716,5 +716,19 @@
  "h.ear.how": "Die zwei Töne nacheinander, aufwärts oder abwärts, oder beide zugleich. <em>Aufwärts oder abwärts</em> hält sie getrennt und verbirgt nur die Richtung; <em>Gemischt</em> nimmt beide zugleich dazu.",
  "h.ear.from": "<em>Ein Ton</em> geht immer von dem Ton aus, auf dem die App steht — das übt das Intervall in einer Tonart, die du kennst. <em>Beliebiger Ton</em> sucht sich einen eigenen: schwerer, und die ehrlichere Probe.",
  "h.ear.round": "Der Knopf unten startet, spielt nochmal, während du überlegst, und stellt nach der Antwort die nächste Frage. Das ♪ neben dem Stand wiederholt jederzeit. Gezählt wird diese Runde; das Verlassen des Modus beginnt eine neue.",
- "ear.updown": "Aufwärts oder abwärts"
+ "ear.updown": "Aufwärts oder abwärts",
+ "ear.k.intervals": "Intervalle",
+ "ear.k.scales": "Tonleitern",
+ "ear.k.chords": "Akkorde",
+ "ear.k.rhythm": "Rhythmus",
+ "ear.oneByOne": "Nacheinander",
+ "ear.wrongPlain": "Das war es nicht — die richtige ist markiert.",
+ "ear.f.quarter": "Viertel",
+ "ear.f.eighth": "Achtel",
+ "ear.f.triplet": "Triolen",
+ "ear.f.sixteenth": "Sechzehntel",
+ "ear.f.dotted": "Punktiert",
+ "ear.f.rest": "Pausen",
+ "h.ear.kinds": "Vier Arten von Frage, jede mit eigenem Bildschirm: Intervalle, Tonleitern, Akkorde und Rhythmus. Der Name oben führt zurück zu dieser Liste.",
+ "ear.kinds.k": "Die Arten"
 }

@@ -688,7 +688,7 @@
  "poly.short": "Poli",
  "ear": "Orecchio",
  "aria.earAgain": "Suona di nuovo",
- "ear.which": "Intervalli",
+ "ear.which": "Che cosa è in gioco",
  "ear.how": "Suonato",
  "ear.from": "Da",
  "ear.up": "In salita",
@@ -703,7 +703,7 @@
  "ear.right": "Giusto",
  "ear.wrong": "Era",
  "ear.yousaid": "hai detto {s}",
- "ear.none": "Scegli almeno un intervallo.",
+ "ear.none": "Scegli almeno uno.",
  "ear.noneShort": "nessuno scelto",
  "ear.count": {
   "one": "{n} intervallo",
@@ -716,5 +716,19 @@
  "h.ear.how": "Le due note una dopo l'altra, in salita o in discesa, oppure insieme. <em>In salita o in discesa</em> le tiene separate e nasconde solo il verso; <em>Misto</em> aggiunge le due insieme.",
  "h.ear.from": "<em>Una nota</em> parte sempre dalla nota su cui è l'app, il che allena l'intervallo contro una tonalità che conosci. <em>Nota qualsiasi</em> ne sceglie una sua: più difficile, e la prova più onesta.",
  "h.ear.round": "Il pulsante in basso comincia, risuona mentre pensi e fa la domanda successiva dopo la risposta. Il ♪ accanto al punteggio ripete quando vuoi. Il conto è di questo giro; uscire dal modo ne comincia un altro.",
- "ear.updown": "In salita o in discesa"
+ "ear.updown": "In salita o in discesa",
+ "ear.k.intervals": "Intervalli",
+ "ear.k.scales": "Scale",
+ "ear.k.chords": "Accordi",
+ "ear.k.rhythm": "Ritmo",
+ "ear.oneByOne": "Una a una",
+ "ear.wrongPlain": "Non era quella — la giusta è segnata.",
+ "ear.f.quarter": "Semiminime",
+ "ear.f.eighth": "Crome",
+ "ear.f.triplet": "Terzine",
+ "ear.f.sixteenth": "Semicrome",
+ "ear.f.dotted": "Puntate",
+ "ear.f.rest": "Pause",
+ "h.ear.kinds": "Quattro tipi di domanda, ognuno con il suo schermo: intervalli, scale, accordi e ritmo. Il nome in alto riporta a questo elenco.",
+ "ear.kinds.k": "I tipi"
 }

@@ -688,7 +688,7 @@
  "poly.short": "Poli",
  "ear": "Ouvido",
  "aria.earAgain": "Tocar outra vez",
- "ear.which": "Intervalos",
+ "ear.which": "O que está em jogo",
  "ear.how": "Tocado",
  "ear.from": "A partir de",
  "ear.up": "A subir",
@@ -703,7 +703,7 @@
  "ear.right": "Certo",
  "ear.wrong": "Era",
  "ear.yousaid": "disseste {s}",
- "ear.none": "Escolhe pelo menos um intervalo.",
+ "ear.none": "Escolhe pelo menos um.",
  "ear.noneShort": "nenhum escolhido",
  "ear.count": {
   "one": "{n} intervalo",
@@ -716,5 +716,19 @@
  "h.ear.how": "As duas notas uma a seguir à outra, a subir ou a descer, ou as duas ao mesmo tempo. <em>A subir ou a descer</em> mantém-nas separadas e esconde só o sentido; <em>Misturado</em> acrescenta as duas juntas.",
  "h.ear.from": "<em>Uma nota</em> parte sempre da nota em que a app está, o que treina o intervalo contra uma tonalidade que conheces. <em>Qualquer nota</em> escolhe uma nota de partida própria — mais difícil, e o teste mais honesto.",
  "h.ear.round": "O botão por baixo do ecrã arranca, toca outra vez enquanto pensas, e faz a pergunta seguinte depois de responderes. O ♪ ao lado da pontuação repete quando quiseres, com ou sem resposta dada. A conta é desta ronda; sair do modo começa outra.",
- "ear.updown": "A subir ou a descer"
+ "ear.updown": "A subir ou a descer",
+ "ear.k.intervals": "Intervalos",
+ "ear.k.scales": "Escalas",
+ "ear.k.chords": "Acordes",
+ "ear.k.rhythm": "Ritmo",
+ "ear.oneByOne": "Uma a uma",
+ "ear.wrongPlain": "Não era essa — a certa está marcada.",
+ "ear.f.quarter": "Semínimas",
+ "ear.f.eighth": "Colcheias",
+ "ear.f.triplet": "Tercinas",
+ "ear.f.sixteenth": "Semicolcheias",
+ "ear.f.dotted": "Pontuadas",
+ "ear.f.rest": "Pausas",
+ "h.ear.kinds": "Quatro tipos de pergunta, cada um com o seu ecrã: intervalos, escalas, acordes e ritmo. O nome no topo traz-te de volta a esta lista.",
+ "ear.kinds.k": "Os tipos"
 }
