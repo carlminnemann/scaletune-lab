@@ -446,7 +446,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .root-box .root-big{font-size:clamp(28px,7vh,44px);font-weight:300;line-height:1}
 .root-box .root-cap{font-size:11px;font-weight:600;text-transform:uppercase;
   letter-spacing:0.08em;opacity:.7}
-#fam-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+#fam-row,#pag-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
 /* ---------- filling the screen ----------
    A grid of boxes that ends half way up reads as a list that was cut short. In
    these two states the column of boxes is the page, so it is given the height:
@@ -471,6 +471,26 @@ body.sub #sec-scales::details-content,body.sub details.fam::details-content{
 body.sub #root-cap-line,body.sub #pitch-info,body.sub #pitch-clear,
 body.sub #blue-line,body.sub #blue-info{flex:0 0 auto}
 body.sub #sec-scales .btn-wrap{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+/* The other panels' fronts and pages, filling the same way. */
+body.painel .scroll,body.painel #pitch-section,body.painel #free-section,
+body.painel details.sec,body.painel details.sec>.sec-body{display:flex;
+  flex-direction:column;flex:1 1 auto;min-height:0}
+body.painel details.sec::details-content{display:flex;flex-direction:column;
+  flex:1 1 auto;min-height:0;height:auto}
+body.painel .scroll>*{flex:0 0 auto}
+body.painel #pitch-section,body.painel #free-section{flex:1 1 auto}
+body.painel #pag-row{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;align-content:stretch}
+body.painel .sec-body>div[id$="-block"],body.painel .sec-body>div[id$="-line"]{
+  display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+body.painel .sec-body>div[id$="-block"]>.group-label,
+body.painel .sec-body>div[id$="-line"]>.group-label{flex:0 0 auto}
+body.painel .sec-body>div[id$="-block"]>.btn-wrap,
+body.painel .sec-body>div[id$="-line"]>.btn-wrap{flex:1 1 auto;min-height:0;
+  grid-template-columns:1fr 1fr!important;gap:var(--s2)!important;
+  grid-auto-rows:1fr;align-content:stretch;align-items:stretch}
+body.painel .sec-body>div[id$="-block"]>.btn-wrap>button,
+body.painel .sec-body>div[id$="-line"]>.btn-wrap>button{min-height:clamp(46px,8.5vh,72px);
+  font-size:15px;border-radius:13px;width:auto;height:auto;align-self:stretch}
 
 /* A page of choices takes the screen: two columns for words, three for the
    twelve notes, and every box the same height. */
@@ -1422,6 +1442,9 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 
 <!-- One box per panel of this mode, in place of the panels themselves. -->
 <div id="panel-row" style="display:none"></div>
+<!-- And one box per page of whichever panel is open. It is moved into that
+     panel rather than copied per panel: one row, wherever it is needed. -->
+<div id="pag-row" style="display:none"></div>
 
 <!-- ============ DRONE ============ -->
 <!-- The tuner. Its own mode because it is the only thing that listens rather
@@ -1540,13 +1563,25 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <details class="sec" id="sec-range">
     <summary><span data-t="sec.range">Range &amp; Direction</span><span class="sec-sum" id="sum-range"></span></summary>
     <div class="sec-body">
-      <div class="head"><span class="group-label" data-t="octaves">Octaves</span>
-        <span class="btn-wrap seg" id="dir-row" data-cols="fixed"></span></div>
-      <div class="btn-wrap" id="span-row"></div>
-      <div class="group-label" data-t="start-octave">Start Octave</div>
-      <div class="btn-wrap" id="rootoct-row"></div>
-      <div class="group-label" id="startdeg-label" data-t="start-on">Start On</div>
-      <div class="btn-wrap" id="startdeg-row"></div>
+      <!-- One block per page: a label and the buttons under it. What used to
+           share a line now stands on its own, because each of these is a page
+           of its own now and a page has one question. -->
+      <div id="oct-block">
+        <div class="group-label" data-t="octaves">Octaves</div>
+        <div class="btn-wrap" id="span-row"></div>
+      </div>
+      <div id="dir-block">
+        <div class="group-label" data-t="direction">Direction</div>
+        <div class="btn-wrap" id="dir-row"></div>
+      </div>
+      <div id="startoct-block">
+        <div class="group-label" data-t="start-octave">Start Octave</div>
+        <div class="btn-wrap" id="rootoct-row"></div>
+      </div>
+      <div id="startdeg-block">
+        <div class="group-label" id="startdeg-label" data-t="start-on">Start On</div>
+        <div class="btn-wrap" id="startdeg-row"></div>
+      </div>
       <div class="head" id="arptop-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
         <span class="group-label" data-t="arp.top">Top note</span>
         <span class="btn-wrap seg" id="arptop-row" data-cols="fixed"></span></div>
@@ -1659,24 +1694,24 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
         <div class="info-line" id="seqpat-info"></div>
       </div>
       <div id="modestour-block" style="display:none">
-        <div class="head" style="margin-bottom:0">
-          <span class="group-label" data-t="modes.tourLabel">The run</span>
-          <span class="btn-wrap seg" id="modestour-row" data-cols="fixed"></span></div>
+        <div class="group-label" data-t="modes.tourLabel">The run</div>
+        <div class="btn-wrap" id="modestour-row"></div>
       </div>
       <div id="rootmove-block">
-      <div class="head"><span class="group-label" data-t="root-movement">Root Movement</span>
-        <span class="btn-wrap seg" id="rootmove-row" data-cols="fixed"></span></div>
+        <div class="group-label" data-t="root-movement">Root Movement</div>
+        <div class="btn-wrap" id="rootmove-row"></div>
       </div>
       <!-- What Up-Down means to whatever is rotating, put where the rotation is
            chosen. It was in Range & Direction, with the direction it qualifies —
            which meant choosing the cycle of fourths here and having to go back to
            another panel to find out that a new question had appeared there. -->
-      <div class="head" id="bothways-line" style="display:none;margin-top:var(--s3);margin-bottom:var(--s3)">
-        <span class="group-label" data-t="updown.means">Up-Down means</span>
-        <span class="btn-wrap seg" id="bothways-row" data-cols="fixed"></span></div>
+      <div id="bothways-line" style="display:none">
+        <div class="group-label" data-t="updown.means">Up-Down means</div>
+        <div class="btn-wrap" id="bothways-row"></div>
+      </div>
       <div id="repeat-block">
-      <div class="head"><span class="group-label" data-t="repeat">Repeat</span>
-        <span class="btn-wrap seg" id="repeat-row" data-cols="fixed"></span></div>
+        <div class="group-label" data-t="repeat">Repeat</div>
+        <div class="btn-wrap" id="repeat-row"></div>
       </div>
       <div class="info-line" id="practice-info"></div>
       <button class="clear-btn panel-clear" data-panel="progress" onclick="limpaPainel('progress')">✕ Clear</button>
@@ -1961,12 +1996,14 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
   <summary><span data-t="sec.phrasing">Phrasing</span><span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body" id="rhythm-body">
     <div id="notelen-block">
-    <div class="head"><span class="group-label" data-t="note-length">Note Length</span>
-      <span class="btn-wrap seg" id="notelen-row" data-cols="fixed"></span></div>
+      <div class="group-label" data-t="note-length">Note Length</div>
+      <div class="btn-wrap" id="notelen-row"></div>
     </div>
-    <div class="head"><span class="group-label" data-t="phrase-alignment">Phrase Alignment</span>
-      <span class="btn-wrap seg" id="align-row" data-cols="fixed"></span></div>
-    <div class="info-line" id="align-info"></div>
+    <div id="align-block">
+      <div class="group-label" data-t="phrase-alignment">Phrase Alignment</div>
+      <div class="btn-wrap" id="align-row"></div>
+      <div class="info-line" id="align-info"></div>
+    </div>
     <button class="clear-btn panel-clear" data-panel="phrasing" onclick="limpaPainel('phrasing')">✕ Clear</button>
   </div>
 </details>
@@ -4817,7 +4854,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10f';
+const APP_VERSION='lab-2026-09-10g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -4885,7 +4922,7 @@ function pintaCasa(){
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
-    :(subPag&&painelAberto==='sec-scales')?nomeDaSub()
+    :(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto]))?nomeDaSub()
     :(painelAberto&&paineisDoModo())?nomeDoPainel(painelAberto)
     :modeLabel(state.mode);
   const sec=document.getElementById('sec-exercises');
@@ -4925,7 +4962,7 @@ function voltaHome(){
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
   // inside a page of a panel, back is back to that panel's front
-  if(subPag&&painelAberto==='sec-scales'){fechaSub();return;}
+  if(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto])){fechaSub();return;}
   // and inside a panel, back is back to the mode's boxes
   if(painelAberto&&paineisDoModo()){fechaPainel();return;}
   if(state.playing)togglePlay();
@@ -4948,16 +4985,17 @@ let pastaAberta=false;
 let subPag=null;
 function abreSub(k){
   subPag=k;
-  arrumaEscalas();pintaCasa();
+  arrumaEscalas();arrumaPaginas();pintaCasa();
   const sc=document.getElementById('scroll-area');
   if(sc)sc.scrollTop=0;
 }
 function fechaSub(){
   if(!subPag)return;
   subPag=null;
-  arrumaEscalas();pintaCasa();
+  arrumaEscalas();arrumaPaginas();pintaCasa();
 }
 function nomeDaSub(){
+  if(PAGINAS[painelAberto])return nomeDaPagina();
   if(subPag==='root')return tr('sec.root','Root');
   const d=document.querySelector('details.fam[data-fam="'+subPag+'"]');
   const t=d&&d.querySelector('summary>span[data-t]');
@@ -4968,7 +5006,10 @@ function nomeDaSub(){
    is looked at. */
 function arrumaEscalas(){
   const dentro=(painelAberto==='sec-scales');
-  if(!dentro&&subPag)subPag=null;
+  /* A page belongs to a panel: leaving the panel closes it. Only where the
+     panel it belongs to is this one — the other panels have pages of their own
+     and this was closing them too. */
+  if(!dentro&&subPag&&!PAGINAS[painelAberto])subPag=null;
   const mostra=(id,v)=>{const e=document.getElementById(id);if(e)e.style.display=v?'':'none';};
   const naFrente=dentro&&!subPag;
   mostra('root-box',naFrente);
@@ -5026,10 +5067,120 @@ document.addEventListener('click',e=>{
      tonic-btn and the scales are pick-btn, and both are choices. */
   const b=e.target&&e.target.closest&&e.target.closest('button');
   if(!b)return;
+  if(b.classList.contains('panel-clear'))return;
+  const defs=PAGINAS[painelAberto];
+  if(defs){
+    /* A page is one question, so answering it puts you back — except where the
+       answer is made of several taps, as the degrees of a shape of your own are. */
+    const pag=defs.find(d=>d.k===subPag);
+    if(!pag||pag.fica)return;
+    if(!b.closest('#'+painelAberto))return;
+    setTimeout(fechaSub,0);
+    return;
+  }
   if(!b.closest('#root-row')&&!b.closest('details.fam'))return;
   if(b.closest('details.fam')&&useListOn())return;
   setTimeout(fechaSub,0);
 },true);
+
+/* ---------- the same law, panel by panel ----------
+   A panel is a front of boxes and a page behind each of them. Which pages a
+   panel has is written here and nowhere else: a name, the block it shows, what
+   the box says underneath, and when the question exists at all. Everything is
+   built exactly as it always was — this decides only what is looked at. */
+const PAGINAS={
+  'sec-range':[
+    {k:'oct',   bloco:'oct-block',      nome:()=>tr('octaves','Octaves'),
+     diz:()=>tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:state.span})},
+    {k:'dir',   bloco:'dir-block',      nome:()=>tr('direction','Direction'),
+     diz:()=>dirLabel(state.direction)},
+    {k:'oct0',  bloco:'startoct-block', nome:()=>tr('start-octave','Start Octave'),
+     diz:()=>String(state.rootOct)},
+    {k:'deg',   bloco:'startdeg-block',
+     nome:()=>(playingKind()==='chord'?tr('sec.inversion','Inversion'):tr('start-on','Start On')),
+     diz:()=>{const d=activeDegrees();return d?String(state.startDeg+1):'';}},
+    {k:'top',   bloco:'arptop-line',    nome:()=>tr('arp.top','Top note'),
+     quando:()=>playingKind()==='chord',
+     diz:()=>state.arpTop?tr('arp.withTop','Come home'):tr('arp.noTop','Stop on the chord')},
+    {k:'turn',  bloco:'turn-line',      nome:()=>tr('turn.note','Turning note'),
+     quando:()=>turnsBothWays(state.direction),
+     diz:()=>state.repeatTurn?tr('turn.twice','Twice'):tr('turn.once','Once')},
+  ],
+  'sec-progress':[
+    {k:'pat',   bloco:'seqpat-block',   nome:()=>tr('seq.pattern','Pattern'),
+     quando:()=>state.mode==='scale',fica:true,
+     diz:()=>lab('seqpat',state.seqPattern,state.seqPattern)},
+    {k:'tour',  bloco:'modestour-block',nome:()=>tr('modes.tourLabel','The run'),
+     quando:()=>modesRunOn()&&modesSnake()},
+    {k:'root',  bloco:'rootmove-block', nome:()=>tr('root-movement','Root Movement'),
+     diz:()=>lab('rootmove',state.practice.rootMove,state.practice.rootMove)},
+    {k:'both',  bloco:'bothways-line',  nome:()=>tr('updown.means','Up-Down means'),
+     quando:()=>passesAlternate()&&!modesRunOn(),
+     diz:()=>state.bothWays?tr('updown.each','Each both ways'):tr('updown.alternate','Alternate')},
+    {k:'rep',   bloco:'repeat-block',   nome:()=>tr('repeat','Repeat'),
+     diz:()=>runsOnce()?tr('sum.once','one round'):tr('repeat.loop','Loop')},
+  ],
+  'sec-rhythm':[
+    {k:'len',   bloco:'notelen-block',  nome:()=>tr('note-length','Note Length'),
+     diz:()=>{const n=NOTE_LENS.find(x=>x.k===state.noteLen);return n?lab('notelen',n.k,n.label):'';}},
+    {k:'align', bloco:'align-block',    nome:()=>tr('phrase-alignment','Phrase Alignment'),
+     diz:()=>state.alignPasses?tr('align.restartEach','Restart each round'):tr('align.drift','Let it drift')},
+  ],
+};
+function paginasDoPainel(){
+  const defs=PAGINAS[painelAberto];
+  if(!defs)return null;
+  return defs.filter(d=>!d.quando||d.quando());
+}
+function nomeDaPagina(){
+  const defs=PAGINAS[painelAberto];
+  const d=defs&&defs.find(x=>x.k===subPag);
+  return d?d.nome():'';
+}
+/* Everything in the panel goes away; the page's own block comes back, and with
+   it whatever wraps it. What is on the screen is one question. */
+function arrumaPaginas(){
+  const defs=PAGINAS[painelAberto];
+  const row=document.getElementById('pag-row');
+  if(!defs){if(row)row.style.display='none';return;}
+  const body=document.querySelector('#'+painelAberto+'>.sec-body');
+  if(!body||!row)return;
+  if(row.parentNode!==body)body.insertBefore(row,body.firstChild);
+  const pag=paginasDoPainel().find(d=>d.k===subPag);
+  const naFrente=!pag;
+  row.style.display=naFrente?'':'none';
+  [...body.children].forEach(c=>{
+    if(c===row)return;
+    /* The clear belongs to the whole panel, so it stays on the front with the
+       boxes rather than hiding inside one of them. */
+    if(c.classList.contains('panel-clear')){c.style.display=naFrente?'':'none';return;}
+    c.style.display='none';
+  });
+  if(naFrente){buildPagRow();pintaClears();return;}
+  const bloco=document.getElementById(pag.bloco);
+  if(bloco){
+    let el=bloco;
+    while(el&&el!==body){el.style.display='';el=el.parentElement;}
+  }
+  document.body.classList.add('sub');
+}
+function buildPagRow(){
+  const row=document.getElementById('pag-row');
+  const defs=paginasDoPainel();
+  if(!row||!defs)return;
+  row.innerHTML='';
+  defs.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='panel-box';b.type='button';
+    const t=document.createElement('span');t.textContent=d.nome();
+    const u=document.createElement('span');u.className='sub';
+    let diz='';try{diz=d.diz?d.diz():'';}catch(e){}
+    u.textContent=diz;
+    b.appendChild(t);b.appendChild(u);
+    b.onclick=()=>abreSub(d.k);
+    row.appendChild(b);
+  });
+}
 
 /* Which panel of the mode is on the screen, or nothing for the boxes. Only
    modes with enough panels to be worth choosing between have the boxes at all;
@@ -5044,6 +5195,7 @@ function paineisDoModo(){return PAINEIS_POR_MODO[state.mode]||null;}
 function temMenuDePaineis(){return !!paineisDoModo()&&!pastaAberta&&!emCasa;}
 function abrePainel(id){
   painelAberto=id;
+  subPag=null;            // a panel opens on its boxes, never inside a page
   const d=document.getElementById(id);
   if(d){d.open=true;}
   pintaCasa();
@@ -5105,6 +5257,7 @@ function arrumaPaineis(){
   if(div&&ids)div.style.display='none';
   if(menu)buildPanelRow();
   arrumaEscalas();
+  arrumaPaginas();
 }
 function abrePasta(){
   if(emCasa)return;
