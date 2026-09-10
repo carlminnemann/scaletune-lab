@@ -92,6 +92,13 @@
      what made the panels read as careless rather than calm. */
   --s1:4px;--s2:8px;--s3:12px;--s4:18px;--s5:24px;
   --h:36px;
+  /* Where the light comes from. One direction for the whole app — from above —
+     so a button is lit on its top edge, shaded on its bottom one, and sits on a
+     shadow of its own. Pressed, the shadow goes inside it. */
+  --lift-hi:rgba(255,255,255,.075);--lift-lo:rgba(0,0,0,.20);
+  --lift-sh:0 1px 2px rgba(0,0,0,.38),0 5px 12px rgba(0,0,0,.26);
+  --lift-in:0 3px 9px rgba(0,0,0,.42) inset;
+  --toque:rgba(255,255,255,.34);
 }
 /* Accent colours are darkened for light mode: the same hue that reads as a
    highlight on black becomes unreadable as text on a pale tint. */
@@ -137,6 +144,13 @@
      it read as the quiet one and not as another shade of the green. */
   --hit1:#868680;--hit2:var(--green);--hit3:var(--stop);
   --brand:#5c6f63;      /* darkened: the dark-theme tone vanishes on paper */
+  /* On paper the relief is the other way round in weight: the highlight has to
+     be strong enough to read on a warm ground, and the shadows soft, or the
+     boxes look printed on top of the page rather than raised out of it. */
+  --lift-hi:rgba(255,255,255,.5);--lift-lo:rgba(0,0,0,.075);
+  --lift-sh:0 1px 2px rgba(60,45,20,.16),0 5px 12px rgba(60,45,20,.12);
+  --lift-in:0 3px 9px rgba(60,45,20,.20) inset;
+  --toque:rgba(255,255,255,.85);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* The app is a frame with a scrolling middle: the name and its two buttons, the
@@ -427,14 +441,78 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 #panel-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-bottom:var(--s3)}
 /* The box, wherever it is used: a mode's panels, a panel's families, anything
    that opens a page of its own. */
-.panel-box{display:flex;flex-direction:column;justify-content:center;gap:3px;
-  min-height:clamp(58px,11vh,86px);padding:10px 12px;text-align:left;width:100%;
-  border:1px solid var(--border2);border-radius:13px;background:var(--bg2);
-  color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;
-  touch-action:manipulation;transition:all .15s}
-.panel-box .sub{font-size:11px;font-style:italic;color:var(--text3);
-  font-weight:400;line-height:1.25;overflow-wrap:anywhere}
-.panel-box:active{border-color:var(--mode)}
+.panel-box{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:clamp(58px,11vh,86px);padding:10px 12px;text-align:center;width:100%;
+  border:1px solid var(--border2);border-radius:14px;background:var(--bg2);
+  color:var(--text);font-size:clamp(15px,2.3vh,19px);font-weight:500;line-height:1.2;
+  cursor:pointer;touch-action:manipulation}
+/* The name, in the middle, and nothing else. The italic line under it said what
+   was chosen inside, and six of those turned a page of choices back into a page
+   of reading. The value is one tap away and written in full on the page the box
+   opens; what the front of a panel has to say is which box to press. It is
+   still there for a screen reader and for a long press — as the box's label,
+   not as ink on the screen. */
+.panel-box .sub{display:none}
+/* Wordless, and it answers the one thing the value line was really for: this is
+   the family the scale being played lives in. */
+.panel-box.tem{border-color:var(--mode);background:var(--mode-bg);color:var(--mode-fg)}
+/* ---------- something worth pressing ----------
+   A flat rectangle on a flat ground reads as a word with a line drawn round it.
+   These are cards: lit along the top edge, shaded under the bottom one, sitting
+   on a shadow — and they travel down into it under the finger, where before
+   only a border changed colour.
+
+   The light of a tap starts at the point of contact. On a box the size of a
+   thumb and a half that is the difference between an answer and a coincidence:
+   a glow from the middle does not belong to a touch that happened in the
+   corner. Nothing here is a new colour — it is the same greys with a direction
+   for the light. */
+.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn{
+  position:relative;overflow:hidden;
+  /* Measured in pixels and not in percentages: a box that grows to fill a
+     screen is 250 tall, and a highlight given as a percentage of that is a wash
+     down half the card rather than a lit edge. Thirty pixels of light at the
+     top and twenty-four of shade at the foot, whatever size the box ends up. */
+  background-image:linear-gradient(180deg,var(--lift-hi),rgba(0,0,0,0) 30px),
+                   linear-gradient(0deg,var(--lift-lo),rgba(0,0,0,0) 24px);
+  box-shadow:var(--lift-sh);
+  transition:transform .11s ease,box-shadow .11s ease,border-color .11s ease}
+.panel-box:active,.root-box:active,.mode-btn:active,.pick-btn:active,
+.tonic-btn:active,.theme-btn:active{
+  transform:translateY(1px) scale(.988);box-shadow:var(--lift-in)}
+.panel-box:active,.root-box:active{border-color:var(--mode)}
+/* The settings are drawn rather than filled, on purpose — they are the quietest
+   thing on the home screen. The light along the top edge was enough to make the
+   button read as filled on paper, so it keeps the shadow and gives up the
+   gradient: raised, still not filled. */
+.home-foot .theme-btn{background-image:none}
+/* Drawn on ::after, so nothing inside the button has to move to make room for
+   it, and gone in a third of a second. */
+.acende::after{content:'';position:absolute;left:var(--px,50%);top:var(--py,50%);
+  width:180%;aspect-ratio:1;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--toque),rgba(255,255,255,0) 68%);
+  animation:acende .34s ease-out forwards}
+@keyframes acende{
+  from{opacity:.9;transform:translate(-50%,-50%) scale(.25)}
+  to{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+  .acende::after{display:none}
+  .panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn{transition:none}
+}
+/* An odd one at the end of a two-column grid sat in the left column with a hole
+   beside it, which reads as a row that failed to fill rather than as a choice.
+   It goes to the middle at the size of the others. Full width is a statement,
+   and it stays reserved for the things that deserve one — Ear training on the
+   home screen. */
+#panel-row>.panel-box:last-child:nth-child(odd),
+#pag-row>.panel-box:last-child:nth-child(odd),
+#fam-row>.panel-box:last-child:nth-child(odd),
+#ear-optbox-row>.panel-box:last-child:nth-child(odd),
+body.sub:not(.notas) .btn-wrap:not(.seg)>button:last-child:nth-child(odd),
+body.painel .sec-body>div[id$="-block"]>.btn-wrap:not(.seg)>button:last-child:nth-child(odd),
+body.painel .sec-body>div[id$="-line"]>.btn-wrap:not(.seg)>button:last-child:nth-child(odd),
+body.earpag #ear-page .btn-wrap:not(.seg)>button:last-child:nth-child(odd){
+  grid-column:1 / -1;justify-self:center;width:calc(50% - var(--s2)/2)}
 /* Inside a panel, its own title is the bar at the top, so the fold's summary
    would say it twice. */
 /* ---------- inside a panel, pages rather than folds ----------
@@ -457,7 +535,12 @@ body.earx #ear-section{display:flex;flex-direction:column;flex:1 1 auto;min-heig
 /* Last of everything in the list, so nothing — not even the timbre — comes
    between the question and the button that asks the next one. */
 body.earx #ear-section{order:9}
-body.earx #ear-opts{flex:0 0 auto}
+/* The options take the room between the name of the exercise and the question
+   at the foot: held to their own height they left a hole in the middle of the
+   screen, which is the one thing the boxes were meant to end. */
+body.earx #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+body.earx #ear-optbox-row{flex:1 1 auto;min-height:min-content;
+  grid-auto-rows:1fr;align-content:stretch}
 body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
 body.earpag #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 body.earpag #ear-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
@@ -477,10 +560,6 @@ body.earpag #sec-sound{display:none}
      gives up and scrolls. */
   body.painel #pag-row .panel-box,body.caixas #panel-row .panel-box{min-height:40px;padding:6px 10px}
   body.earx #ear-optbox-row .panel-box{min-height:44px;padding:7px 10px}
-  /* Two lines of reading is enough on a small screen; the box says what is on,
-     not everything that is on. */
-  body.earx #ear-optbox-row .panel-box .sub{display:-webkit-box;-webkit-line-clamp:2;
-    -webkit-box-orient:vertical;overflow:hidden}
   body.earx .ear-panel{padding:var(--s3)}
   body.earx .ear-say{min-height:2.1em;font-size:14px;margin-bottom:var(--s2)}
   body.earx #ear-answers.ritmo{gap:5px}
@@ -518,8 +597,17 @@ body.painel details.sec,body.painel details.sec>.sec-body{display:flex;
 body.painel details.sec::details-content{display:flex;flex-direction:column;
   flex:1 1 auto;min-height:0;height:auto}
 body.painel .scroll>*{flex:0 0 auto}
-body.painel #pitch-section,body.painel #free-section{flex:1 1 auto}
-body.painel #pag-row{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
+/* The two wrappers hold two panels each — the scales and the range, the free
+   notes and their range — and only the one whose panel is open has anything to
+   show. Growing both took 121 pixels off the top of the metronome inside Scale
+   and gave them to an empty box: the boxes started a third of the way down the
+   screen with nothing above them. It grows when it holds the open panel, and
+   not otherwise. */
+body.painel #pitch-section,body.painel #free-section{flex:0 0 auto}
+body.painel #pitch-section:has(>details.sec[open]),
+body.painel #free-section:has(>details.sec[open]){flex:1 1 auto}
+body.painel #pag-row,body.painel #fam-row{flex:1 1 auto;min-height:min-content;
+  grid-auto-rows:1fr;align-content:stretch}
 body.painel .sec-body>div[id$="-block"],body.painel .sec-body>div[id$="-line"]{
   display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
 body.painel .sec-body>div[id$="-block"]>.group-label,
@@ -4865,7 +4953,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10j';
+const APP_VERSION='lab-2026-09-10k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5078,16 +5166,15 @@ function buildFamRow(){
     const b=document.createElement('button');
     b.className='panel-box';b.type='button';
     const nome=document.createElement('span');
-    nome.textContent=t?t.textContent.trim():fam;
-    const sub=document.createElement('span');sub.className='sub';
-    const escolhida=arp
-      ?(state.chordGroup===fam?chordLabel(state.chordName):'')
-      :(state.scaleGroup===fam?scaleLabel(state.scaleName):'');
-    const quantas=d.querySelectorAll('.btn-wrap .pick-btn').length;
-    sub.textContent=escolhida||(arp
-      ? tr('fam.countChords',{one:'{n} chord',other:'{n} chords'},{n:quantas})
-      : tr('fam.count',{one:'{n} scale',other:'{n} scales'},{n:quantas}));
-    b.appendChild(nome);b.appendChild(sub);
+    const titulo=t?t.textContent.trim():fam;
+    nome.textContent=titulo;
+    /* The one thing the front of the panel has to answer — which family holds
+       what is being played — is worn rather than written. */
+    const escolhida=arp?(state.chordGroup===fam):(state.scaleGroup===fam);
+    if(escolhida)b.classList.add('tem');
+    const dentro=arp?chordLabel(state.chordName):scaleLabel(state.scaleName);
+    b.setAttribute('aria-label',escolhida?titulo+' — '+dentro:titulo);
+    b.appendChild(nome);
     b.onclick=()=>abreSub(fam);
     row.appendChild(b);
   });
@@ -5114,6 +5201,31 @@ document.addEventListener('click',e=>{
   if(!b.closest('#root-row')&&!b.closest('details.fam'))return;
   if(b.closest('details.fam')&&useListOn())return;
   setTimeout(fechaSub,0);
+},true);
+
+/* ---------- the light of a tap ----------
+   One listener for the whole app rather than a handler per button: the rows are
+   rebuilt constantly — every family, every page, every option box — and a light
+   that had to be wired on would be lost each time one was. The point of contact
+   is written onto the button as two percentages and the animation is CSS's. */
+const ACENDE='.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn';
+document.addEventListener('pointerdown',e=>{
+  const b=e.target&&e.target.closest&&e.target.closest(ACENDE);
+  if(!b||b.disabled)return;
+  const r=b.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+  b.style.setProperty('--px',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
+  b.style.setProperty('--py',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+  /* Taking the class off and reading a layout property back is what makes a
+     second tap on the same button light again: without it the animation is
+     already finished and the browser has nothing to restart. */
+  b.classList.remove('acende');
+  void b.offsetWidth;
+  b.classList.add('acende');
+},true);
+document.addEventListener('animationend',e=>{
+  if(e.animationName==='acende'&&e.target&&e.target.classList)
+    e.target.classList.remove('acende');
 },true);
 
 /* ---------- the same law, panel by panel ----------
@@ -5197,10 +5309,16 @@ function paginasDoPainel(){
   if(!defs)return null;
   return defs.filter(d=>!d.quando||d.quando());
 }
+/* A few keys carry their own markup, because in the markup they fill a whole
+   element and not a word — 'bar' is a section label wrapped in a span. Written
+   into a box as text, that span was read out literally: the Metronome's second
+   box said <span class="section-label">Takt</span> in German. A name on a box is
+   a name, so it is taken as words. */
+function soTexto(s){return String(s==null?'':s).replace(/<[^>]*>/g,'').trim();}
 function nomeDaPagina(){
   const defs=PAGINAS[painelAberto];
   const d=defs&&defs.find(x=>x.k===subPag);
-  return d?d.nome():'';
+  return d?soTexto(d.nome()):'';
 }
 /* Everything in the panel goes away; the page's own block comes back, and with
    it whatever wraps it. What is on the screen is one question. */
@@ -5243,11 +5361,13 @@ function buildPagRow(){
   defs.forEach(d=>{
     const b=document.createElement('button');
     b.className='panel-box';b.type='button';
-    const t=document.createElement('span');t.textContent=d.nome();
-    const u=document.createElement('span');u.className='sub';
-    let diz='';try{diz=d.diz?d.diz():'';}catch(e){}
-    u.textContent=diz;
-    b.appendChild(t);b.appendChild(u);
+    const nome=soTexto(d.nome());
+    const t=document.createElement('span');t.textContent=nome;
+    /* What is set inside is not printed on the box any more; it is still what
+       the box is called, for a screen reader and for a long press. */
+    let diz='';try{diz=soTexto(d.diz?d.diz():'');}catch(e){}
+    b.setAttribute('aria-label',diz?nome+' — '+diz:nome);
+    b.appendChild(t);
     b.onclick=()=>abreSub(d.k);
     row.appendChild(b);
   });
@@ -5301,9 +5421,11 @@ function buildPanelRow(){
     const b=document.createElement('button');
     b.className='panel-box';
     b.type='button';
-    const t=document.createElement('span');t.textContent=nomeDoPainel(id);
-    const u=document.createElement('span');u.className='sub';u.textContent=resumoDoPainel(id);
-    b.appendChild(t);b.appendChild(u);
+    const nome=nomeDoPainel(id);
+    const t=document.createElement('span');t.textContent=nome;
+    const resumo=soTexto(resumoDoPainel(id));
+    b.setAttribute('aria-label',resumo?nome+' — '+resumo:nome);
+    b.appendChild(t);
     b.onclick=()=>abrePainel(id);
     row.appendChild(b);
   });
@@ -5785,11 +5907,11 @@ function buildEarOptRow(){
   earPaginas().forEach(function(d){
     const b=document.createElement('button');
     b.className='panel-box';b.type='button';
-    const t=document.createElement('span');t.textContent=d.nome();
-    const u=document.createElement('span');u.className='sub';
-    let diz='';try{diz=d.diz?d.diz():'';}catch(e){}
-    u.textContent=diz;
-    b.appendChild(t);b.appendChild(u);
+    const nome=soTexto(d.nome());
+    const t=document.createElement('span');t.textContent=nome;
+    let diz='';try{diz=soTexto(d.diz?d.diz():'');}catch(e){}
+    b.setAttribute('aria-label',diz?nome+' — '+diz:nome);
+    b.appendChild(t);
     b.onclick=function(){earAbrePagina(d.k);};
     row.appendChild(b);
   });
