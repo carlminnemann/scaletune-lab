@@ -949,8 +949,14 @@ details.sec[open] .sec-sum{display:none}
   letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .tuner-note .oct{font-size:.42em;color:var(--text3);margin-left:2px}
 .tuner-note.in-tune{color:var(--green-hi)}
+/* It keeps its line whether or not there is anything to say. Empty, it was worth
+   no height at all, so the moment a note was recognised the reading grew by
+   seventeen pixels and — the panel being centred — the meter and the needle
+   moved down under the eye that was reading them. Nothing on this screen may
+   move except the needle. */
 .tuner-cents{font-size:clamp(13px,2.2vh,19px);color:var(--text3);margin-top:6px;
-  font-variant-numeric:tabular-nums}
+  font-variant-numeric:tabular-nums;min-height:1.3em;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* In tune, the number says so in the same colour the note and the needle wear —
    three things agreeing is what makes it readable without being read. */
 .tuner-cents.in-tune{color:var(--afina-bem)}
@@ -971,6 +977,9 @@ details.sec[open] .sec-sum{display:none}
   left:50%;transform:translateX(-50%);
   transition:left 90ms linear,background-color 120ms,box-shadow 120ms}
 .tuner-needle.in-tune{background:var(--afina-bem);box-shadow:0 0 16px 3px var(--afina-bem)}
+/* Nothing being heard is not the same as being out of tune: with no note the
+   needle is ink again, in the middle, saying nothing. */
+.tuner-needle.parado{background:var(--text3);box-shadow:none}
 .tuner-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);
   margin-top:4px;letter-spacing:.06em}
 /* ---------- the tuner's own screen ----------
@@ -1016,8 +1025,12 @@ body.afinapag #tuner-page{display:flex!important;flex-direction:column;flex:1 1 
   border-radius:var(--r);background:var(--bg3)}
 /* the deviation list is a reference, not a sentence: small and tight */
 .tuner-devs{font-size:11px;line-height:1.45;margin-top:var(--s2)}
+/* One line, always: with the frequencies written out this wraps in Portuguese
+   and in German on a narrow phone, and a second line here moves the meter as
+   surely as the cents line did. */
 .tuner-hz{font-size:11px;color:var(--text3);margin-top:6px;
-  font-variant-numeric:tabular-nums;min-height:18px}
+  font-variant-numeric:tabular-nums;min-height:18px;line-height:18px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* A label line: what the group is on the left, and on the right the switch that
    says HOW you choose within it. A modifier given the same size as the things it
@@ -5169,7 +5182,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10n';
+const APP_VERSION='lab-2026-09-10o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -11194,7 +11207,7 @@ function renderTuner(f){
     noteEl.textContent='—';noteEl.classList.remove('in-tune');
     centsEl.textContent='';centsEl.classList.remove('in-tune');
     hzEl.textContent=micStream?tr('tuner.listening','listening for a note'):tr('tuner.press','press Listen');
-    needle.style.left='50%';needle.classList.remove('in-tune');
+    needle.style.left='50%';needle.classList.remove('in-tune');needle.classList.add('parado');
     drawStrobe(0,false);
     return;
   }
@@ -11215,6 +11228,7 @@ function renderTuner(f){
   hzEl.textContent=tr('tuner.hzLine','{heard} Hz   ·   {wanted} Hz wanted',
     {heard:f.toFixed(2),wanted:target.toFixed(2)});
   needle.style.left=(50+tuneSmooth)+'%';
+  needle.classList.remove('parado');
   needle.classList.toggle('in-tune',inTune);
   drawStrobe(f-target,inTune);
 }
