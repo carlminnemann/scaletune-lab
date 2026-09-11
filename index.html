@@ -1636,9 +1636,29 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 .beat-dot.poly{border-radius:6px}
 .beat-dot.poly.active-beat{background:var(--brand);border-color:var(--brand)}
 .beat-dot.poly.acc-low.active-beat{background:var(--mode);border-color:var(--mode)}
+/* Once a style is chosen the accompaniment page grows three more questions —
+   the kit, how busy it is, the hi-hat — under ten styles. The styles give a
+   little height and the three keep their labels on the same line as their
+   answers, which is what they were before a page was a page. */
+body.sub #groove-block .btn-wrap>button{min-height:clamp(40px,7vh,62px)}
+body.sub #groove-block .head:has(>.seg){flex-direction:row;align-items:center;
+  gap:var(--s2);margin-bottom:var(--s2)}
+body.sub #groove-block .head:has(>.seg)>.section-label{text-align:left}
+body.sub #groove-block .seg{display:flex!important;width:auto;flex:0 1 auto;gap:var(--s1)}
+body.sub #groove-block .seg>button{min-height:32px;height:32px;font-size:12px;
+  border-radius:8px;padding:0 12px;width:auto}
 /* The pattern is the one page where the buttons are not the point: the grid is.
    Three levels side by side and two bars beside them, at the size they were —
    big buttons here would be taking room from the thing being written. */
+/* Wood or digital is the click's own timbre — chosen once and left. It sits on
+   the tempo page beside things that matter more, so it is a pair of small
+   buttons rather than two of the big ones. */
+body.sub #click-block .head:has(>#clicksound-row){flex-direction:row;
+  align-items:center;justify-content:center;gap:var(--s2);margin-bottom:var(--s2)}
+body.sub #click-block #clicksound-row{display:flex!important;width:auto;
+  flex:0 1 auto;gap:var(--s1)}
+body.sub #click-block #clicksound-row>button{min-height:30px;height:30px;
+  font-size:12px;border-radius:8px;padding:0 14px;width:auto}
 body.sub #pattern-block .head:has(>.seg){flex-direction:row;align-items:center;
   gap:var(--s2);margin-bottom:var(--s2)}
 body.sub #pattern-block .head:has(>.seg)>.section-label{text-align:left}
@@ -4503,6 +4523,17 @@ const GROOVES={
   rnb:{label:'R&B',bars:1,hits:inSixteenths([
     [0,'k',1],[6,'k',.75],[10,'k',.8],[8,'s',1],[3,'g',1],[13,'g',1],
     [0,'h',.7],[2,'h',.45],[4,'h',.6],[6,'h',.45],[8,'h',.7],[10,'h',.45],[12,'h',.6],[14,'h',.45]]),extra:inSixteenths([[14,'k',.7],[6,'g',1],[15,'o',.5]])},
+  /* A shuffle is the triplet felt as two: the hat plays the beat and the last
+     third of it, never the middle one, and the snare walks on two and four. It
+     is written in the app's own grid of twelfths, where 0, 12, 24, 36 are the
+     beats and 8, 20, 32, 44 are exactly that last third — the same places the
+     jazz ride lands, played straight rather than ridden. */
+  shuffle:{label:'Shuffle',bars:1,hits:[
+    [0,'k',1],[24,'k',.9],
+    [12,'s',1],[36,'s',1],
+    [0,'h',.9],[8,'h',.5],[12,'h',.8],[20,'h',.5],
+    [24,'h',.9],[32,'h',.5],[36,'h',.8],[44,'h',.5]],
+    extra:[[20,'k',.6],[44,'g',1],[32,'o',.45]]},
   // The clave runs across two bars, which is what makes it a bossa and not a
   // one-bar pattern with a Latin sound.
   bossa:{label:'Bossa',bars:2,hits:inSixteenths([
@@ -5498,7 +5529,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11e';
+const APP_VERSION='lab-2026-09-11f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6393,6 +6424,9 @@ function earToca(){
       loadSampler(state.timbre,earToca);
       return;
     }
+    /* The rhythm exercise plays a drum, so the kit is fetched the first time one
+       is asked for rather than waited for on the beat. */
+    if(earQ.kind==='rhythm')loadDrums();
     stopAllAudio();
     const t=audioCtx.currentTime+0.1;
     if(earQ.kind==='intervals'){
@@ -6419,13 +6453,23 @@ function earToca(){
 }
 /* A bar of count-in first, on the same click, so the tempo is given rather than
    guessed — a rhythm heard without a pulse under it is a different question. */
+/* The count-in is the metronome's click and the rhythm is a drum. They were
+   both the click, which made the four beats you are counted in on and the four
+   you are asked about the same sound — and the question is where one ends and
+   the other begins. The hand falls on a snare; the count keeps its click.
+   Where the kit has not arrived, it falls back to the click rather than to
+   silence. */
+function earBateRitmo(t,forte){
+  if(drumHit(forte?'snare':'snare-soft',t,forte?0.95:0.7))return;
+  scheduleClick(t,forte?'low':'high');
+}
 function earTocaRitmo(beats,t0){
   const spb=60/(state.ear.bpm||84);
   for(let i=0;i<4;i++)scheduleClick(t0+i*spb,i===0?'low':'sub');
   const inicio=t0+4*spb;
   beats.forEach(function(f,b){
     (EAR_FIGS[f]||[]).forEach(function(frac,i){
-      scheduleClick(inicio+(b+frac)*spb,(b===0&&i===0)?'low':'high');
+      earBateRitmo(inicio+(b+frac)*spb,(b===0&&i===0));
     });
   });
 }

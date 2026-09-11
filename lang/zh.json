@@ -758,5 +758,6 @@
  "int.11": "大七度",
  "int.12": "八度",
  "set.turn": "轮换颜色",
- "set.turnBack": "反向轮换颜色"
+ "set.turnBack": "反向轮换颜色",
+ "groove.shuffle": "摇曳（Shuffle）"
 }

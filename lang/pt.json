@@ -773,5 +773,6 @@
  "int.11": "7ª maior",
  "int.12": "Oitava",
  "set.turn": "Rodar as cores",
- "set.turnBack": "Rodar as cores para trás"
+ "set.turnBack": "Rodar as cores para trás",
+ "groove.shuffle": "Shuffle"
 }

@@ -773,5 +773,6 @@
  "int.11": "7ª maggiore",
  "int.12": "Ottava",
  "set.turn": "Ruota i colori",
- "set.turnBack": "Ruota i colori indietro"
+ "set.turnBack": "Ruota i colori indietro",
+ "groove.shuffle": "Shuffle"
 }

@@ -773,5 +773,6 @@
  "int.11": "7me majeure",
  "int.12": "Octave",
  "set.turn": "Tourner les couleurs",
- "set.turnBack": "Tourner les couleurs en arrière"
+ "set.turnBack": "Tourner les couleurs en arrière",
+ "groove.shuffle": "Shuffle"
 }
