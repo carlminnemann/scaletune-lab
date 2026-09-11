@@ -99,14 +99,22 @@
   /* Where the light comes from. One direction for the whole app — from above —
      so a button is lit on its top edge, shaded on its bottom one, and sits on a
      shadow of its own. Pressed, the shadow goes inside it. */
-  --lift-hi:rgba(255,255,255,.075);--lift-lo:rgba(0,0,0,.20);
-  --lift-sh:0 1px 2px rgba(0,0,0,.38),0 5px 12px rgba(0,0,0,.26);
-  --lift-in:0 3px 9px rgba(0,0,0,.42) inset;
+  --lift-hi:rgba(255,255,255,.16);--lift-lo:rgba(0,0,0,.32);
+  --lift-sh:0 1px 2px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.42);
+  --lift-in:0 4px 12px rgba(0,0,0,.5) inset;
+  /* The line of light along the top edge — what makes a surface look wet rather
+     than painted. Gloss and matte were telling each other apart by a shadow
+     nobody could see; this is the difference you notice first. */
+  --sheen:rgba(255,255,255,.3);
   --toque:rgba(255,255,255,.5);
   /* The tuner reads at arm's length while both hands are busy, so its two
      answers are the app's own red and green taken up in brightness until they
      carry across a room. Nothing else wears these. */
   --afina-mal:#ff5f52;--afina-bem:#57d98d;
+  /* Right and wrong, fixed. Every other colour in the app belongs to the
+     palette; these two belong to the answer. */
+  --certo:#4ade80;--certo-bg:#10331f;--certo-fg:#dcfce7;
+  --errado:#ff6b5e;--errado-bg:#3a1512;--errado-fg:#ffe4e0;
   --premido:1.22;          /* how much a button brightens under the finger */
 }
 /* Accent colours are darkened for light mode: the same hue that reads as a
@@ -158,13 +166,16 @@
   /* On paper the same two have to go the other way to stay bright against a
      warm ground: saturated rather than pale. */
   --afina-mal:#d92b1f;--afina-bem:#1c8f52;
+  --certo:#12703c;--certo-bg:#cdeedb;--certo-fg:#0b3d22;
+  --errado:#c1291c;--errado-bg:#f6d5d1;--errado-fg:#5a140e;
   --premido:0.92;          /* on paper it darkens instead */
   /* On paper the relief is the other way round in weight: the highlight has to
      be strong enough to read on a warm ground, and the shadows soft, or the
      boxes look printed on top of the page rather than raised out of it. */
-  --lift-hi:rgba(255,255,255,.6);--lift-lo:rgba(0,0,0,.09);
-  --lift-sh:0 1px 2px rgba(60,45,20,.2),0 5px 12px rgba(60,45,20,.16);
-  --lift-in:0 3px 9px rgba(60,45,20,.24) inset;
+  --lift-hi:rgba(255,255,255,.95);--lift-lo:rgba(0,0,0,.14);
+  --lift-sh:0 1px 2px rgba(60,45,20,.28),0 8px 18px rgba(60,45,20,.22);
+  --lift-in:0 4px 12px rgba(60,45,20,.3) inset;
+  --sheen:rgba(255,255,255,.95);
   /* A white bloom on cream is invisible, which is exactly what he saw: on paper
      the light of a tap is a shadow rather than a light. */
   --toque:rgba(52,40,18,.34);
@@ -448,9 +459,13 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
    say is the min-height, which needs no flex at all. */
 .ear-say{min-height:2.6em;font-size:15px;line-height:1.3;color:var(--text2);
   margin-bottom:var(--s3)}
+/* Right and wrong are not the palette's business: green and red mean what they
+   mean, and an exercise that marked a wrong answer in the theme's own yellow
+   would be asking the player to learn the theme first. These two are the only
+   colours in the app that no palette touches. */
 .ear-say .ear-mark{font-weight:600}
-.ear-say.certo .ear-mark{color:var(--mode)}
-.ear-say.errado .ear-mark{color:var(--stop)}
+.ear-say.certo .ear-mark{color:var(--certo)}
+.ear-say.errado .ear-mark{color:var(--errado)}
 /* A written bar is wide and there are four of them: one to a row, and the
    drawing takes the width it needs. */
 #ear-answers.ritmo{grid-template-columns:1fr;display:grid;gap:8px}
@@ -460,8 +475,8 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .ear-cheia{fill:currentColor}
 .ear-tinta{stroke:currentColor;stroke-width:1.4}
 .ear-tres{fill:currentColor;font-size:9px;font-style:italic}
-#ear-answers .pick-btn.certo{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
-#ear-answers .pick-btn.errado{background:var(--stop-bg);border-color:var(--stop);color:var(--stop-fg)}
+#ear-answers .pick-btn.certo{background:var(--certo-bg);border-color:var(--certo);color:var(--certo-fg)}
+#ear-answers .pick-btn.errado{background:var(--errado-bg);border-color:var(--errado);color:var(--errado-fg)}
 /* ---------- a mode's panels, as boxes ----------
    Six folds stacked one on another is a page to scroll; six boxes are a choice
    to make. Tapping one gives it the screen and takes the rest away, and the
@@ -522,9 +537,14 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
      screen is 250 tall, and a highlight given as a percentage of that is a wash
      down half the card rather than a lit edge. Thirty pixels of light at the
      top and twenty-four of shade at the foot, whatever size the box ends up. */
-  background-image:linear-gradient(180deg,var(--lift-hi),rgba(0,0,0,0) 30px),
+  /* Three layers, and matte turns all three off by emptying the colours they
+     are drawn in: a curved sheen across the top, the lit edge under it, and the
+     shade at the foot. Gloss and matte were telling each other apart by a
+     shadow nobody could see. */
+  background-image:radial-gradient(130% 90% at 50% -40%,var(--lift-hi),rgba(0,0,0,0) 62%),
+                   linear-gradient(180deg,var(--lift-hi),rgba(0,0,0,0) 30px),
                    linear-gradient(0deg,var(--lift-lo),rgba(0,0,0,0) 24px);
-  box-shadow:var(--lift-sh);
+  box-shadow:inset 0 1px 0 var(--sheen),var(--lift-sh);
   transition:transform .11s ease,box-shadow .11s ease,border-color .11s ease}
 /* Pressed, the ground changes too. The travel and the inner shadow alone were
    nothing on paper, where a shadow is the faintest thing there is. */
@@ -609,6 +629,10 @@ body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
    In play there is nothing on the screen but the question and the answers, and
    the answers are the screen: a quiz, not a form. */
 body.jogo #sec-sound,body.jogo #ear-opts{display:none!important}
+/* And the other way round: the question and its answers are the game. On the
+   screen where the exercise is set up they were a panel at the foot showing
+   what would be asked, which reads as an instruction nobody asked for. */
+body.earx:not(.jogo) .ear-panel{display:none!important}
 /* The line that says an instrument has loaded belongs to setting the app up,
    not to answering a question. */
 body.ouvido .status-bar,body.earx .status-bar{display:none!important}
@@ -1737,8 +1761,12 @@ body.sub .sec-body .info-line{text-align:center}
   letter-spacing:.08em;color:var(--text3);text-align:center;margin-top:var(--s5)}
 /* Matte: the same colours with the light taken out of them. One switch, and it
    holds whatever palette is on. */
+/* Matte: the same colours with the light taken out of them. A shadow of no
+   size rather than none at all, so the rule that lists it beside the sheen
+   stays a valid list. */
 :root[data-brilho="mate"]{--lift-hi:rgba(0,0,0,0);--lift-lo:rgba(0,0,0,0);
-  --lift-sh:none;--lift-in:none;--toque:rgba(128,128,128,.22)}
+  --sheen:rgba(0,0,0,0);--lift-sh:0 0 0 rgba(0,0,0,0);
+  --lift-in:0 0 0 rgba(0,0,0,0);--toque:rgba(128,128,128,.22)}
 :root[data-brilho="mate"] .tuner-needle,
 :root[data-brilho="mate"] .beats-row.pulse .beat-dot.active-beat,
 :root[data-brilho="mate"] .beats-row.pulse .beat-dot.acc-low.active-beat{box-shadow:none}
@@ -5321,7 +5349,7 @@ function setPlayUI(on){
   updateRotationPanelSoon();
   const b=document.getElementById('play-btn');
   b.textContent=state.mode==='ear'
-    ?(!earQ?tr('play.start','▶ Start')
+    ?((!jogoOuvido||!earQ)?tr('play.start','▶ Start')
            :(earQ.answered?tr('ear.next','Next one'):tr('ear.again','▶ Play again')))
     :state.mode==='tuner'
     ?(on?tr('play.stopListening','■ Stop listening'):tr('play.listen','● Listen'))
@@ -5470,7 +5498,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11d';
+const APP_VERSION='lab-2026-09-11e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -12227,6 +12255,8 @@ const PALETAS=[
   {k:'ceu',     base:'light',fundo:'#eef1f6',acento:'#1e50a2',alerta:'#e0a400'},
   {k:'noite',   base:'dark', fundo:'#0b1220',acento:'#4aa3c7',alerta:'#e0665a'},
   {k:'quadro',  base:'dark', fundo:'#16211b',acento:'#cfd8c6',alerta:'#d98b5f'},
+  /* A deeper red than any of the others, and turned once it is the ground. */
+  {k:'vinho',   base:'dark', fundo:'#1c1012',acento:'#d9a34a',alerta:'#a12a2a'},
 ];
 function paletaDe(k){return PALETAS.find(p=>p.k===k)||PALETAS[0];}
 /* The same three colours can be three themes: which of them is the ground,
@@ -12320,9 +12350,6 @@ function tokensDaPaleta(p){
     '--afina-bem':ateContraste(mistura(acento,escuro?branco:preto,0.25),bg2,5),
     '--premido':escuro?'1.22':'0.92',
     '--toque':escuro?'rgba(255,255,255,.5)':'rgba(20,14,4,.3)',
-    /* Which way the relief is lit follows the ink, not the palette's name. */
-    '--lift-hi':escuro?'rgba(255,255,255,.075)':'rgba(255,255,255,.6)',
-    '--lift-lo':escuro?'rgba(0,0,0,.20)':'rgba(0,0,0,.09)',
   };
 }
 function currentTheme(){return document.documentElement.getAttribute('data-tema')||'preto';}
@@ -12441,8 +12468,9 @@ const SET_PAGS=[
    diz:()=>{const l=LANGS.find(x=>x.code===LANG);return l?l.label:LANG;}},
   {k:'notes',nome:()=>tr('set.notenames','Note names'),
    diz:()=>noteStyleLabel(state.noteNames)},
-  {k:'theme',nome:()=>tr('set.theme','Theme'),
-   diz:()=>currentTheme()==='light'?tr('set.theme.light','Light'):tr('set.theme.dark','Dark')},
+  /* A palette has no name — it is three colours — so the box says its own name
+     and nothing else. */
+  {k:'theme',nome:()=>tr('set.theme','Theme'),diz:()=>''},
 ];
 function buildSetBoxes(){
   const row=document.getElementById('set-boxes');
