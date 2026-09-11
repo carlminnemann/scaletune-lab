@@ -1731,11 +1731,16 @@ body.sub .sec-body .seg>button.active{background:var(--blue-bg);border-color:var
    page that asks one thing with two answers gives them the width; a page with
    several rows keeps them side by side, or a page of small settings would
    become a column of slabs. Which it is, is counted when the page opens. */
-body.sub .sec-body .duas.btn-wrap,body.sub .sec-body .duas.seg,
-body.painel.sub .sec-body .duas.btn-wrap{grid-template-columns:1fr!important}
-/* And they are the page, so they are the size of one: a third of the screen
-   each rather than two bars at the top of an empty one. */
-body.sub .sec-body .duas>button{min-height:clamp(64px,15vh,128px);font-size:16px}
+/* A question whose answers fit in a column stands them in one, in the middle of
+   the screen — three answers are three buttons, not three slabs a third of a
+   screen each. Two columns are what you fall back to when they will not fit. */
+body.sub .sec-body .pilha.btn-wrap,body.sub .sec-body .pilha.seg,
+body.painel.sub .sec-body .pilha.btn-wrap,
+body.earpag #ear-page .pilha{grid-template-columns:1fr!important;
+  grid-auto-rows:auto!important;align-content:center!important;gap:var(--s2)!important}
+body.sub .sec-body .pilha>button,body.earpag #ear-page .pilha>button{
+  min-height:76px!important;height:auto!important;font-size:16px;
+  width:min(100%,440px)!important;justify-self:center;grid-column:1 / -1!important}
 body.sub .sec-body .estica{display:flex;flex-direction:column;flex:1 1 auto;min-height:min-content}
 /* The block itself is held to display:block by the rule that decides which
    page is on the screen, and that rule is marked important — so the one page
@@ -5548,7 +5553,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11g';
+const APP_VERSION='lab-2026-09-11h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6100,8 +6105,17 @@ function escondeTituloRepetido(nome){
 /* One question with two answers gets the full width for each of them. Counted
    rather than asked in CSS, because what decides it is how many questions the
    page holds and not how many buttons the row has. */
+/* Will they stand in a column? Measured against the room the page actually has,
+   at the height a stacked button is given, with the gaps counted. */
+const ALTURA_PILHA=84,GAP_PILHA=8;
+function cabeEmPilha(n){
+  const sc=document.getElementById('scroll-area');
+  const room=sc?sc.clientHeight:0;
+  if(!room||!n)return false;
+  return n*ALTURA_PILHA+(n-1)*GAP_PILHA<=room;
+}
 function marcaDuas(){
-  document.querySelectorAll('.duas,.unica').forEach(e=>{e.classList.remove('duas');e.classList.remove('unica');});
+  document.querySelectorAll('.unica,.pilha').forEach(e=>{e.classList.remove('unica');e.classList.remove('pilha');});
   document.querySelectorAll('.estica').forEach(e=>e.classList.remove('estica'));
   const linhas=[...document.querySelectorAll('.pagina-aberta .seg,.pagina-aberta .btn-wrap')]
     .filter(r=>r.getClientRects().length&&r.children.length);
@@ -6116,10 +6130,12 @@ function marcaDuas(){
     .filter(e=>e.getClientRects().length&&e.parentElement!==linha
                &&!e.classList.contains('clear-btn')&&!e.classList.contains('panel-clear'));
   if(outros.length)return;
-  /* One question on the page: its answers take the page, however many they are.
-     Two of them stand one above the other as well. */
+  /* One question on the page. Its answers stand one above the other, the whole
+     stack in the middle of the screen — that is what a question with three
+     answers looks like — and they go into two columns only when there are too
+     many of them to stand up. */
   linha.classList.add('unica');
-  if(linha.children.length===2)linha.classList.add('duas');
+  linha.classList.toggle('pilha',cabeEmPilha(linha.children.length));
   /* And the way up from it is opened so it can take the height: the row is
      inside a label line inside a block, and none of those was asked to grow. */
   let el=linha.parentElement;
@@ -6801,6 +6817,16 @@ function earCaixasSeg(host,itens,agora,escolhe){
   });
   host.appendChild(w);
 }
+/* The ear's pages are built by their own code but answer the same question, so
+   they are laid out the same way: a column of answers in the middle while they
+   fit, two across when they do not. */
+function arrumaEscolhasDoOuvido(){
+  const host=document.getElementById('ear-page');
+  if(!host)return;
+  const linha=host.querySelector('.btn-wrap:not(.ear-todos)');
+  if(!linha)return;
+  linha.classList.toggle('pilha',cabeEmPilha(linha.children.length));
+}
 function buildEarPage(){
   const host=document.getElementById('ear-page');
   if(!host)return;
@@ -6917,6 +6943,7 @@ function buildEarOpts(){
   if(painel)painel.style.display=(earPag&&!jogoOuvido)?'none':'';
   if(!earPag)buildEarOptRow();
   buildEarPage();
+  arrumaEscolhasDoOuvido();
 }
 function earFigLabel(f){
   return {'4':tr('ear.f.quarter','Quarters'),'8':tr('ear.f.eighth','Eighths'),
