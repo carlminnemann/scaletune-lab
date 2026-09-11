@@ -1768,6 +1768,38 @@ body.paginas #pat-mine-head{order:9}
 body.paginas #pat-list{order:10}
 body.paginas #pat-body>.ex-new{order:11}
 body.paginas #pat-mine-info{order:12}
+/* The pattern is two questions and they are two pages: what the bars are made
+   of, and the bars themselves. Each page shows its own half. */
+body.so-padrao #pattern-block #pat-level-line,body.so-padrao #pattern-block #pat-bar-row,
+body.so-padrao #pattern-block .pat-scroll,body.so-padrao #pattern-block #pat-copy-line,
+body.so-padrao #pattern-block #pat-body>.step-row,
+body.so-padrao #pattern-block #pat-info{display:none!important}
+body.so-grelha #pattern-block #pat-time-line,body.so-grelha #pattern-block #pat-loop-line,
+body.so-grelha #pattern-block #pat-mine-head,body.so-grelha #pattern-block #pat-list,
+body.so-grelha #pattern-block #pat-body>.ex-new,
+body.so-grelha #pattern-block #pat-mine-info{display:none!important}
+/* Advance Every is a number and what it counts: the number written the size a
+   metronome writes one, the two words under it the size every other answer in
+   the app is, and the pair of them together in the middle of the screen. */
+/* Short of the screen, and so in the middle of it. Only where the page fits:
+   a page taller than the screen scrolls, and it starts at the top. */
+body.sub.centra-pagina .scroll{display:flex!important;flex-direction:column;
+  justify-content:center;min-height:0;height:auto}
+/* The panel's own block is told to grow by the rule that lets it fill a panel;
+   on a page that is being centred it takes only the height it needs. */
+body.sub.centra-pagina .scroll>*,
+body.sub.centra-pagina #pitch-section,body.sub.centra-pagina #free-section{
+  flex:0 0 auto!important}
+body.sub #pass-block{gap:var(--s4)}
+body.sub #pass-block #pass-now{flex:0 0 auto;margin-top:auto}
+body.sub #pass-block #pass-now .val{font-size:clamp(52px,13vh,104px);flex:0 1 auto;min-width:0}
+body.sub #pass-block #pass-now button{flex:0 0 auto;
+  width:clamp(58px,11vh,80px);height:clamp(58px,11vh,80px);font-size:26px}
+body.sub #pass-block #pass-unit-row.unica{flex:0 0 auto;margin-bottom:auto}
+/* A finger that lands on the grid has to be able to scroll the page it is on:
+   pan-x alone said the only gesture here is sideways, and on a tablet held
+   sideways that left the rest of the page out of reach. */
+.pat-scroll{touch-action:pan-x pan-y}
 /* The timbres were the last row of small buttons in the app: a wrapped line of
    six, inside a panel that has a screen to itself. Two columns of the same
    buttons everything else is made of, the odd one centred, and the volume under
@@ -1832,6 +1864,11 @@ body.painel.sub.estica-chain details.sec>.sec-body{display:flex;flex-direction:c
 body.painel.sub.estica-chain details.sec::details-content{display:flex;
   flex-direction:column;flex:1 1 auto;min-height:0;height:auto}
 body.painel.sub.estica-chain .scroll>*{flex:0 0 auto}
+/* And a section that has nothing on this page takes no room. The rule above
+   names the scale block so that its own pages can stretch, and on a page
+   belonging to another panel that left an empty block growing at the top of the
+   screen — which is what pushed Repeat down into the bottom half. */
+body.painel.sub.estica-chain .scroll>*:not(:has(.pagina-aberta)){flex:0 0 auto!important}
 /* The block itself is held to display:block by the rule that decides which
    page is on the screen, and that rule is marked important — so the one page
    that wants to stretch says so louder. */
@@ -2668,6 +2705,7 @@ body.bolinhas .pulse-bpm{display:none}
              min="1" max="60" step="1" value="5" aria-label="BPM each step">
       <span class="step-unit" data-t="bpm-every">BPM every</span>
       <select class="sig-select active" id="speed-every" data-ta="aria.speedEvery" aria-label="How often the tempo steps"></select>
+      <span class="step-unit" id="speed-every-unit" data-t="min">min</span>
     </div>
     <div class="step-row" id="speed-ramp" style="display:none">
       <span class="step-lead" data-t="to">to</span>
@@ -2727,12 +2765,16 @@ body.bolinhas .pulse-bpm{display:none}
     </div>
   </div>
 
+  <!-- How many bars before the figure and the tempo move on: one number, written
+       the size a metronome writes one, and under it what is being counted. -->
   <div class="mgroup" id="pass-block" style="display:none">
-    <div class="head" style="margin-bottom:0"><span class="section-label" data-t="advance-every">Advance Every</span>
-      <span class="sig-fields">
-        <select class="sig-select" id="pass-count" data-ta="aria.passCount" aria-label="How many before the figure and the tempo move on"></select>
-        <span class="btn-wrap seg" id="pass-unit-row" data-cols="fixed"></span>
-      </span></div>
+    <div class="head" style="margin-bottom:0"><span class="section-label" data-t="advance-every">Advance Every</span></div>
+    <div class="tuner-a4-now so-numero" id="pass-now">
+      <button type="button" id="pass-less" data-ta="aria.passLess" aria-label="One less">−</button>
+      <div class="val"><span id="pass-num">1</span></div>
+      <button type="button" id="pass-more" data-ta="aria.passMore" aria-label="One more">+</button>
+    </div>
+    <div class="btn-wrap" id="pass-unit-row"></div>
   </div>
   <div class="mgroup" id="poly-block">
   <div class="head"><span class="section-label" data-t="polyrhythm">Polyrhythm</span>
@@ -2756,7 +2798,8 @@ body.bolinhas .pulse-bpm{display:none}
          rows of pulses back to plain and leaves the numbers alone -->
     <button class="clear-btn" id="polyacc-clear" onclick="clearPolyAccents()" data-t="clear.accents">✕ Clear accents</button>
   </div>
-    <button class="clear-btn panel-clear" data-panel="poly" onclick="limpaPainel('poly')">✕ Clear</button>
+  <!-- No Clear here: it cleared nothing, it only turned the polyrhythm off, and
+       the button that turns it on turns it off again. -->
   </div>
   </div>
 </details>
@@ -5665,7 +5708,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11q';
+const APP_VERSION='lab-2026-09-11r';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5869,6 +5912,20 @@ function nomeDaSub(){
 /* What is on the screen inside the Scales panel: its front, the twelve notes,
    or one family. Everything is built as it always was — this only decides what
    is looked at. */
+/* A page that does not fill the screen sits in the middle of it. The seven modes
+   of the major scale are seven buttons and half a screen, and half a screen of
+   nothing under them reads as a list cut short — where they do not fill it they
+   are centred in it. A page that is taller than the screen is left alone: it
+   has to scroll, and a scrolling page starts at the top. */
+function centraSeCabe(){
+  const sc=document.getElementById('scroll-area');
+  if(!sc)return;
+  document.body.classList.remove('centra-pagina');
+  if(!document.body.classList.contains('sub'))return;
+  if(document.body.classList.contains('estica-chain'))return;
+  if(document.body.classList.contains('bolinhas'))return;
+  if(sc.scrollHeight<=sc.clientHeight+1)document.body.classList.add('centra-pagina');
+}
 function arrumaEscalas(){
   const dentro=(painelAberto==='sec-scales');
   /* A page belongs to a panel: leaving the panel closes it. Only where the
@@ -5895,6 +5952,7 @@ function arrumaEscalas(){
   if(naFrente)buildFamRow();
   const big=document.getElementById('root-big');
   if(big)big.textContent=bareName(NOTES.indexOf(state.root));
+  centraSeCabe();
 }
 /* One box per family, saying what is chosen inside it — so the front of the
    panel answers "which scale is this?" without opening anything. */
@@ -6101,6 +6159,12 @@ const PAGINAS={
     {k:'pat',   bloco:'pattern-block', nome:()=>tr('pattern','Pattern'),fica:true,
      quando:()=>grooveAllowed()&&!state.poly.on,
      mexeu:difG('custom'),diz:()=>resumoDe('pat-sum')},
+    /* The bars you write are a screen of their own. On one page with everything
+       else the grid was the part that would not fit, and on a tablet held
+       sideways it was cut off with no way to reach the rest of it. */
+    {k:'grid',  bloco:'pattern-block', nome:()=>tr('pat.grid','The grid'),fica:true,
+     quando:()=>grooveAllowed()&&!state.poly.on,
+     mexeu:difG('custom'),diz:()=>resumoDe('pat-sum')},
     {k:'mix',   bloco:'mixer-block',   nome:()=>tr('mixer','Mixer'),fica:true,
      quando:()=>grooveAllowed()&&!state.poly.on,
      mexeu:difG('mix'),diz:()=>resumoDe('mix-sum')},
@@ -6155,6 +6219,15 @@ function arrumaPaginas(){
     if(row)row.style.display='none';
     document.body.classList.remove('paginas');
     document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
+    /* And the marks a page left behind go with it. This panel has no pages, so
+       whatever the last one measured is no longer true — left standing, the
+       chain that makes one question fill the screen was still on while a panel
+       of boxes was being shown. */
+    olhaPagina(false);
+    document.querySelectorAll('.unica,.pilha').forEach(e=>{e.classList.remove('unica');e.classList.remove('pilha');});
+    document.querySelectorAll('.estica').forEach(e=>e.classList.remove('estica'));
+    document.body.classList.remove('estica-chain','so-padrao','so-grelha');
+    centraSeCabe();
     return;
   }
   const body=document.querySelector('#'+painelAberto+'>.sec-body');
@@ -6181,7 +6254,11 @@ function arrumaPaginas(){
      says which block the rule lets through. */
   document.body.classList.add('paginas');
   [...body.children].forEach(c=>c.classList.remove('pagina-aberta'));
-  if(naFrente){buildPagRow();pintaClears();return;}
+  if(naFrente){
+    olhaPagina(false);
+    document.body.classList.remove('so-padrao','so-grelha');
+    buildPagRow();pintaClears();return;
+  }
   /* A page is usually one block, and sometimes two that answer one question —
      the tempo and the bar are the metronome. */
   const blocos=typeof pag.blocos==='function'?pag.blocos():(pag.blocos||[pag.bloco]);
@@ -6196,6 +6273,12 @@ function arrumaPaginas(){
     }
   });
   document.body.classList.add('sub');
+  /* Two pages out of one block: the pattern's settings, and the bars themselves.
+     Scoped to the metronome, because a page called 'pat' is also the sequence's
+     own in Practice Progressions. */
+  const noMetro=painelAberto==='metro-section';
+  document.body.classList.toggle('so-padrao',noMetro&&pag.k==='pat');
+  document.body.classList.toggle('so-grelha',noMetro&&pag.k==='grid');
   /* The bar above the page already says what the page is: the group inside it
      that says the same word again is one title too many. */
   escondeTituloRepetido(nomeDaPagina());
@@ -6204,6 +6287,7 @@ function arrumaPaginas(){
      changed: on a page they are bigger than in a panel, and the class that says
      so is put on after they were last laid out. */
   layoutAllBeats();
+  olhaPagina(true);
 }
 /* The three folds inside the metronome — the pattern, the mixer and the
    subdivision — were written when the metronome was one long panel and folding
@@ -6245,7 +6329,7 @@ function marcaDuas(){
   document.body.classList.remove('estica-chain');
   const linhas=[...document.querySelectorAll('.pagina-aberta .seg,.pagina-aberta .btn-wrap')]
     .filter(r=>r.getClientRects().length&&r.children.length);
-  if(linhas.length!==1)return;
+  if(linhas.length!==1){centraSeCabe();return;}
   const linha=linhas[0];
   /* And it is only the page's one question if the page holds nothing else to
      set: the tempo page has a row of two sounds on it and a number, a bar
@@ -6254,8 +6338,11 @@ function marcaDuas(){
   const outros=[...document.querySelectorAll('.pagina-aberta button,.pagina-aberta select,'+
       '.pagina-aberta input,.pagina-aberta .note-btn')]
     .filter(e=>e.getClientRects().length&&e.parentElement!==linha
-               &&!e.classList.contains('clear-btn')&&!e.classList.contains('panel-clear'));
-  if(outros.length)return;
+               &&!e.classList.contains('clear-btn')&&!e.classList.contains('panel-clear')
+               /* A number with a step either side of it is the page's own
+                  display, not a second question on it. */
+               &&!e.closest('.tuner-a4-now'));
+  if(outros.length){centraSeCabe();return;}
   /* One question on the page. Its answers stand one above the other, the whole
      stack in the middle of the screen — that is what a question with three
      answers looks like — and they go into two columns only when there are too
@@ -6273,6 +6360,48 @@ function marcaDuas(){
   /* And the levels above the page, which are block flow while a page is open so
      that a tall one can scroll. */
   document.body.classList.add('estica-chain');
+  centraSeCabe();
+}
+/* A page is measured when it opens, and a page can change while it is open: a
+   count-in of two bars brings out the line that says when to count again, the
+   pattern brings out its grid. The measurement was made once and never again,
+   so the page was laid out for the question it used to be — which is why
+   leaving it and coming back put it right. Anything that changes inside an open
+   page is measured again here.
+
+   The guard is not decoration: the measuring itself moves classes about, and
+   without it this would call itself for as long as the page was open. The
+   pulse is left out of it — a running metronome lights a circle every beat, and
+   that is not the page changing shape. */
+let revendoPagina=false;
+function revePagina(){
+  if(revendoPagina)return;
+  if(!subPag||!document.body.classList.contains('sub'))return;
+  revendoPagina=true;
+  requestAnimationFrame(()=>{
+    try{
+      escondeTituloRepetido(nomeDaPagina());
+      marcaDuas();
+      layoutAllBeats();
+      centraSeCabe();
+    }catch(e){}
+    requestAnimationFrame(()=>{revendoPagina=false;});
+  });
+}
+function doPulso(n){
+  const el=n&&(n.nodeType===1?n:n.parentElement);
+  return !!(el&&el.closest&&(el.closest('.beats-row')||el.closest('#pulse-wrap')));
+}
+const OLHA_PAGINA=typeof MutationObserver==='function'?new MutationObserver(function(recs){
+  for(let i=0;i<recs.length;i++)if(!doPulso(recs[i].target))return revePagina();
+}):null;
+function olhaPagina(liga){
+  if(!OLHA_PAGINA)return;
+  OLHA_PAGINA.disconnect();
+  if(!liga)return;
+  const sc=document.getElementById('scroll-area');
+  if(sc)OLHA_PAGINA.observe(sc,{childList:true,subtree:true,
+    attributes:true,attributeFilter:['style','hidden','class','disabled']});
 }
 function abreDobras(el){
   DOBRAS.forEach(([h,b,depois])=>{
@@ -9057,8 +9186,11 @@ function buildSpeedControls(){
 
   const every=document.getElementById('speed-every');
   if(every&&!every.options.length){
+    /* The word goes beside the roller, not inside it — the ramp under this line
+       has always read that way and this one now reads the same. The first
+       option is not a number of minutes, so the word steps aside for it. */
     every.appendChild(new Option(passWord(),'pass'));
-    for(let i=1;i<=RAMP_MAX_MIN;i++)every.appendChild(new Option(tr('ramp.min','{n} min',{n:i}),String(i)));
+    for(let i=1;i<=RAMP_MAX_MIN;i++)every.appendChild(new Option(String(i),String(i)));
     every.addEventListener('change',()=>{
       P.tempoEvery=every.value==='pass'?'pass':parseInt(every.value,10);
       buildSpeedControls();updatePracticeInfo();refreshSectionSummaries();
@@ -9070,12 +9202,9 @@ function buildSpeedControls(){
   if(every&&every.options.length){
     const w=passWord();
     if(every.options[0].textContent!==w)every.options[0].textContent=w;
-    if(every.dataset.lang!==LANG){
-      every.dataset.lang=LANG;
-      for(let i=1;i<every.options.length;i++)
-        every.options[i].textContent=tr('ramp.min','{n} min',{n:i});
-    }
   }
+  const everyUnit=document.getElementById('speed-every-unit');
+  if(everyUnit)everyUnit.style.display=(P.tempoEvery==='pass')?'none':'';
   const rmin=document.getElementById('ramp-min');
   if(rmin&&!rmin.options.length){
     for(let i=1;i<=RAMP_MAX_MIN;i++)rmin.appendChild(new Option(i,i));
@@ -9340,24 +9469,23 @@ function buildCountRow(){
 }
 
 const PASS_MAX=32;
+function poePassCount(n){
+  state.practice.passCount=Math.max(1,Math.min(PASS_MAX,Math.round(n)||1));
+  buildPassRow();buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
+}
 function buildPassRow(){
-  const sel=document.getElementById('pass-count');
+  const num=document.getElementById('pass-num');
   const row=document.getElementById('pass-unit-row');
   const block=document.getElementById('pass-block');
-  if(!sel||!row)return;
+  if(!num||!row)return;
   /* Only a pulse without notes needs to be told what a pass is — Metro, and now
      Drone, where the metronome runs over a held note and nothing comes round on
      its own either. */
   if(block)block.style.display=(pulseOnly()&&!state.poly.on)?'':'none';
-  if(!sel.options.length){
-    for(let i=1;i<=PASS_MAX;i++)sel.appendChild(new Option(i,i));
-    sel.addEventListener('change',()=>{
-      state.practice.passCount=parseInt(sel.value,10)||1;
-      buildPassRow();buildTempoStepRow();updatePracticeInfo();refreshSectionSummaries();
-    });
-  }
-  sel.value=String(passCount());
-  sel.classList.add('active');
+  const menos=document.getElementById('pass-less'),mais=document.getElementById('pass-more');
+  if(menos&&!menos.onclick)menos.onclick=()=>poePassCount(passCount()-1);
+  if(mais&&!mais.onclick)mais.onclick=()=>poePassCount(passCount()+1);
+  num.textContent=String(passCount());
   row.innerHTML='';
   [['bar',tr('pass.bars','Bars')],['beat',tr('pass.beats','Beats')]].forEach(([k,label])=>{
     const b=document.createElement('button');

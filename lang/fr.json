@@ -792,5 +792,8 @@
  "ear.simple": "Simple",
  "ear.compound": "Composée",
  "ear.slower": "Plus lent",
- "ear.faster": "Plus rapide"
+ "ear.faster": "Plus rapide",
+ "pat.grid": "La grille",
+ "aria.passLess": "Un de moins",
+ "aria.passMore": "Un de plus"
 }

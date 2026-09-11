@@ -777,5 +777,8 @@
  "ear.simple": "单拍子",
  "ear.compound": "复拍子",
  "ear.slower": "更慢",
- "ear.faster": "更快"
+ "ear.faster": "更快",
+ "pat.grid": "网格",
+ "aria.passLess": "减一",
+ "aria.passMore": "加一"
 }
