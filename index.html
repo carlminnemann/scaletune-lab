@@ -170,6 +170,10 @@
   --toque:rgba(52,40,18,.34);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+/* iOS grows the text of a block it thinks is too narrow to read, which makes a
+   screen that fits on every other browser overflow on a phone — and the app
+   measures what it lays out, so it never knew. The sizes here are chosen. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* The app is a frame with a scrolling middle: the name and its two buttons, the
    modes, and Start hold their places, and only the settings move under them.
    The page itself never scrolls, so there is no rubber-band, and the Start
@@ -434,7 +438,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .ear-panel{padding:var(--s4) var(--s4) var(--s3)}
 .ear-head{display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
 .ear-score{font-size:12px;color:var(--text3);letter-spacing:0.04em}
-.ear-again{margin-left:auto;flex:0 0 auto;width:auto;min-width:46px;padding:0 12px;font-size:16px}
+
 /* What just happened, in one line, where the eye already is. It keeps its
    height when it has nothing to say, so answering does not move the buttons
    under the finger that is about to press the next one. */
@@ -590,7 +594,7 @@ body.earpag #ear-page .btn-wrap:not(.seg)>button:last-child:nth-child(odd){
    button that runs it, and a page of options taking the screen when one is
    open. */
 body.earx .scroll{display:flex;flex-direction:column;min-height:0}
-body.earx #ear-section{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+body.earx #ear-section{display:flex;flex-direction:column;flex:1 1 auto;min-height:min-content}
 /* Last of everything in the list, so nothing — not even the timbre — comes
    between the question and the button that asks the next one. */
 body.earx #ear-section{order:9}
@@ -604,9 +608,12 @@ body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
 /* ---------- the game ----------
    In play there is nothing on the screen but the question and the answers, and
    the answers are the screen: a quiz, not a form. */
-body.jogo #sec-sound,body.jogo #ear-opts,body.jogo .status-bar{display:none!important}
+body.jogo #sec-sound,body.jogo #ear-opts{display:none!important}
+/* The line that says an instrument has loaded belongs to setting the app up,
+   not to answering a question. */
+body.ouvido .status-bar,body.earx .status-bar{display:none!important}
 body.jogo .ear-panel{margin-top:0;flex:1 1 auto;display:flex;flex-direction:column;
-  min-height:0;padding:var(--s3)}
+  min-height:min-content;padding:var(--s3)}
 body.jogo .ear-say{min-height:2.4em;font-size:clamp(16px,2.6vh,22px);
   text-align:center;margin-bottom:var(--s3)}
 body.jogo .ear-head{margin-bottom:var(--s2)}
@@ -1047,7 +1054,7 @@ details.sec[open] .sec-sum{display:none}
    choices takes the screen from both — the same law as everywhere else. */
 body.afina .scroll{display:flex;flex-direction:column;min-height:0}
 body.afina .scroll>*{flex:0 0 auto}
-body.afina #tuner-section{display:flex!important;flex-direction:column;flex:1 1 auto;min-height:0}
+body.afina #tuner-section{display:flex!important;flex-direction:column;flex:1 1 auto;min-height:min-content}
 body.afina .tuner-panel{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center}
 .tuner-boxes{display:none}
 body.afina .tuner-boxes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);
@@ -1384,41 +1391,44 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 
 .legend{display:flex;gap:12px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap}
 .note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:1.25rem}
-.note-btn{padding:8px 4px;font-weight:500;cursor:pointer;border:1px solid var(--border2);
+.note-btn{padding:6px 4px;font-weight:500;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);text-align:center;
   position:relative;user-select:none;-webkit-user-select:none;
   transition:background 0.12s;touch-action:manipulation;
-  display:flex;align-items:stretch;min-height:clamp(48px,8vh,74px)}
-/* The empty column that balances the stepper, so the name is centred in the
-   button and not in the space the stepper left. */
-.note-btn.active::before{content:'';flex:0 0 34px}
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:clamp(48px,8vh,74px)}
+/* Room on both sides for the octave to sit out to the right without pulling the
+   name off centre. */
+.note-btn.active{padding-left:20px;padding-right:20px}
 .note-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .note-btn.start{background:transparent;border-color:var(--green);color:var(--green-hi);
   box-shadow:0 0 0 1px var(--green)}
-.note-name{font-size:clamp(17px,2.8vh,26px);font-weight:500;flex:1 1 auto;
-  display:flex;align-items:center;justify-content:center;min-width:0}
+.note-name{font-size:clamp(17px,2.8vh,26px);font-weight:500;line-height:1.05;
+  display:block;min-width:0}
 .free-grid .note-btn{padding:8px 4px}
-.oct-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:stretch;
-  gap:4px;flex:0 0 36px;align-self:stretch}
-.oct-btn{width:100%;flex:1 1 0;min-height:22px;border:1px solid var(--border2);
-  border-radius:7px;background:var(--bg3);color:var(--text2);font-size:11px;line-height:1;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  touch-action:manipulation;padding:0}
-/* The octave belongs to the note, so it is written with it. */
-.note-oct{font-size:.52em;font-weight:600;opacity:.75;margin-left:3px}
+
+/* An arrow and the room around it: no border, no fill — what is pressed is the
+   space, what is seen is the mark. */
+.oct-btn{border:0;background:none;color:var(--text3);font-size:10px;line-height:1;
+  cursor:pointer;padding:5px 20px;width:auto;min-height:0;
+  touch-action:manipulation;display:block}
+.oct-btn:active{color:var(--text)}
+/* The octave itself, out to the right of the name. */
+.note-oct{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  font-size:12px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
 
 /* On a narrow phone the stepper is what decides how many notes fit across: at
    its full size only two columns fit, which turns twelve notes into six rows in
    the very mode you scroll least. Trimmed, three fit — and because the column
    count is measured rather than written down, nothing else has to be told. */
 @media (max-width:400px){
-  .oct-btn{font-size:10px;min-height:20px}
-  .oct-controls{gap:3px;flex:0 0 30px}
-  .note-btn.active::before{flex:0 0 30px}
+  .oct-btn{padding:4px 16px}
+  .note-btn.active{padding-left:16px;padding-right:16px}
+  .note-oct{right:4px;font-size:11px}
 }
-.note-btn.active .oct-btn{border-color:var(--blue);color:var(--blue)}
+.note-btn.active .oct-btn{color:var(--blue);opacity:.75}
 
-.note-btn.start .oct-btn{border-color:var(--green);color:var(--green-hi)}
+.note-btn.start .oct-btn{color:var(--green-hi);opacity:.75}
 
 .start-badge{position:absolute;top:2px;right:4px;font-size:10px;color:var(--green-hi);font-weight:700}
 
@@ -1671,7 +1681,7 @@ body.painel.sub .sec-body .duas.btn-wrap{grid-template-columns:1fr!important}
 /* And they are the page, so they are the size of one: a third of the screen
    each rather than two bars at the top of an empty one. */
 body.sub .sec-body .duas>button{min-height:clamp(64px,15vh,128px);font-size:16px}
-body.sub .sec-body .estica{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+body.sub .sec-body .estica{display:flex;flex-direction:column;flex:1 1 auto;min-height:min-content}
 /* The block itself is held to display:block by the rule that decides which
    page is on the screen, and that rule is marked important — so the one page
    that wants to stretch says so louder. */
@@ -1714,7 +1724,13 @@ body.sub .sec-body .info-line{text-align:center}
 #settings-overlay .set-pagina .info-line{text-align:center;margin-top:var(--s3)}
 /* A palette is chosen by its colours: three circles in a row inside the button,
    the ground first and then the two it is written in. */
-.tema-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:0 12px}
+.tema-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:0 4px}
+/* The two turns live inside the button and are not it: pressing one moves the
+   three colours round, pressing anywhere else chooses the palette. */
+.tema-seta{flex:0 0 auto;padding:0 8px;font-size:18px;line-height:1;
+  color:var(--text3);cursor:pointer;user-select:none;-webkit-user-select:none;
+  touch-action:manipulation}
+.tema-seta:active{color:var(--text)}
 .tema-cor{width:clamp(18px,4vh,28px);height:clamp(18px,4vh,28px);border-radius:50%;
   border:1px solid rgba(128,128,128,.45);flex:0 0 auto}
 #settings-overlay .set-sub{font-size:11px;font-weight:600;text-transform:uppercase;
@@ -1822,7 +1838,7 @@ body.sub #poly-block #poly-row-b{margin-bottom:var(--s3)}
 #pulse-wrap{display:none}
 body.bolinhas .scroll>*:not(#metro-section){display:none!important}
 body.bolinhas #metro-section{display:flex!important;flex-direction:column;
-  flex:1 1 auto;min-height:0;border:0;background:none;margin:0}
+  flex:1 1 auto;min-height:min-content;border:0;background:none;margin:0}
 body.bolinhas #metro-section>.sec-body>*:not(#pulse-wrap){display:none!important}
 body.bolinhas #metro-section>.sec-body{display:flex;flex-direction:column;
   flex:1 1 auto;min-height:0;padding:0}
@@ -1922,6 +1938,8 @@ body.bolinhas .pulse-bpm{display:none}
   if(t==='light')t='papel';
   if(!t)t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'papel':'preto';
   document.documentElement.setAttribute('data-tema',t);
+  /* A first guess only, so the page is not white for one frame: the script
+     works out the real one from the palette's ground as soon as it runs. */
   document.documentElement.setAttribute('data-theme',(t==='papel'||t==='ceu')?'light':'dark');
   document.documentElement.setAttribute('data-brilho',br||'brilho');
   /* And the language, before anything is painted. The pack arrives after the
@@ -2233,10 +2251,9 @@ body.bolinhas .pulse-bpm{display:none}
     <div id="ear-page" style="display:none"></div>
   </div>
   <div class="panel ear-panel" id="ear-panel">
+    <!-- One button plays it again, and it is the big one at the foot. -->
     <div class="ear-head">
       <span class="ear-score" id="ear-score"></span>
-      <button class="pick-btn ear-again" id="ear-again" type="button" onclick="earToca()"
-              data-ta="aria.earAgain" aria-label="Play it again">&#9834;</button>
     </div>
     <div class="ear-say" id="ear-say"></div>
     <div class="btn-wrap" id="ear-answers"></div>
@@ -5453,7 +5470,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11c';
+const APP_VERSION='lab-2026-09-11d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6212,8 +6229,14 @@ function earKindLabel(k){
           rhythm:tr('ear.k.rhythm','Rhythm')}[k]||k;
 }
 const EAR_STEPS=[1,2,3,4,5,6,7,8,9,10,11,12];
-const EAR_LABEL={1:'m2',2:'M2',3:'m3',4:'M3',5:'P4',6:'TT',7:'P5',
-                 8:'m6',9:'M6',10:'m7',11:'M7',12:'P8'};
+/* Written out, not abbreviated: m2 and M2 are the same two letters to anyone
+   who has not spent years reading them, and the answer to "what was that?" is a
+   name. Each language writes an interval its own way — the number takes the
+   ordinal mark of that language, and major and minor are words. */
+const EAR_LABEL={1:'minor 2nd',2:'Major 2nd',3:'minor 3rd',4:'Major 3rd',
+                 5:'Perfect 4th',6:'Tritone',7:'Perfect 5th',8:'minor 6th',
+                 9:'Major 6th',10:'minor 7th',11:'Major 7th',12:'Octave'};
+function intervalLabel(n){return tr('int.'+n,EAR_LABEL[n]);}
 /* Everything the app knows, and not a shortlist: the families are pages and
    each of them opens its own scales to be switched on. A name lives in more
    than one family — the melodic minor is in its own and among the gregorian
@@ -6400,7 +6423,7 @@ function earResponde(v){
    given is an answer that could have been asked. */
 function earOpcoes(){
   const k=earKind();
-  if(k==='intervals')return earOn().map(function(n){return {v:n,label:EAR_LABEL[n]};});
+  if(k==='intervals')return earOn().map(function(n){return {v:n,label:intervalLabel(n)};});
   if(k==='scales')return earScalesOn().map(function(x){return {v:x[1],label:scaleLabel(x[1])};});
   if(k==='chords')return earChordsOn().map(function(x){return {v:x[1],label:chordLabel(x[1])};});
   if(k==='rhythm'&&earQ)return earQ.opcoes.map(function(b){return {v:b.join('|'),svg:earRitmoSVG(b)};});
@@ -6408,14 +6431,14 @@ function earOpcoes(){
 }
 function earNomeDaCerta(){
   if(!earQ)return '';
-  if(earQ.kind==='intervals')return EAR_LABEL[earQ.semis];
+  if(earQ.kind==='intervals')return intervalLabel(earQ.semis);
   if(earQ.kind==='scales')return scaleLabel(earQ.name);
   if(earQ.kind==='chords')return chordLabel(earQ.name);
   return '';
 }
 function earNomeDoDito(){
   if(!earQ||earQ.said===null)return '';
-  if(earQ.kind==='intervals')return EAR_LABEL[earQ.said];
+  if(earQ.kind==='intervals')return intervalLabel(earQ.said);
   if(earQ.kind==='scales')return scaleLabel(earQ.said);
   if(earQ.kind==='chords')return chordLabel(earQ.said);
   return '';
@@ -6493,8 +6516,6 @@ function renderEar(){
     });
     if(earKind()!=='rhythm')gridify(row);
   }
-  const again=document.getElementById('ear-again');
-  if(again)again.style.display=earQ?'':'none';
   refreshSectionSummaries();
 }
 
@@ -6589,7 +6610,7 @@ function buildEarPage(){
   const k=earKind();
   if(!earPag)return;
   if(earPag==='sel'){
-    earCaixasToggle(host,EAR_STEPS.map(function(n){return {n:n,label:EAR_LABEL[n]};}),
+    earCaixasToggle(host,EAR_STEPS.map(function(n){return {n:n,label:intervalLabel(n)};}),
       function(it){return state.ear.sel[it.n];},
       function(it){state.ear.sel[it.n]=!state.ear.sel[it.n];earMexeu();});
   } else if(earPag==='how'){
@@ -6861,9 +6882,7 @@ function renderDroneNote(n){
   div.className='note-btn'+(sel?' active':'');
   // the octave stepper only exists once the note is armed, so nudging it can
   // never add a note that was not chosen
-  div.innerHTML=
-    nomeComOitava(spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]),sel,state.droneSelected[n])+
-    octControlsHTML(sel,state.droneSelected[n]);
+  div.innerHTML=noteInnerHTML(spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]),sel,state.droneSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
     b.onpointerdown=e=>{
       e.stopPropagation();e.preventDefault();
@@ -9220,8 +9239,7 @@ function renderFreeNote(n){
   // it would silently add a note the user never picked.
   div.innerHTML=
     (isRoot?'<span class="start-badge">'+tr('free.rootBadge','root')+'</span>':'')+
-    nomeComOitava(spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]),sel,state.freeSelected[n])+
-    octControlsHTML(sel,state.freeSelected[n]);
+    noteInnerHTML(spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]),sel,state.freeSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
     b.onpointerdown=e=>{
       e.stopPropagation();e.preventDefault();
@@ -11307,17 +11325,15 @@ function fitWordmark(){
    stack, the arrows a few pixels from the number they moved — now each arrow is
    half the height of the button and the number is out of their way, with the
    name. */
-function octControlsHTML(on,val){
-  return on
-    ? '<div class="oct-controls">'+
-        '<button class="oct-btn" data-oct="1" aria-label="'+tr('oct.up','Octave up')+'">\u25B2</button>'+
-        '<button class="oct-btn" data-oct="-1" aria-label="'+tr('oct.down','Octave down')+'">\u25BC</button>'+
-      '</div>'
-    : '';
-}
-function nomeComOitava(texto,on,val){
-  return '<div class="note-name">'+texto+
-    (on?'<span class="note-oct">'+val+'</span>':'')+'</div>';
+/* The note, standing up: an arrow over its name and an arrow under it, and the
+   octave itself out to the right. No boxes — a box round an arrow that small is
+   more box than arrow — and the arrows are drawn small with the room round them
+   doing the catching. */
+function noteInnerHTML(texto,on,val){
+  return (on?'<button class="oct-btn" data-oct="1" aria-label="'+tr('oct.up','Octave up')+'">\u25B2</button>':'')+
+    '<div class="note-name">'+texto+'</div>'+
+    (on?'<button class="oct-btn" data-oct="-1" aria-label="'+tr('oct.down','Octave down')+'">\u25BC</button>'+
+        '<span class="note-oct">'+val+'</span>':'');
 }
 /* How wide a note needs to be once it is ON. A note that is off is 40px; the
    moment it is armed the stepper appears and it becomes 92, and four of those
@@ -11337,7 +11353,7 @@ function measureNoteCell(force){
   if(!g||!g.children.length)return noteCellNeed;
   const p=g.children[0].cloneNode(false);
   p.className='note-btn active';
-  p.innerHTML=nomeComOitava('C#',true,3)+octControlsHTML(true,3);
+  p.innerHTML=noteInnerHTML('C#',true,3);
   p.style.cssText='position:absolute;left:-9999px;top:0;width:max-content';
   g.appendChild(p);
   noteCellNeed=Math.ceil(p.getBoundingClientRect().width);
@@ -12181,11 +12197,20 @@ function contraste(a,b){const x=luz(a),y=luz(b);
 /* Walk a colour toward white or black until it can be read on the ground it is
    going to sit on. Measured rather than chosen, because a palette's ground can
    be any lightness and a fixed grey clears on one and not on the next. */
-function ateContraste(cor,fundo,alvo){
-  const para=luz(fundo)>0.4?'#000000':'#ffffff';
+/* Both ways, and whichever gets there. A colour already at white cannot be made
+   whiter — the accent of a rotated palette can be exactly that, sitting on a
+   pale card — so darkening it is the only move, and which move helps is a
+   question with an answer rather than a guess. */
+function _passos(cor,para,fundo,alvo){
   let c=cor;
   for(let i=0;i<30&&contraste(c,fundo)<alvo;i++)c=mistura(c,para,0.07);
   return c;
+}
+function ateContraste(cor,fundo,alvo){
+  if(contraste(cor,fundo)>=alvo)return cor;
+  const claro=_passos(cor,'#ffffff',fundo,alvo);
+  const escuro=_passos(cor,'#000000',fundo,alvo);
+  return contraste(claro,fundo)>=contraste(escuro,fundo)?claro:escuro;
 }
 /* The other way round: a fill that moves until the ink on it can be read. White
    on a mid green cannot be made whiter, so it is the green that gives. */
@@ -12204,51 +12229,100 @@ const PALETAS=[
   {k:'quadro',  base:'dark', fundo:'#16211b',acento:'#cfd8c6',alerta:'#d98b5f'},
 ];
 function paletaDe(k){return PALETAS.find(p=>p.k===k)||PALETAS[0];}
+/* The same three colours can be three themes: which of them is the ground,
+   which is the selection and which is the alarm. Six palettes and three turns
+   of each is eighteen without a longer list to read — and a red ground, which
+   no palette here would otherwise have. */
+let ROTACOES={};
+try{ROTACOES=JSON.parse(localStorage.getItem('scaletune-lab-rot')||'{}')||{};}catch(e){ROTACOES={};}
+function rotacaoDe(k){return ((ROTACOES[k]|0)%3+3)%3;}
+function coresDe(p){
+  const c=[p.fundo,p.acento,p.alerta],r=rotacaoDe(p.k);
+  return [c[r%3],c[(r+1)%3],c[(r+2)%3]];
+}
+function rodaPaleta(k,d){
+  ROTACOES[k]=(rotacaoDe(k)+d+3)%3;
+  try{localStorage.setItem('scaletune-lab-rot',JSON.stringify(ROTACOES));}catch(e){}
+  if(currentTheme()===k)applyTheme(k); else buildThemeRow();
+}
 /* The whole set of tokens, from the three. */
 function tokensDaPaleta(p){
-  const escuro=p.base==='dark';
+  const cores=coresDe(p);
   const branco='#ffffff',preto='#000000';
-  const bg=p.fundo;
-  const bg2=mistura(bg,branco,escuro?0.15:0.45);
-  const bg3=mistura(bg,branco,escuro?0.22:0.24);
-  const tinta=escuro?branco:mistura(bg,preto,0.9);
-  const texto =ateContraste(escuro?'#eeeeee':tinta,bg2,10);
+  const bg=cores[0];
+  /* A surface sits a measured step off the ground rather than a fixed
+     percentage of it: on black, a step toward white is a dark grey; on a
+     mid-green ground the same percentage would be a wash, and on paper it would
+     be nothing at all. The step is a contrast ratio, so it reads as a step
+     whatever the ground is — and near-white grounds take theirs downward,
+     there being nowhere else to go. */
+  const degrau=(base,para,alvo)=>{
+    let c=base;
+    for(let i=0;i<40&&contraste(c,base)<alvo;i++)c=mistura(c,para,0.04);
+    return c;
+  };
+  /* The ink is whichever of black and white can be read on the ground, and the
+     surfaces move AWAY from it: a page in the middle of the range gets cards
+     that are darker than it when the ink is white, and lighter when it is
+     black. Only where there is nowhere left to go — a ground already at black
+     or at white — do they step toward the ink instead, which is the case both
+     of the app's first two themes were built on. */
+  const tinta=contraste(branco,bg)>=contraste(preto,bg)?branco:preto;
+  const escuro=tinta===branco;
+  const oposto=escuro?preto:branco;
+  /* Both ways are tried: a step up and a step down, each pushed as far as the
+     ink needs. A ground already at black cannot step down at all, so that
+     candidate is thrown away — it would be no step — and of what is left the
+     one the ink reads best on wins. */
+  const cand=[];
+  [oposto,tinta].forEach(para=>{
+    const c=fundoAteContraste(degrau(bg,para,1.45),tinta,8.5);
+    if(contraste(c,bg)>=1.25)cand.push(c);
+  });
+  const bg2=cand.length
+    ?cand.reduce((a,b)=>contraste(tinta,a)>=contraste(tinta,b)?a:b)
+    :degrau(bg,tinta,1.45);
+  const bg3=mistura(bg,bg2,0.55);
+  const texto =ateContraste(tinta,bg2,10);
   const texto2=ateContraste(mistura(texto,bg2,0.22),bg2,8);
   const texto3=ateContraste(mistura(texto,bg2,0.34),bg2,7);
-  const linha =mistura(bg,tinta,escuro?0.22:0.30);
-  const linha2=mistura(bg,tinta,escuro?0.32:0.42);
-  const linha3=mistura(bg,tinta,escuro?0.42:0.54);
-  const acento=p.acento,alerta=p.alerta;
-  const modoFg0=luz(mistura(bg,acento,escuro?0.34:0.62))>0.4?preto:branco;
-  const modoBg=fundoAteContraste(mistura(bg,acento,escuro?0.34:0.62),modoFg0,5.5);
-  const modoFg=modoFg0;
-  const stopFg0=luz(mistura(bg,alerta,escuro?0.48:0.72))>0.4?preto:branco;
-  const stopBg=fundoAteContraste(mistura(bg,alerta,escuro?0.48:0.72),stopFg0,5.5);
-  const stopFg=stopFg0;
-  const selFg0=luz(mistura(bg,tinta,escuro?0.26:0.62))>0.4?preto:branco;
-  const selBg=fundoAteContraste(mistura(bg,tinta,escuro?0.26:0.62),selFg0,5.5);
-  const selFg=selFg0;
+  const linha =mistura(bg2,tinta,0.20);
+  const linha2=mistura(bg2,tinta,0.30);
+  const linha3=mistura(bg2,tinta,0.40);
+  const acento=cores[1],alerta=cores[2];
+  /* A fill takes the ink that can be read on it, and then moves until it can. */
+  const enche=(cor,forca)=>{
+    const f0=mistura(bg,cor,forca);
+    const ink=contraste(branco,f0)>=contraste(preto,f0)?branco:preto;
+    return {bg:fundoAteContraste(f0,ink,5.5),fg:ink};
+  };
+  const modo=enche(acento,escuro?0.5:0.7);
+  const stop=enche(alerta,escuro?0.55:0.75);
+  const sel =enche(tinta,escuro?0.26:0.62);
   return {
     '--bg':bg,'--bg2':bg2,'--bg3':bg3,
     '--border':linha,'--border2':linha2,'--border3':linha3,
     '--text':texto,'--text2':texto2,'--text3':texto3,
-    '--blue':selFg,'--blue-bg':selBg,
-    '--mode':ateContraste(acento,bg2,4.5),'--mode-bg':modoBg,'--mode-fg':modoFg,
-    '--green':ateContraste(acento,bg2,4.5),'--green-bg':modoBg,
+    '--blue':sel.fg,'--blue-bg':sel.bg,
+    '--mode':ateContraste(acento,bg2,4.5),'--mode-bg':modo.bg,'--mode-fg':modo.fg,
+    '--green':ateContraste(acento,bg2,4.5),'--green-bg':modo.bg,
     '--green-hi':ateContraste(acento,bg2,7),
     '--brand':ateContraste(acento,bg,4.5),
-    '--stop':ateContraste(alerta,bg2,4.5),'--stop-bg':stopBg,'--stop-fg':stopFg,
+    '--stop':ateContraste(alerta,bg2,4.5),'--stop-bg':stop.bg,'--stop-fg':stop.fg,
     '--red':ateContraste(alerta,bg2,4.5),'--red-bg':mistura(bg,alerta,escuro?0.3:0.6),
     '--yellow':ateContraste(acento,bg2,4.5),'--yellow-bg':mistura(bg,acento,escuro?0.3:0.6),
-    '--wipe':ateContraste(alerta,bg2,5),'--wipe-bd':mistura(bg,alerta,0.5),
+    '--wipe':ateContraste(alerta,bg2,5),'--wipe-bd':mistura(bg2,alerta,0.5),
     '--fader':texto,'--qink':texto,'--qbd':linha3,
     '--hit1':texto3,'--hit2':ateContraste(acento,bg2,4.5),'--hit3':ateContraste(alerta,bg2,4.5),
     /* The tuner's two answers are the palette's own two, taken up in brightness
        until they carry across a room. */
-    '--afina-mal':mistura(alerta,escuro?branco:preto,escuro?0.3:0.12),
-    '--afina-bem':mistura(acento,escuro?branco:preto,escuro?0.34:0.14),
+    '--afina-mal':ateContraste(mistura(alerta,escuro?branco:preto,0.25),bg2,5),
+    '--afina-bem':ateContraste(mistura(acento,escuro?branco:preto,0.25),bg2,5),
     '--premido':escuro?'1.22':'0.92',
     '--toque':escuro?'rgba(255,255,255,.5)':'rgba(20,14,4,.3)',
+    /* Which way the relief is lit follows the ink, not the palette's name. */
+    '--lift-hi':escuro?'rgba(255,255,255,.075)':'rgba(255,255,255,.6)',
+    '--lift-lo':escuro?'rgba(0,0,0,.20)':'rgba(0,0,0,.09)',
   };
 }
 function currentTheme(){return document.documentElement.getAttribute('data-tema')||'preto';}
@@ -12257,11 +12331,11 @@ function applyTheme(k){
   const p=paletaDe(k);
   const raiz=document.documentElement;
   raiz.setAttribute('data-tema',p.k);
-  /* The base still decides what the browser paints behind the page and which
-     way round the relief is lit; the palette decides everything written on it. */
-  raiz.setAttribute('data-theme',p.base);
-  const t=tokensDaPaleta(p);
-  Object.keys(t).forEach(n=>raiz.style.setProperty(n,t[n]));
+  /* The base decides what the browser paints behind the page; which of the three
+     colours is the ground decides whether this is a dark theme or a light one. */
+  const t0=tokensDaPaleta(p);
+  raiz.setAttribute('data-theme',contraste('#ffffff',t0['--bg2'])>=contraste('#000000',t0['--bg2'])?'dark':'light');
+  Object.keys(t0).forEach(n=>raiz.style.setProperty(n,t0[n]));
   buildThemeRow();
 }
 function setTheme(k){
@@ -12327,11 +12401,20 @@ function buildThemeRow(){
     b.className='pick-btn tema-btn'+(agora===p.k?' active':'');
     b.type='button';b.dataset.theme=p.k;
     b.setAttribute('aria-label',p.k);
-    [p.fundo,p.acento,p.alerta].forEach(c=>{
+    const seta=(d,glifo,rotulo)=>{
+      const x=document.createElement('span');
+      x.className='tema-seta';x.textContent=glifo;
+      x.setAttribute('role','button');x.setAttribute('aria-label',rotulo);
+      x.onpointerdown=e=>{e.stopPropagation();e.preventDefault();rodaPaleta(p.k,d);};
+      return x;
+    };
+    b.appendChild(seta(-1,'\u2039',tr('set.turnBack','Turn the colours back')));
+    coresDe(p).forEach(c=>{
       const o=document.createElement('span');
       o.className='tema-cor';o.style.background=c;
       b.appendChild(o);
     });
+    b.appendChild(seta(1,'\u203A',tr('set.turn','Turn the colours')));
     b.onclick=()=>setTheme(p.k);
     row.appendChild(b);
   });

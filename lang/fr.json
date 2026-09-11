@@ -759,5 +759,19 @@
  "oct.down": "Octave en dessous",
  "set.gloss": "Brillant",
  "set.matte": "Mat",
- "set.finish": "Finition"
+ "set.finish": "Finition",
+ "int.1": "2de mineure",
+ "int.2": "2de majeure",
+ "int.3": "3ce mineure",
+ "int.4": "3ce majeure",
+ "int.5": "4te juste",
+ "int.6": "Triton",
+ "int.7": "5te juste",
+ "int.8": "6te mineure",
+ "int.9": "6te majeure",
+ "int.10": "7me mineure",
+ "int.11": "7me majeure",
+ "int.12": "Octave",
+ "set.turn": "Tourner les couleurs",
+ "set.turnBack": "Tourner les couleurs en arrière"
 }

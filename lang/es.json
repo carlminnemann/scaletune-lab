@@ -759,5 +759,19 @@
  "oct.down": "Octava abajo",
  "set.gloss": "Brillo",
  "set.matte": "Mate",
- "set.finish": "Acabado"
+ "set.finish": "Acabado",
+ "int.1": "2ª menor",
+ "int.2": "2ª mayor",
+ "int.3": "3ª menor",
+ "int.4": "3ª mayor",
+ "int.5": "4ª justa",
+ "int.6": "Trítono",
+ "int.7": "5ª justa",
+ "int.8": "6ª menor",
+ "int.9": "6ª mayor",
+ "int.10": "7ª menor",
+ "int.11": "7ª mayor",
+ "int.12": "Octava",
+ "set.turn": "Girar los colores",
+ "set.turnBack": "Girar los colores atrás"
 }

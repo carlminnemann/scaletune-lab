@@ -759,5 +759,19 @@
  "oct.down": "Ottava sotto",
  "set.gloss": "Lucido",
  "set.matte": "Opaco",
- "set.finish": "Finitura"
+ "set.finish": "Finitura",
+ "int.1": "2ª minore",
+ "int.2": "2ª maggiore",
+ "int.3": "3ª minore",
+ "int.4": "3ª maggiore",
+ "int.5": "4ª giusta",
+ "int.6": "Tritono",
+ "int.7": "5ª giusta",
+ "int.8": "6ª minore",
+ "int.9": "6ª maggiore",
+ "int.10": "7ª minore",
+ "int.11": "7ª maggiore",
+ "int.12": "Ottava",
+ "set.turn": "Ruota i colori",
+ "set.turnBack": "Ruota i colori indietro"
 }

@@ -759,5 +759,19 @@
  "oct.down": "Oktave tiefer",
  "set.gloss": "Glanz",
  "set.matte": "Matt",
- "set.finish": "Oberfläche"
+ "set.finish": "Oberfläche",
+ "int.1": "kleine 2.",
+ "int.2": "große 2.",
+ "int.3": "kleine 3.",
+ "int.4": "große 3.",
+ "int.5": "reine 4.",
+ "int.6": "Tritonus",
+ "int.7": "reine 5.",
+ "int.8": "kleine 6.",
+ "int.9": "große 6.",
+ "int.10": "kleine 7.",
+ "int.11": "große 7.",
+ "int.12": "Oktave",
+ "set.turn": "Farben drehen",
+ "set.turnBack": "Farben zurückdrehen"
 }
