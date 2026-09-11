@@ -3330,6 +3330,8 @@ let state={
           that makes it hard. Which of them is what most of the difference
           between an easy exercise and a hard one is made of. */
        scaleDir:'updown',scaleVel:0.34,
+       /* Simple or compound: whether the beat divides in two or in three. */
+       composto:false,
        /* Which of the three sets of settings was last asked for. It is a
           shortcut, not a mode: everything it sets stays where it can be
           changed by hand afterwards. */
@@ -5553,7 +5555,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11h';
+const APP_VERSION='lab-2026-09-11i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6338,9 +6340,22 @@ function intervalLabel(n){return tr('int.'+n,EAR_LABEL[n]);}
 /* One beat each, written as the fractions of it where a note begins. A rest is
    a beat with nothing in it — a figure like any other, and the one that makes a
    rhythm hard to hear. */
-const EAR_FIGS={'4':[0],'8':[0,0.5],'3':[0,1/3,2/3],'16':[0,0.25,0.5,0.75],
-                'd':[0,0.75],'r':[]};
-const EAR_FIG_ORDER=['4','8','3','16','d','r'];
+/* Where the notes of a beat fall, as fractions of it. Two tables, because a
+   beat divides in two or in three and that is the whole difference between a
+   simple metre and a compound one: in 6/8 the beat is dotted and its eighths
+   are three, not two with a bracket over them. */
+const EAR_FIGS_SIMPLES={'4':[0],'8':[0,0.5],'3':[0,1/3,2/3],'16':[0,0.25,0.5,0.75],
+  'd':[0,0.75],'r':[]};
+const EAR_FIGS_COMPOSTO={'4':[0],'8':[0,1/3,2/3],'16':[0,1/6,2/6,0.5,4/6,5/6],
+  'd':[0,2/3],'r':[]};
+const EAR_ORDEM_SIMPLES=['4','8','3','16','d','r'];
+const EAR_ORDEM_COMPOSTO=['4','8','16','d','r'];
+function earComposto(){return !!state.ear.composto;}
+function earFigsTab(){return earComposto()?EAR_FIGS_COMPOSTO:EAR_FIGS_SIMPLES;}
+function earFigOrdem(){return earComposto()?EAR_ORDEM_COMPOSTO:EAR_ORDEM_SIMPLES;}
+/* Kept under their old names for everything that reads them by name. */
+const EAR_FIGS=EAR_FIGS_SIMPLES;
+const EAR_FIG_ORDER=EAR_ORDEM_SIMPLES;
 
 let earQ=null,earAsked=0,earRight=0;
 /* The words come from a language pack, and a pack is a file: it is written as
@@ -6364,7 +6379,7 @@ function earLigadas(tabela,escolhidas){
 }
 function earScalesOn(){return earLigadas(SCALES,state.ear.scales);}
 function earChordsOn(){return earLigadas(CHORDS,state.ear.chords);}
-function earFigsOn(){return EAR_FIG_ORDER.filter(f=>state.ear.figs[f]);}
+function earFigsOn(){return earFigOrdem().filter(f=>state.ear.figs[f]);}
 
 /* Where a question starts from. Fixed is the note the app is set to — the
    interval against a key you know; roaming picks its own, which is harder and
@@ -6461,9 +6476,6 @@ function earToca(){
       loadSampler(state.timbre,earToca);
       return;
     }
-    /* The rhythm exercise plays a drum, so the kit is fetched the first time one
-       is asked for rather than waited for on the beat. */
-    if(earQ.kind==='rhythm')loadDrums();
     stopAllAudio();
     const t=audioCtx.currentTime+0.1;
     if(earQ.kind==='intervals'){
@@ -6500,8 +6512,12 @@ function earToca(){
    the other begins. The hand falls on a snare; the count keeps its click.
    Where the kit has not arrived, it falls back to the click rather than to
    silence. */
+/* The machine's own snare rather than the recorded one: it is made here out of
+   noise and two short tones, so it needs nothing fetched, it is the same on
+   every device, and it does not sound like a drummer in a room behind a
+   metronome. */
 function earBateRitmo(t,forte){
-  if(drumHit(forte?'snare':'snare-soft',t,forte?0.95:0.7))return;
+  if(MACHINE&&MACHINE.s){MACHINE.s(t,forte?1:0.62);return;}
   scheduleClick(t,forte?'low':'high');
 }
 function earTocaRitmo(beats,t0){
@@ -6509,7 +6525,7 @@ function earTocaRitmo(beats,t0){
   for(let i=0;i<4;i++)scheduleClick(t0+i*spb,i===0?'low':'sub');
   const inicio=t0+4*spb;
   beats.forEach(function(f,b){
-    (EAR_FIGS[f]||[]).forEach(function(frac,i){
+    (earFigsTab()[f]||[]).forEach(function(frac,i){
       earBateRitmo(inicio+(b+frac)*spb,(b===0&&i===0));
     });
   });
@@ -6566,7 +6582,7 @@ function earRitmoSVG(beats){
   const W=60,H=42,base=30,haste=13,g=[],w=W*4;
   g.push('<line x1="4" y1="'+base+'" x2="'+(w-4)+'" y2="'+base+'" class="ear-linha"/>');
   beats.forEach(function(f,b){
-    const frac=EAR_FIGS[f]||[];
+    const frac=earFigsTab()[f]||[];
     const x0=b*W+10;
     if(f==='r'){
       const x=x0+14,y=base-13;
@@ -6689,6 +6705,8 @@ function earPaginas(){
               return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};}));
   if(k==='rhythm')return [
     earNivelCaixa(),
+    {k:'metro',nome:function(){return tr('ear.metre','Metre');},
+     diz:function(){return earComposto()?tr('ear.compound','Compound'):tr('ear.simple','Simple');}},
     {k:'figs',nome:function(){return tr('ear.figures','Figures');},
      diz:function(){return earFigsOn().map(earFigLabel).join(' · ');}},
     {k:'bpm', nome:function(){return tr('tempo','Tempo');},
@@ -6736,9 +6754,10 @@ function earAplicaNivel(n){
         Object.keys(CHORDS[g]).forEach(function(x){todos.push(x);});});
       ligaSo(E.chords,todos);}
   } else if(k==='rhythm'){
+    const comp=earComposto();
     if(n==='facil'){ligaSo(E.figs,['4','8','r']);E.bpm=72;}
-    else if(n==='medio'){ligaSo(E.figs,['4','8','3','16','r']);E.bpm=84;}
-    else{ligaSo(E.figs,['4','8','3','16','d','r']);E.bpm=120;}
+    else if(n==='medio'){ligaSo(E.figs,comp?['4','8','16','r']:['4','8','3','16','r']);E.bpm=84;}
+    else{ligaSo(E.figs,comp?['4','8','16','d','r']:['4','8','3','16','d','r']);E.bpm=120;}
   }
   earMexeu();
 }
@@ -6780,6 +6799,37 @@ function earFechaPagina(){earPag=null;buildEarOpts();renderEar();pintaCasa();}
    the round again: answering with a button that is no longer offered would be
    answering a question that can no longer be asked. */
 function earMexeu(){earQ=null;buildEarOpts();renderEar();setPlayUI(false);}
+/* The tempo, chosen rather than picked from a short list: the number in full
+   with a step either side of it, and the four it is most often set to under
+   them. The same shape as the tuner's reference pitch, which is the same kind
+   of question. */
+const EAR_BPM_MIN=40,EAR_BPM_MAX=200;
+function earPoeBpm(n){
+  state.ear.bpm=Math.max(EAR_BPM_MIN,Math.min(EAR_BPM_MAX,Math.round(n)));
+  earMexeu();
+}
+function earTempoLivre(host){
+  const linha=document.createElement('div');linha.className='tuner-a4-now';
+  const menos=document.createElement('button');menos.type='button';menos.textContent='\u2212';
+  menos.setAttribute('aria-label',tr('ear.slower','Slower'));
+  menos.onclick=function(){earPoeBpm((state.ear.bpm||84)-2);};
+  const val=document.createElement('div');val.className='val';
+  val.innerHTML=(state.ear.bpm||84)+'<small>BPM</small>';
+  const mais=document.createElement('button');mais.type='button';mais.textContent='+';
+  mais.setAttribute('aria-label',tr('ear.faster','Faster'));
+  mais.onclick=function(){earPoeBpm((state.ear.bpm||84)+2);};
+  linha.appendChild(menos);linha.appendChild(val);linha.appendChild(mais);
+  host.appendChild(linha);
+  const grid=document.createElement('div');grid.className='btn-wrap';
+  EAR_BPMS.forEach(function(n){
+    const b=document.createElement('button');
+    b.className='pick-btn'+((state.ear.bpm||84)===n?' active':'');
+    b.type='button';b.textContent=String(n);
+    b.onclick=function(){earPoeBpm(n);};
+    grid.appendChild(b);
+  });
+  host.appendChild(grid);
+}
 function earCaixasToggle(host,itens,ligado,mexe,todos){
   if(todos){
     /* All of them or none of them, above the list rather than inside it: they
@@ -6869,14 +6919,22 @@ function buildEarPage(){
     earCaixasSeg(host,[[false,tr('ear.fixed','One note')],[true,tr('ear.roam','Anywhere')]],
       !!state.ear.roam,function(v){state.ear.roam=v;earMexeu();});
   } else if(earPag==='figs'){
-    earCaixasToggle(host,EAR_FIG_ORDER.map(function(f){return {f:f,label:earFigLabel(f)};}),
+    earCaixasToggle(host,earFigOrdem().map(function(f){return {f:f,label:earFigLabel(f)};}),
       function(it){return state.ear.figs[it.f];},
       function(it){state.ear.figs[it.f]=!state.ear.figs[it.f];earMexeu();},
-      {liga:function(){ligaSo(state.ear.figs,EAR_FIG_ORDER);earMexeu();},
+      {liga:function(){ligaSo(state.ear.figs,earFigOrdem());earMexeu();},
        desliga:function(){ligaSo(state.ear.figs,[]);earMexeu();}});
+  } else if(earPag==='metro'){
+    earCaixasSeg(host,[[false,tr('ear.simple','Simple')],[true,tr('ear.compound','Compound')]],
+      earComposto(),function(v){
+        state.ear.composto=v;
+        /* The figures are not the same two sets, so what was on is put back to
+           what this metre can be asked in. */
+        ligaSo(state.ear.figs,earComposto()?['4','8','16','r']:['4','8','3','16','r']);
+        earMexeu();
+      });
   } else if(earPag==='bpm'){
-    earCaixasSeg(host,EAR_BPMS.map(function(n){return [n,String(n)];}),state.ear.bpm||84,
-      function(v){state.ear.bpm=v;earMexeu();});
+    earTempoLivre(host);
   } else if(earPag.indexOf('fam:')===0){
     const g=earPag.slice(4);
     if(k==='chords'){
@@ -6932,6 +6990,10 @@ function earVoltaMenu(){
   renderEar();pintaCasa();setPlayUI(false);
 }
 function buildEarOpts(){
+  /* A rhythm has no timbre: it is a drum, and the panel that chooses a voice
+     for the notes has nothing to say about it. */
+  const som=document.getElementById('sec-sound');
+  if(som&&state.mode==='ear')som.style.display=(earKind()==='rhythm')?'none':'';
   const row=document.getElementById('ear-optbox-row');
   const page=document.getElementById('ear-page');
   if(row)row.style.display=earPag?'none':'';

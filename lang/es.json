@@ -787,5 +787,10 @@
  "ear.slow": "Lenta",
  "ear.middling": "Media",
  "ear.fast": "Rápida",
- "ear.upAndDown": "Sube y baja"
+ "ear.upAndDown": "Sube y baja",
+ "ear.metre": "Compás",
+ "ear.simple": "Simple",
+ "ear.compound": "Compuesto",
+ "ear.slower": "Más lento",
+ "ear.faster": "Más rápido"
 }

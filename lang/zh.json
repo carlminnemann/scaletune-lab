@@ -772,5 +772,10 @@
  "ear.slow": "慢",
  "ear.middling": "中",
  "ear.fast": "快",
- "ear.upAndDown": "上行再下行"
+ "ear.upAndDown": "上行再下行",
+ "ear.metre": "拍子",
+ "ear.simple": "单拍子",
+ "ear.compound": "复拍子",
+ "ear.slower": "更慢",
+ "ear.faster": "更快"
 }

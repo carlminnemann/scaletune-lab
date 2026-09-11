@@ -803,5 +803,10 @@
  "ear.slow": "Медленно",
  "ear.middling": "Средне",
  "ear.fast": "Быстро",
- "ear.upAndDown": "Вверх и вниз"
+ "ear.upAndDown": "Вверх и вниз",
+ "ear.metre": "Метр",
+ "ear.simple": "Простой",
+ "ear.compound": "Сложный",
+ "ear.slower": "Медленнее",
+ "ear.faster": "Быстрее"
 }
