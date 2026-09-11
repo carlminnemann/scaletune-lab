@@ -654,9 +654,23 @@ body.earpag #ear-page .ear-acoes{display:flex!important;justify-content:center;
 body.earpag #ear-page .ear-acoes>button{min-height:58px!important;height:58px!important;
   width:auto!important;flex:0 1 auto;padding:0 22px;font-size:15px;border-radius:13px;
   align-self:center}
-body.earpag #ear-page .ear-todos>button{min-height:30px;height:30px;font-size:12px;
-  border-radius:8px;padding:0 16px;width:auto;background:var(--bg2);
+/* And they are two words, not two slabs: the rule that gives the answers below
+   them the height of the screen matches these as well, so this one says so
+   louder — the pair keeps its own size and stands on one line, centred. */
+body.earpag #ear-page .ear-todos{align-items:center}
+body.earpag #ear-page .ear-todos>button{min-height:44px!important;height:44px!important;
+  font-size:14px;border-radius:11px;padding:0 20px;width:auto!important;
+  flex:0 1 auto;align-self:center!important;background:var(--bg2);
   border:1px solid var(--border2);color:var(--text2);cursor:pointer}
+/* A tempo is one number, and on a page that asks only for it the number stands
+   in the middle of the screen with a step either side. The short list of usual
+   tempos was a column of slabs under it and is gone: what is wanted is the
+   number. */
+body.earpag #ear-page .tuner-a4-now.so-numero{margin:auto 0;flex:0 0 auto}
+body.earpag #ear-page .tuner-a4-now.so-numero .val{font-size:clamp(52px,13vh,104px);
+  flex:0 1 auto;min-width:0}
+body.earpag #ear-page .tuner-a4-now.so-numero button{flex:0 0 auto;
+  width:clamp(58px,11vh,80px);height:clamp(58px,11vh,80px);font-size:26px}
 /* And the other way round: the question and its answers are the game. On the
    screen where the exercise is set up they were a panel at the foot showing
    what would be asked, which reads as an instruction nobody asked for. */
@@ -5646,7 +5660,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11o';
+const APP_VERSION='lab-2026-09-11p';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6997,18 +7011,8 @@ function earTempoLivre(host){
   mais.setAttribute('aria-label',tr('ear.faster','Faster'));
   mais.onclick=function(){earPoeBpm((state.ear.bpm||84)+2);};
   linha.appendChild(menos);linha.appendChild(val);linha.appendChild(mais);
+  linha.classList.add('so-numero');
   host.appendChild(linha);
-  /* The suggestions are numbers: three across, the way the reference pitch's
-     are, rather than a column of wide buttons under a wide number. */
-  const grid=document.createElement('div');grid.className='btn-wrap notas';
-  EAR_BPMS.forEach(function(n){
-    const b=document.createElement('button');
-    b.className='pick-btn'+((state.ear.bpm||84)===n?' active':'');
-    b.type='button';b.textContent=String(n);
-    b.onclick=function(){earPoeBpm(n);};
-    grid.appendChild(b);
-  });
-  host.appendChild(grid);
 }
 function earCaixasToggle(host,itens,ligado,mexe,todos){
   if(todos){
