@@ -756,5 +756,8 @@
  "beats.only": "Solo i movimenti",
  "aria.home": "Inizio",
  "oct.up": "Ottava sopra",
- "oct.down": "Ottava sotto"
+ "oct.down": "Ottava sotto",
+ "set.gloss": "Lucido",
+ "set.matte": "Opaco",
+ "set.finish": "Finitura"
 }

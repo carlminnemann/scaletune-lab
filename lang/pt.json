@@ -756,5 +756,8 @@
  "beats.only": "Só os tempos",
  "aria.home": "Início",
  "oct.up": "Oitava acima",
- "oct.down": "Oitava abaixo"
+ "oct.down": "Oitava abaixo",
+ "set.gloss": "Brilho",
+ "set.matte": "Mate",
+ "set.finish": "Acabamento"
 }

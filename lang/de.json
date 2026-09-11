@@ -756,5 +756,8 @@
  "beats.only": "Nur die Schläge",
  "aria.home": "Start",
  "oct.up": "Oktave höher",
- "oct.down": "Oktave tiefer"
+ "oct.down": "Oktave tiefer",
+ "set.gloss": "Glanz",
+ "set.matte": "Matt",
+ "set.finish": "Oberfläche"
 }

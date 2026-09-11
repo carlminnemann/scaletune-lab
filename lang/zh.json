@@ -741,5 +741,8 @@
  "beats.only": "只看拍子",
  "aria.home": "首页",
  "oct.up": "高八度",
- "oct.down": "低八度"
+ "oct.down": "低八度",
+ "set.gloss": "亮面",
+ "set.matte": "雾面",
+ "set.finish": "质感"
 }

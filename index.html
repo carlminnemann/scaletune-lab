@@ -190,7 +190,7 @@ html,body{height:var(--app-h,100dvh)}
 /* min-height:0, or a flex child refuses to shrink below its content and the
    scrolling never starts */
 .scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
-  margin:0 -4px;padding:0 4px 4px}
+  -webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px 4px}
 
 /* One column, at every size and in both orientations. Two columns were tried on
    a wide screen and read as lopsided; scaling the column up to fill read as
@@ -438,8 +438,12 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 /* What just happened, in one line, where the eye already is. It keeps its
    height when it has nothing to say, so answering does not move the buttons
    under the finger that is about to press the next one. */
+/* Block, not flex: a flex container makes a separate item of every text node
+   and trims the space at each end of them, so "It was m3 — you said m2" came
+   out as "It wasm3— you said m2". The height it holds when it has nothing to
+   say is the min-height, which needs no flex at all. */
 .ear-say{min-height:2.6em;font-size:15px;line-height:1.3;color:var(--text2);
-  margin-bottom:var(--s3);display:flex;align-items:center}
+  margin-bottom:var(--s3)}
 .ear-say .ear-mark{font-weight:600}
 .ear-say.certo .ear-mark{color:var(--mode)}
 .ear-say.errado .ear-mark{color:var(--stop)}
@@ -492,6 +496,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
      there that the number above it and Tap already do. */
   body.compoly.sub #bpm-slider{display:none}
   body.compoly.sub .tempo-now{margin-bottom:var(--s2)}
+
 }
 /* Wordless, and it answers the one thing the value line was really for: this is
    the family the scale being played lives in. */
@@ -596,6 +601,24 @@ body.earx #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:
 body.earx #ear-optbox-row{flex:1 1 auto;min-height:min-content;
   grid-auto-rows:1fr;align-content:stretch}
 body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
+/* ---------- the game ----------
+   In play there is nothing on the screen but the question and the answers, and
+   the answers are the screen: a quiz, not a form. */
+body.jogo #sec-sound,body.jogo #ear-opts,body.jogo .status-bar{display:none!important}
+body.jogo .ear-panel{margin-top:0;flex:1 1 auto;display:flex;flex-direction:column;
+  min-height:0;padding:var(--s3)}
+body.jogo .ear-say{min-height:2.4em;font-size:clamp(16px,2.6vh,22px);
+  text-align:center;margin-bottom:var(--s3)}
+body.jogo .ear-head{margin-bottom:var(--s2)}
+body.jogo .ear-score{font-size:14px}
+body.jogo #ear-answers{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;
+  align-content:stretch;gap:var(--s2)}
+body.jogo #ear-answers .pick-btn{font-size:clamp(17px,3vh,26px);border-radius:14px;
+  min-height:clamp(52px,10vh,110px)}
+/* A written bar is a picture, so it keeps its own height and grows with the
+   room rather than stretching the drawing out of shape. */
+body.jogo #ear-answers.ritmo .pick-btn{min-height:0;padding:8px}
+body.jogo .ear-ritmo{max-height:none;height:clamp(34px,7vh,64px)}
 body.earpag #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 body.earpag #ear-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 body.earpag #ear-page .btn-wrap{flex:1 1 auto;min-height:min-content;grid-template-columns:1fr 1fr!important;
@@ -825,7 +848,12 @@ details.sec.pinned>summary::after{display:none}
 /* Room above for the rule that marks the sounding bar: this box scrolls, so
    anything drawn past its edge is cut off, and at the top the rule was being
    cut off entirely. */
-.pat-scroll{overflow-x:auto;padding:7px 2px 2px;margin:0 -2px}
+/* Sideways only. On iOS a box that scrolls in both directions takes the whole
+   gesture: a drag up inside the grid was being spent on a scroller with nothing
+   above it to reach, and the page behind it never moved — which is why the
+   pattern's own options could not be got to on a phone. */
+.pat-scroll{overflow-x:auto;overflow-y:hidden;touch-action:pan-x;
+  -webkit-overflow-scrolling:touch;padding:7px 2px 2px;margin:0 -2px}
 .pat-grid{display:flex;flex-direction:column;gap:var(--s3);min-width:260px}
 .pat-half{display:flex;flex-direction:column;gap:3px}
 /* ---------- the grid ----------
@@ -893,9 +921,13 @@ details.sec.pinned>summary::after{display:none}
 #pattern-block{padding-left:var(--s1);padding-right:var(--s1)}
 #pat-info{white-space:pre-line}
 #mixer-block{padding-left:var(--s2);padding-right:var(--s2)}
-.mix-row{display:grid;grid-template-columns:74px 1fr 42px;gap:var(--s2);align-items:center;
+.mix-row{display:grid;grid-template-columns:80px 1fr 46px;gap:var(--s3);align-items:center;
+  min-height:46px;
   margin-bottom:6px}
-.mix-name{font-size:11px;color:var(--text2)}
+.mix-name{font-size:12px;color:var(--text2)}
+/* Room between one fader and the next, so the finger that misses one does not
+   land on another. */
+#mix-rows .mix-row+.mix-row{margin-top:var(--s2)}
 .mix-row.unused{opacity:.45}
 .mix-row input[type=range]{width:100%;min-width:0}
 .mix-row .val{font-size:11px;color:var(--text3);text-align:right;font-variant-numeric:tabular-nums}
@@ -1360,28 +1392,28 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 .note-name{font-size:clamp(17px,2.8vh,26px);font-weight:500;flex:1 1 auto;
   display:flex;align-items:center;justify-content:center;min-width:0}
 .free-grid .note-btn{padding:8px 4px}
-.oct-controls{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;flex:0 0 34px}
-.oct-btn{width:32px;height:26px;border:1px solid var(--border2);border-radius:6px;
-  background:var(--bg3);color:var(--text2);font-size:11px;line-height:1;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+.oct-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:stretch;
+  gap:4px;flex:0 0 36px;align-self:stretch}
+.oct-btn{width:100%;flex:1 1 0;min-height:22px;border:1px solid var(--border2);
+  border-radius:7px;background:var(--bg3);color:var(--text2);font-size:11px;line-height:1;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
   touch-action:manipulation;padding:0}
-.oct-val{font-size:13px;font-weight:600;color:var(--text2);min-width:0;text-align:center;
-  font-variant-numeric:tabular-nums}
+/* The octave belongs to the note, so it is written with it. */
+.note-oct{font-size:.52em;font-weight:600;opacity:.75;margin-left:3px}
+
 /* On a narrow phone the stepper is what decides how many notes fit across: at
    its full size only two columns fit, which turns twelve notes into six rows in
    the very mode you scroll least. Trimmed, three fit — and because the column
    count is measured rather than written down, nothing else has to be told. */
 @media (max-width:400px){
-  .oct-val{font-size:12px}
-  .oct-btn{width:26px;height:22px;font-size:10px}
-  .oct-controls{gap:2px;flex:0 0 28px}
-  .note-btn.active::before{flex:0 0 28px}
+  .oct-btn{font-size:10px;min-height:20px}
+  .oct-controls{gap:3px;flex:0 0 30px}
+  .note-btn.active::before{flex:0 0 30px}
 }
 .note-btn.active .oct-btn{border-color:var(--blue);color:var(--blue)}
-.note-btn.active .oct-val{color:var(--blue)}
+
 .note-btn.start .oct-btn{border-color:var(--green);color:var(--green-hi)}
-.note-btn.start .oct-val{color:var(--green-hi)}
+
 .start-badge{position:absolute;top:2px;right:4px;font-size:10px;color:var(--green-hi);font-weight:700}
 
 .control-row{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
@@ -1398,22 +1430,34 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
    The filled part is painted rather than inherited: styling the track at all
    takes accent-color's fill away in WebKit, and Firefox paints its own through
    ::-moz-range-progress. Both read --f, which is the value in per cent. */
+/* A fader is aimed at with a thumb on a phone. The track is thicker, the cap is
+   bigger, and the row it lives in is taller — eight of them in the mixer, a
+   finger's width apart, was the thing that could not be hit. */
 input[type=range]{-webkit-appearance:none;appearance:none;background:none;
-  cursor:pointer;height:22px;touch-action:pan-y;min-width:0;--f:0}
-input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;
+  cursor:pointer;height:34px;touch-action:pan-y;min-width:0;--f:0}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;
   background:linear-gradient(to right,var(--fader) 0 calc(var(--f)*1%),var(--border2) calc(var(--f)*1%) 100%)}
-input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:var(--border2)}
-input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:var(--fader)}
+input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:var(--border2)}
+input[type=range]::-moz-range-progress{height:5px;border-radius:3px;background:var(--fader)}
 /* Wider than tall and squared off at the corners: a cap, the shape of the
    buttons, rather than a bead on a string. */
 /* Ringed in the same ink as the filled part of the track, not in the panel's
    own border: a hairline of --border3 on a dark panel is a cap you have to go
    looking for, and this is the thing your finger is aiming at. */
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
-  width:22px;height:15px;margin-top:-6px;border-radius:5px;
-  background:var(--bg2);border:1.5px solid var(--fader);box-sizing:border-box}
-input[type=range]::-moz-range-thumb{width:22px;height:15px;border-radius:5px;
-  background:var(--bg2);border:1.5px solid var(--fader);box-sizing:border-box}
+  width:28px;height:22px;margin-top:-9px;border-radius:7px;
+  background:var(--bg2);border:2px solid var(--fader);box-sizing:border-box;
+  box-shadow:var(--lift-sh)}
+input[type=range]::-moz-range-thumb{width:28px;height:22px;border-radius:7px;
+  background:var(--bg2);border:2px solid var(--fader);box-sizing:border-box}
+/* A phone this short cannot hold eight faders a finger apart and everything
+   else on one screen: they keep the bigger cap and give back a little of the
+   air around it. Written after the rules it trims, or it would lose to them. */
+@media(max-height:700px){
+  input[type=range]{height:28px}
+  .mix-row{min-height:38px}
+  #mix-rows .mix-row+.mix-row{margin-top:2px}
+}
 input[type=range]:focus-visible{outline:2px solid var(--text3);outline-offset:3px}
 input[type=range]:active::-webkit-slider-thumb{background:var(--fader);border-color:var(--fader)}
 input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:var(--fader)}
@@ -1552,6 +1596,21 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 .beat-dot.poly{border-radius:6px}
 .beat-dot.poly.active-beat{background:var(--brand);border-color:var(--brand)}
 .beat-dot.poly.acc-low.active-beat{background:var(--mode);border-color:var(--mode)}
+/* The pattern is the one page where the buttons are not the point: the grid is.
+   Three levels side by side and two bars beside them, at the size they were —
+   big buttons here would be taking room from the thing being written. */
+body.sub #pattern-block .head:has(>.seg){flex-direction:row;align-items:center;
+  gap:var(--s2);margin-bottom:var(--s2)}
+body.sub #pattern-block .head:has(>.seg)>.section-label{text-align:left}
+body.sub #pattern-block .seg{display:flex!important;width:auto;flex:0 1 auto;
+  gap:var(--s1)}
+body.sub #pattern-block .seg>button{min-height:32px;height:32px;font-size:12px;
+  border-radius:8px;padding:0 10px;width:auto}
+/* And the line that starts a pattern from a style is a footnote here, not the
+   question the page is asking. */
+body.sub #pattern-block .step-row{justify-content:flex-start;margin:var(--s2) 0}
+body.sub #pattern-block .step-row .sig-select{font-size:14px!important;
+  min-width:0!important;padding:3px 8px!important}
 /* ---------- the pattern, on its own page ----------
    Written when it was a fold at the bottom of a long panel, it opens with the
    list of saved patterns, the loop length and two rows of settings, and the grid
@@ -1647,6 +1706,21 @@ body.sub .sec-body .info-line{text-align:center}
 #settings-overlay .set-pagina .btn-wrap:has(>button:nth-child(2):last-child){
   grid-template-columns:1fr}
 #settings-overlay .set-pagina .info-line{text-align:center;margin-top:var(--s3)}
+/* A palette is chosen by its colours: three circles in a row inside the button,
+   the ground first and then the two it is written in. */
+.tema-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:0 12px}
+.tema-cor{width:clamp(18px,4vh,28px);height:clamp(18px,4vh,28px);border-radius:50%;
+  border:1px solid rgba(128,128,128,.45);flex:0 0 auto}
+#settings-overlay .set-sub{font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--text3);text-align:center;margin-top:var(--s5)}
+/* Matte: the same colours with the light taken out of them. One switch, and it
+   holds whatever palette is on. */
+:root[data-brilho="mate"]{--lift-hi:rgba(0,0,0,0);--lift-lo:rgba(0,0,0,0);
+  --lift-sh:none;--lift-in:none;--toque:rgba(128,128,128,.22)}
+:root[data-brilho="mate"] .tuner-needle,
+:root[data-brilho="mate"] .beats-row.pulse .beat-dot.active-beat,
+:root[data-brilho="mate"] .beats-row.pulse .beat-dot.acc-low.active-beat{box-shadow:none}
+:root[data-brilho="mate"] input[type=range]::-webkit-slider-thumb{box-shadow:none}
 /* ---------- the tempo page ----------
    The number is what the page is for, so it is the size of one: centred, large,
    and still the field you tap to type into. Under it, immediately, the circles
@@ -1662,8 +1736,12 @@ body.sub .sec-body .info-line{text-align:center}
 .tap-line{display:flex;justify-content:center;margin-bottom:var(--s3)}
 .tap-line .tap-btn{min-width:min(70%,240px);height:44px;font-size:14px}
 /* The bar length sits with the circles it counts, not up beside the number. */
-body.sub #sig-block>.head{justify-content:center;gap:var(--s2);margin-bottom:var(--s3)}
-body.sub #sig-block>.head .sig-unit{margin:0}
+/* The bar length, discreet at the foot and to the right — the one thing on this
+   page that is set once. */
+.sig-foot{display:flex;align-items:center;justify-content:flex-end;gap:var(--s2);
+  margin-top:var(--s3);opacity:.8}
+.sig-foot .sig-select{font-size:15px!important;padding:2px 8px!important;min-width:0!important}
+.sig-foot .sig-unit{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
 /* The two pills, centred under whichever rows are on the screen. */
 #beats-only-line{display:flex;justify-content:center;gap:var(--s2);
   margin:var(--s2) 0 var(--s3)}
@@ -1831,10 +1909,15 @@ body.bolinhas .pulse-bpm{display:none}
 <script>
 // Runs before first paint so the page never flashes the wrong theme.
 (function(){
-  var t=null;
-  try{t=localStorage.getItem('scaletune-lab-theme');}catch(e){}
-  if(!t)t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
-  document.documentElement.setAttribute('data-theme',t);
+  var t=null,br=null;
+  try{t=localStorage.getItem('scaletune-lab-theme');br=localStorage.getItem('scaletune-lab-brilho');}catch(e){}
+  /* The two names the app used before it had palettes still mean something. */
+  if(t==='dark')t='preto';
+  if(t==='light')t='papel';
+  if(!t)t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'papel':'preto';
+  document.documentElement.setAttribute('data-tema',t);
+  document.documentElement.setAttribute('data-theme',(t==='papel'||t==='ceu')?'light':'dark');
+  document.documentElement.setAttribute('data-brilho',br||'brilho');
   /* And the language, before anything is painted. The pack arrives after the
      first paint, so the page said lang="en" while it was about to be read in
      Portuguese — which is a browser's cue to offer a translation. */
@@ -2240,11 +2323,12 @@ body.bolinhas .pulse-bpm{display:none}
          panel appears when this is on, and is not there at all when it is off.
          The label carries the key now — it was on the head, and translating a
          head replaces everything inside it, this button included. -->
-    <div class="head" style="margin-bottom:var(--s2)"><span class="section-label" data-t="bar">Bar</span>
-      <span class="sig-fields">
-        <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
-      </span>
-      <span class="sig-unit" data-t="beats">beats</span></div>
+    <!-- Tap tempo sits under the number it sets, where the bar length used to
+         be: the fader and the tap were side by side, which is two ways of doing
+         the same thing competing for the same corner of the screen. -->
+    <div class="tap-line">
+      <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
+    </div>
     <div class="beats-row" id="beats-row"></div>
     <div class="beats-hint" data-t="tap-a-beat-accent-it">tap a beat: accent it, then silence it</div>
     <!-- where every other Clear in the app sits: under its panel, on the left -->
@@ -2262,10 +2346,11 @@ body.bolinhas .pulse-bpm{display:none}
 
   <!-- What sets the tempo, under what reads it. -->
   <div class="mgroup" id="click-block">
-    <div class="tap-line">
-      <button class="tap-btn" id="tap-btn" data-t="tap.tempo" onclick="tapTempo()">Tap tempo</button>
+    <!-- A fader with nothing written beside it is a fader for something. -->
+    <div class="vol-line">
+      <span class="section-label" data-t="tempo">Tempo</span>
+      <input type="range" id="bpm-slider" min="10" max="300" step="1" value="60" oninput="updateBPM(this.value)">
     </div>
-    <input type="range" id="bpm-slider" min="10" max="300" step="1" value="60" style="width:100%" oninput="updateBPM(this.value)">
     <!-- the click's own level belongs with the click and needs no group of its
          own: a label, a slider and a number on one line -->
     <div class="vol-line">
@@ -2278,6 +2363,14 @@ body.bolinhas .pulse-bpm{display:none}
     <div class="head" style="margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="click.sound">Sound</span>
       <span class="btn-wrap seg" id="clicksound-row" data-cols="fixed"></span></div>
+    <!-- How long the bar is, which is set once and then left: small, at the
+         foot, on the right — out of the way of the number and the circles. -->
+    <div class="sig-foot">
+      <span class="sig-fields">
+        <select class="sig-select active" id="sig-4" data-ta="aria.beats" aria-label="Beats per bar"></select>
+      </span>
+      <span class="sig-unit" data-t="beats">beats</span>
+    </div>
     <button class="clear-btn panel-clear" data-panel="tempo" onclick="limpaPainel('tempo')">✕ Clear</button>
   </div>
 
@@ -2715,6 +2808,9 @@ body.bolinhas .pulse-bpm{display:none}
 
   <div class="help-sec set-pagina" id="set-theme" style="display:none">
     <div class="btn-wrap" id="theme-row"></div>
+    <!-- One choice across every palette: lit, or flat. -->
+    <div class="set-sub" data-t="set.finish">Finish</div>
+    <div class="btn-wrap" id="brilho-row"></div>
   </div>
  </div>
 </div>
@@ -5351,7 +5447,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11a';
+const APP_VERSION='lab-2026-09-11b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5416,7 +5512,8 @@ function pintaCasa(){
     !emCasa&&!pastaAberta&&state.mode==='ear'&&!state.ear.kind);
   const noOuvido=!emCasa&&!pastaAberta&&state.mode==='ear'&&!!state.ear.kind;
   document.body.classList.toggle('earx',noOuvido);
-  document.body.classList.toggle('earpag',noOuvido&&!!earPag);
+  document.body.classList.toggle('earpag',noOuvido&&!!earPag&&!jogoOuvido);
+  document.body.classList.toggle('jogo',noOuvido&&jogoOuvido);
   /* The tuner is one reading and two things it is measured against, so it has
      the same two states as everything else: the reading, and a page. */
   document.body.classList.toggle('bolinhas',soBolinhas&&!emCasa&&!pastaAberta);
@@ -5480,8 +5577,9 @@ function limpaEstadoDoModo(){
   if(typeof earPag!=='undefined')earPag=null;
   if(typeof tunerPag!=='undefined')tunerPag=null;
   if(typeof soBolinhas!=='undefined')soBolinhas=false;
+  if(typeof jogoOuvido!=='undefined')jogoOuvido=false;
   document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag',
-    'afina','afinapag','bolinhas');
+    'afina','afinapag','bolinhas','jogo');
   document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
 }
 /* Home from anywhere, in one tap on the name — where Back walks one level at a
@@ -5499,6 +5597,8 @@ function casaJa(){
 }
 function voltaHome(){
   if(pastaAberta){fechaPasta();return;}
+  // out of the game, back to the exercise as it was set up
+  if(state.mode==='ear'&&jogoOuvido){saiDoJogo();return;}
   // inside a page of ear options, back is back to the exercise
   if(state.mode==='ear'&&earPag){earFechaPagina();return;}
   // and inside one of the tuner's, back is back to the reading
@@ -5889,7 +5989,10 @@ const DOBRAS=[
 function escondeTituloRepetido(nome){
   document.querySelectorAll('.titulo-repetido').forEach(e=>e.classList.remove('titulo-repetido'));
   if(!nome)return;
+  /* A label that names a control rather than the group — the word beside the
+     tempo's own fader — keeps it even when the page is called the same thing. */
   const alvo=[...document.querySelectorAll('.pagina-aberta .section-label,.pagina-aberta .group-label')]
+    .filter(e=>!e.closest('.vol-line'))
     .find(e=>soTexto(e.textContent).toLowerCase()===String(nome).toLowerCase());
   if(alvo)alvo.classList.add('titulo-repetido');
 }
@@ -6551,7 +6654,7 @@ function earEscolhe(k){
   buildEarOpts();renderEar();pintaCasa();setPlayUI(false);
 }
 function earVoltaMenu(){
-  state.ear.kind=null;earPag=null;
+  state.ear.kind=null;earPag=null;jogoOuvido=false;
   earZera();stopAllAudio();
   renderEar();pintaCasa();setPlayUI(false);
 }
@@ -6560,9 +6663,11 @@ function buildEarOpts(){
   const page=document.getElementById('ear-page');
   if(row)row.style.display=earPag?'none':'';
   if(page)page.style.display=earPag?'':'none';
+  const opts=document.getElementById('ear-opts');
+  if(opts)opts.style.display=jogoOuvido?'none':'';
   const painel=document.getElementById('ear-panel');
   // a page takes the screen, the exercise included
-  if(painel)painel.style.display=earPag?'none':'';
+  if(painel)painel.style.display=(earPag&&!jogoOuvido)?'none':'';
   if(!earPag)buildEarOptRow();
   buildEarPage();
 }
@@ -6574,8 +6679,30 @@ function earFigLabel(f){
 const EAR_BPMS=[60,72,84,100,120];
 /* One button does the whole loop: it starts, it plays again while you are
    thinking, and it asks the next one once you have answered. */
+/* ---------- the game ----------
+   Setting an exercise up and playing it are two different things, and they were
+   on one screen: what is in play, what it is played from, the timbre, the
+   question and the answers, all at once. The first press of Start goes into the
+   game — the options leave, the answers take the screen — and the arrow at the
+   top comes back out of it. Nothing is lost by going in and out: it is the same
+   exercise, with the score kept. */
+let jogoOuvido=false;
+function entraNoJogo(){
+  if(jogoOuvido)return;
+  jogoOuvido=true;
+  earPag=null;
+  buildEarOpts();pintaCasa();
+}
+function saiDoJogo(){
+  if(!jogoOuvido)return false;
+  jogoOuvido=false;
+  stopAllAudio();
+  buildEarOpts();renderEar();pintaCasa();setPlayUI(false);
+  return true;
+}
 function earBotao(){
   if(!earKind())return;
+  entraNoJogo();
   if(!earQ||earQ.answered)earNova();
   else earToca();
 }
@@ -6729,7 +6856,7 @@ function renderDroneNote(n){
   // the octave stepper only exists once the note is armed, so nudging it can
   // never add a note that was not chosen
   div.innerHTML=
-    '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
+    nomeComOitava(spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]),sel,state.droneSelected[n])+
     octControlsHTML(sel,state.droneSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
     b.onpointerdown=e=>{
@@ -9087,7 +9214,7 @@ function renderFreeNote(n){
   // it would silently add a note the user never picked.
   div.innerHTML=
     (isRoot?'<span class="start-badge">'+tr('free.rootBadge','root')+'</span>':'')+
-    '<div class="note-name">'+spelledText(DEFAULT_SPELL[NOTES.indexOf(n)])+'</div>'+
+    nomeComOitava(spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]),sel,state.freeSelected[n])+
     octControlsHTML(sel,state.freeSelected[n]);
   div.querySelectorAll('.oct-btn').forEach(b=>{
     b.onpointerdown=e=>{
@@ -10534,6 +10661,11 @@ function setGroove(k){
   } else if(hadWritten&&state.sigBeforeGroove){
     const back=state.sigBeforeGroove;state.sigBeforeGroove=null;setSig(back);
   }
+  /* The brushes are a held bed of noise, not a hit: nothing in the beat stops
+     it, so changing the style under a running metronome left the sweep humming
+     under the new one until the transport was stopped and started again. It is
+     dropped here, and the first swirl of a style that uses it starts it. */
+  stopBrushBed();
   // fetch them now rather than on the first beat, and only once there is a
   // context to decode them into
   if(grooveOn()&&state.kit!=='machine')Promise.resolve(initAudio()).then(loadDrums).catch(()=>{});
@@ -11164,14 +11296,22 @@ function fitWordmark(){
    note goes. A note that is not chosen has no octave to set, so it has nothing
    there — and the empty column on the other side is what keeps its name in the
    middle of the button rather than in the middle of what is left of it. */
+/* The octave: the number joined to the note it belongs to, and the two arrows
+   as the two halves of a column beside them. They were three small things in a
+   stack, the arrows a few pixels from the number they moved — now each arrow is
+   half the height of the button and the number is out of their way, with the
+   name. */
 function octControlsHTML(on,val){
   return on
     ? '<div class="oct-controls">'+
         '<button class="oct-btn" data-oct="1" aria-label="'+tr('oct.up','Octave up')+'">\u25B2</button>'+
-        '<span class="oct-val">'+val+'</span>'+
         '<button class="oct-btn" data-oct="-1" aria-label="'+tr('oct.down','Octave down')+'">\u25BC</button>'+
       '</div>'
     : '';
+}
+function nomeComOitava(texto,on,val){
+  return '<div class="note-name">'+texto+
+    (on?'<span class="note-oct">'+val+'</span>':'')+'</div>';
 }
 /* How wide a note needs to be once it is ON. A note that is off is 40px; the
    moment it is armed the stepper appears and it becomes 92, and four of those
@@ -11191,7 +11331,7 @@ function measureNoteCell(force){
   if(!g||!g.children.length)return noteCellNeed;
   const p=g.children[0].cloneNode(false);
   p.className='note-btn active';
-  p.innerHTML='<div class="note-name">C#</div>'+octControlsHTML(true,3);
+  p.innerHTML=nomeComOitava('C#',true,3)+octControlsHTML(true,3);
   p.style.cssText='position:absolute;left:-9999px;top:0;width:max-content';
   g.appendChild(p);
   noteCellNeed=Math.ceil(p.getBoundingClientRect().width);
@@ -12011,15 +12151,124 @@ function initSections(){
 }
 
 /* ---------- theme ---------- */
-function currentTheme(){return document.documentElement.getAttribute('data-theme')||'dark';}
-function applyTheme(t){
-  document.documentElement.setAttribute('data-theme',t);
-  document.querySelectorAll('#theme-row .pick-btn').forEach(b=>
-    b.classList.toggle('active',b.dataset.theme===t));
+/* ---------- palettes ----------
+   A theme is three colours: the ground it is all written on, the colour of what
+   is chosen and sounding, and the colour of what stops or is wrong. Everything
+   else — the three greys of the surfaces, the three of the ink, the lines, the
+   fills behind a selection — is worked out from those three here rather than
+   written out six times, so a new palette is three values and not a stylesheet.
+
+   The ladders are the ones the app already had: the surfaces rise from the
+   ground, the ink is held to 7:1 against the palest surface it sits on, and the
+   selection wears the accent with ink chosen for the fill it lands on. */
+function _rgb(h){h=String(h).replace('#','');
+  if(h.length===3)h=h.split('').map(c=>c+c).join('');
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function _hx(r,g,b){const f=n=>Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,'0');
+  return '#'+f(r)+f(g)+f(b);}
+function mistura(a,b,t){const A=_rgb(a),B=_rgb(b);
+  return _hx(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t);}
+function luz(c){const v=_rgb(c).map(x=>{x/=255;return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);});
+  return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
+function contraste(a,b){const x=luz(a),y=luz(b);
+  return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);}
+/* Walk a colour toward white or black until it can be read on the ground it is
+   going to sit on. Measured rather than chosen, because a palette's ground can
+   be any lightness and a fixed grey clears on one and not on the next. */
+function ateContraste(cor,fundo,alvo){
+  const para=luz(fundo)>0.4?'#000000':'#ffffff';
+  let c=cor;
+  for(let i=0;i<30&&contraste(c,fundo)<alvo;i++)c=mistura(c,para,0.07);
+  return c;
 }
-function setTheme(t){
-  applyTheme(t);
-  try{localStorage.setItem('scaletune-lab-theme',t);}catch(e){}
+/* The other way round: a fill that moves until the ink on it can be read. White
+   on a mid green cannot be made whiter, so it is the green that gives. */
+function fundoAteContraste(fundo,tinta,alvo){
+  const para=luz(tinta)>0.5?'#000000':'#ffffff';
+  let f=fundo;
+  for(let i=0;i<30&&contraste(tinta,f)<alvo;i++)f=mistura(f,para,0.06);
+  return f;
+}
+const PALETAS=[
+  {k:'preto',   base:'dark', fundo:'#060606',acento:'#8d9c93',alerta:'#c98d86'},
+  {k:'papel',   base:'light',fundo:'#d6cba8',acento:'#3f5147',alerta:'#9c4a3c'},
+  {k:'ambar',   base:'dark', fundo:'#0a0a0a',acento:'#e2b53a',alerta:'#d2442f'},
+  {k:'ceu',     base:'light',fundo:'#eef1f6',acento:'#1e50a2',alerta:'#e0a400'},
+  {k:'noite',   base:'dark', fundo:'#0b1220',acento:'#4aa3c7',alerta:'#e0665a'},
+  {k:'quadro',  base:'dark', fundo:'#16211b',acento:'#cfd8c6',alerta:'#d98b5f'},
+];
+function paletaDe(k){return PALETAS.find(p=>p.k===k)||PALETAS[0];}
+/* The whole set of tokens, from the three. */
+function tokensDaPaleta(p){
+  const escuro=p.base==='dark';
+  const branco='#ffffff',preto='#000000';
+  const bg=p.fundo;
+  const bg2=mistura(bg,branco,escuro?0.15:0.45);
+  const bg3=mistura(bg,branco,escuro?0.22:0.24);
+  const tinta=escuro?branco:mistura(bg,preto,0.9);
+  const texto =ateContraste(escuro?'#eeeeee':tinta,bg2,10);
+  const texto2=ateContraste(mistura(texto,bg2,0.22),bg2,8);
+  const texto3=ateContraste(mistura(texto,bg2,0.34),bg2,7);
+  const linha =mistura(bg,tinta,escuro?0.22:0.30);
+  const linha2=mistura(bg,tinta,escuro?0.32:0.42);
+  const linha3=mistura(bg,tinta,escuro?0.42:0.54);
+  const acento=p.acento,alerta=p.alerta;
+  const modoFg0=luz(mistura(bg,acento,escuro?0.34:0.62))>0.4?preto:branco;
+  const modoBg=fundoAteContraste(mistura(bg,acento,escuro?0.34:0.62),modoFg0,5.5);
+  const modoFg=modoFg0;
+  const stopFg0=luz(mistura(bg,alerta,escuro?0.48:0.72))>0.4?preto:branco;
+  const stopBg=fundoAteContraste(mistura(bg,alerta,escuro?0.48:0.72),stopFg0,5.5);
+  const stopFg=stopFg0;
+  const selFg0=luz(mistura(bg,tinta,escuro?0.26:0.62))>0.4?preto:branco;
+  const selBg=fundoAteContraste(mistura(bg,tinta,escuro?0.26:0.62),selFg0,5.5);
+  const selFg=selFg0;
+  return {
+    '--bg':bg,'--bg2':bg2,'--bg3':bg3,
+    '--border':linha,'--border2':linha2,'--border3':linha3,
+    '--text':texto,'--text2':texto2,'--text3':texto3,
+    '--blue':selFg,'--blue-bg':selBg,
+    '--mode':ateContraste(acento,bg2,4.5),'--mode-bg':modoBg,'--mode-fg':modoFg,
+    '--green':ateContraste(acento,bg2,4.5),'--green-bg':modoBg,
+    '--green-hi':ateContraste(acento,bg2,7),
+    '--brand':ateContraste(acento,bg,4.5),
+    '--stop':ateContraste(alerta,bg2,4.5),'--stop-bg':stopBg,'--stop-fg':stopFg,
+    '--red':ateContraste(alerta,bg2,4.5),'--red-bg':mistura(bg,alerta,escuro?0.3:0.6),
+    '--yellow':ateContraste(acento,bg2,4.5),'--yellow-bg':mistura(bg,acento,escuro?0.3:0.6),
+    '--wipe':ateContraste(alerta,bg2,5),'--wipe-bd':mistura(bg,alerta,0.5),
+    '--fader':texto,'--qink':texto,'--qbd':linha3,
+    '--hit1':texto3,'--hit2':ateContraste(acento,bg2,4.5),'--hit3':ateContraste(alerta,bg2,4.5),
+    /* The tuner's two answers are the palette's own two, taken up in brightness
+       until they carry across a room. */
+    '--afina-mal':mistura(alerta,escuro?branco:preto,escuro?0.3:0.12),
+    '--afina-bem':mistura(acento,escuro?branco:preto,escuro?0.34:0.14),
+    '--premido':escuro?'1.22':'0.92',
+    '--toque':escuro?'rgba(255,255,255,.5)':'rgba(20,14,4,.3)',
+  };
+}
+function currentTheme(){return document.documentElement.getAttribute('data-tema')||'preto';}
+function currentBrilho(){return document.documentElement.getAttribute('data-brilho')||'brilho';}
+function applyTheme(k){
+  const p=paletaDe(k);
+  const raiz=document.documentElement;
+  raiz.setAttribute('data-tema',p.k);
+  /* The base still decides what the browser paints behind the page and which
+     way round the relief is lit; the palette decides everything written on it. */
+  raiz.setAttribute('data-theme',p.base);
+  const t=tokensDaPaleta(p);
+  Object.keys(t).forEach(n=>raiz.style.setProperty(n,t[n]));
+  buildThemeRow();
+}
+function setTheme(k){
+  applyTheme(k);
+  try{localStorage.setItem('scaletune-lab-theme',k);}catch(e){}
+}
+function applyBrilho(b){
+  document.documentElement.setAttribute('data-brilho',b);
+  buildThemeRow();
+}
+function setBrilho(b){
+  applyBrilho(b);
+  try{localStorage.setItem('scaletune-lab-brilho',b);}catch(e){}
 }
 
 /* ---------- settings ---------- */
@@ -12056,19 +12305,41 @@ function buildSettings(){
       nr.appendChild(b);
     });
   }
-  const themeRow=document.getElementById('theme-row');
-  if(themeRow){
-    themeRow.innerHTML='';
-    [['dark',tr('set.theme.dark','Dark')],['light',tr('set.theme.light','Light')]].forEach(([k,label])=>{
-      const b=document.createElement('button');
-      b.className='pick-btn'+(currentTheme()===k?' active':'');
-      b.dataset.theme=k;b.textContent=label;
-      b.onclick=()=>setTheme(k);
-      themeRow.appendChild(b);
-    });
-  }
+  buildThemeRow();
   paintNoteHint();
   buildSetBoxes();
+}
+/* A theme is chosen by looking at it, not by reading its name: three circles in
+   a row, the colours the palette is made of. */
+function buildThemeRow(){
+  const row=document.getElementById('theme-row');
+  if(!row)return;
+  row.innerHTML='';
+  const agora=currentTheme();
+  PALETAS.forEach(p=>{
+    const b=document.createElement('button');
+    b.className='pick-btn tema-btn'+(agora===p.k?' active':'');
+    b.type='button';b.dataset.theme=p.k;
+    b.setAttribute('aria-label',p.k);
+    [p.fundo,p.acento,p.alerta].forEach(c=>{
+      const o=document.createElement('span');
+      o.className='tema-cor';o.style.background=c;
+      b.appendChild(o);
+    });
+    b.onclick=()=>setTheme(p.k);
+    row.appendChild(b);
+  });
+  const linha=document.getElementById('brilho-row');
+  if(linha){
+    linha.innerHTML='';
+    [['brilho',tr('set.gloss','Gloss')],['mate',tr('set.matte','Matte')]].forEach(([k,label])=>{
+      const b=document.createElement('button');
+      b.className='pick-btn'+(currentBrilho()===k?' active':'');
+      b.type='button';b.textContent=label;
+      b.onclick=()=>setBrilho(k);
+      linha.appendChild(b);
+    });
+  }
 }
 function paintNoteHint(){
   const h=document.getElementById('notenames-hint');

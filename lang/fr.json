@@ -756,5 +756,8 @@
  "beats.only": "Seulement les temps",
  "aria.home": "Accueil",
  "oct.up": "Octave au-dessus",
- "oct.down": "Octave en dessous"
+ "oct.down": "Octave en dessous",
+ "set.gloss": "Brillant",
+ "set.matte": "Mat",
+ "set.finish": "Finition"
 }
