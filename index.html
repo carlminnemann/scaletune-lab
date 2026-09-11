@@ -484,6 +484,15 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
    be worth choosing between: a menu of two boxes is not a menu, so Drone, Metro
    and the tuner keep what they had. */
 #panel-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-bottom:var(--s3)}
+/* Two boxes or three stand one above the other; four and more take two columns.
+   A row of three is a column with one beside a hole, and the hole is what the
+   eye reads first. One rule, every row of boxes in the app. */
+#panel-row:has(>*:nth-child(2)):not(:has(>*:nth-child(4))),
+#pag-row:has(>*:nth-child(2)):not(:has(>*:nth-child(4))),
+#fam-row:has(>*:nth-child(2)):not(:has(>*:nth-child(4))),
+#ear-optbox-row:has(>*:nth-child(2)):not(:has(>*:nth-child(4))),
+#set-boxes:has(>*:nth-child(2)):not(:has(>*:nth-child(4))),
+.tuner-boxes:has(>*:nth-child(2)):not(:has(>*:nth-child(4))){grid-template-columns:1fr}
 /* The box, wherever it is used: a mode's panels, a panel's families, anything
    that opens a page of its own. */
 .panel-box{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -584,10 +593,12 @@ body.painel .sec-body>.legend{flex:0 0 auto;justify-content:center;text-align:ce
    It goes to the middle at the size of the others. Full width is a statement,
    and it stays reserved for the things that deserve one — Ear training on the
    home screen. */
-#panel-row>.panel-box:last-child:nth-child(odd),
-#pag-row>.panel-box:last-child:nth-child(odd),
-#fam-row>.panel-box:last-child:nth-child(odd),
-#ear-optbox-row>.panel-box:last-child:nth-child(odd),
+/* Only where the row is in two columns: in a column of three the last box is
+   the third of three, not an odd one out. */
+#panel-row:has(>*:nth-child(4))>.panel-box:last-child:nth-child(odd),
+#pag-row:has(>*:nth-child(4))>.panel-box:last-child:nth-child(odd),
+#fam-row:has(>*:nth-child(4))>.panel-box:last-child:nth-child(odd),
+#ear-optbox-row:has(>*:nth-child(4))>.panel-box:last-child:nth-child(odd),
 body.sub:not(.notas) .btn-wrap:not(.seg)>button:last-child:nth-child(odd),
 body.painel .sec-body>div[id$="-block"]>.btn-wrap:not(.seg)>button:last-child:nth-child(odd),
 body.painel .sec-body>div[id$="-line"]>.btn-wrap:not(.seg)>button:last-child:nth-child(odd),
@@ -1769,7 +1780,7 @@ body.sub .sec-body .info-line{text-align:center}
    The same boxes the rest of the app is made of, and the same pages behind
    them: two across with the odd one centred, and answers big enough to hit. */
 #set-boxes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s4)}
-#set-boxes .panel-box:last-child:nth-child(odd){grid-column:1 / -1;
+#set-boxes:has(>*:nth-child(4)) .panel-box:last-child:nth-child(odd){grid-column:1 / -1;
   justify-self:center;width:calc(50% - var(--s2)/2)}
 #settings-overlay.numa-pagina #set-boxes{display:none}
 #settings-overlay .set-pagina .btn-wrap{display:grid;grid-template-columns:1fr 1fr;
@@ -5555,7 +5566,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11i';
+const APP_VERSION='lab-2026-09-11j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6411,6 +6422,7 @@ function earNova(){
     if(how==='mix')how=earSorteia(['up','down','harmonic']);
     else if(how==='updown')how=earSorteia(['up','down']);
     earQ={kind:k,semis:semis,base:earBase(semis),how:how};
+    earQ.opcoes=earSorteiaOpcoes(earTodasAsOpcoes(),semis);
   } else if(k==='scales'){
     const pool=earScalesOn();
     if(!pool.length)return earFaltam();
@@ -6418,6 +6430,7 @@ function earNova(){
     let dir=state.ear.scaleDir||'updown';
     if(dir==='mix')dir=earSorteia(['up','down','updown']);
     earQ={kind:k,group:par[0],name:par[1],base:earBase(12),dir:dir};
+    earQ.opcoes=earSorteiaOpcoes(earTodasAsOpcoes(),par[1]);
   } else if(k==='chords'){
     const pool=earChordsOn();
     if(!pool.length)return earFaltam();
@@ -6425,6 +6438,7 @@ function earNova(){
     let how=state.ear.chordHow;
     if(how==='mix')how=earSorteia(['up','block']);
     earQ={kind:k,group:par[0],name:par[1],how:how,base:earBase(12)};
+    earQ.opcoes=earSorteiaOpcoes(earTodasAsOpcoes(),par[1]);
   } else if(k==='rhythm'){
     const pool=earFigsOn();
     if(pool.length<2)return earFaltam();
@@ -6438,26 +6452,45 @@ function earNova(){
 }
 /* A bar of four beats, never four rests — that is not a rhythm, it is a bar
    nobody can answer. */
+/* Two bars, not one. A single bar of four is a cell to copy; two are a phrase,
+   and telling two phrases apart is the exercise. The compound metre has two
+   dotted beats to a bar, so two bars of it are four cells where two bars of a
+   simple metre are eight. */
+function earCelulasPorCompasso(){return earComposto()?2:4;}
+function earCelulas(){return earCelulasPorCompasso()*2;}
 function earRitmo(pool){
-  for(let tenta=0;tenta<40;tenta++){
-    const b=[0,1,2,3].map(function(){return earSorteia(pool);});
+  const n=earCelulas();
+  for(let tenta=0;tenta<60;tenta++){
+    const b=[];for(let i=0;i<n;i++)b.push(earSorteia(pool));
     if(b.some(function(f){return f!=='r';}))return b;
   }
-  return ['4','4','4','4'];
+  const b=[];for(let i=0;i<n;i++)b.push('4');
+  return b;
 }
 /* The wrong answers are the right one with a single beat changed. That is what
    makes them worth offering: an option that differs everywhere is not a
    question about hearing, it is a question about reading. */
+/* How far the wrong answers stand from the right one is the difficulty of the
+   question, more than the figures in it: one cell changed out of eight is a
+   question about hearing, three changed is a question about noticing. */
+function earQuantasMudam(){
+  const n=state.ear.nivel||'medio';
+  return n==='facil'?3:n==='dificil'?1:2;
+}
 function earOpcoesRitmo(certo,pool){
   const chave=function(a){return a.join('|');};
   const vistos={};vistos[chave(certo)]=1;
   const out=[certo.slice()];
-  for(let tenta=0;tenta<200&&out.length<4;tenta++){
+  const n=certo.length,mudam=Math.min(earQuantasMudam(),n);
+  for(let tenta=0;tenta<400&&out.length<4;tenta++){
     const alt=certo.slice();
-    const i=Math.floor(Math.random()*4);
-    const outros=pool.filter(function(f){return f!==certo[i];});
-    if(!outros.length)break;
-    alt[i]=earSorteia(outros);
+    for(let m=0;m<mudam;m++){
+      const i=Math.floor(Math.random()*n);
+      const outros=pool.filter(function(f){return f!==alt[i];});
+      if(!outros.length)continue;
+      alt[i]=earSorteia(outros);
+    }
+    if(chave(alt)===chave(certo))continue;
     if(!alt.some(function(f){return f!=='r';}))continue;
     if(vistos[chave(alt)])continue;
     vistos[chave(alt)]=1;out.push(alt);
@@ -6520,13 +6553,26 @@ function earBateRitmo(t,forte){
   if(MACHINE&&MACHINE.s){MACHINE.s(t,forte?1:0.62);return;}
   scheduleClick(t,forte?'low':'high');
 }
+/* The count-in says what the metre is. In a simple metre that is one bar of
+   four; in a compound one it is two bars of three eighths with the first of
+   each accented, which is how 6/8 is counted in and the only way the ear knows
+   the beat is dotted before the first figure arrives. */
 function earTocaRitmo(beats,t0){
   const spb=60/(state.ear.bpm||84);
-  for(let i=0;i<4;i++)scheduleClick(t0+i*spb,i===0?'low':'sub');
-  const inicio=t0+4*spb;
+  let inicio;
+  if(earComposto()){
+    const oitava=spb/3;
+    for(let i=0;i<6;i++)scheduleClick(t0+i*oitava,(i%3===0)?'low':'sub');
+    inicio=t0+6*oitava;
+  } else {
+    for(let i=0;i<4;i++)scheduleClick(t0+i*spb,i===0?'low':'sub');
+    inicio=t0+4*spb;
+  }
+  const porCompasso=earCelulasPorCompasso();
   beats.forEach(function(f,b){
     (earFigsTab()[f]||[]).forEach(function(frac,i){
-      earBateRitmo(inicio+(b+frac)*spb,(b===0&&i===0));
+      /* The first of every bar is the strong one, not only the first of the two. */
+      earBateRitmo(inicio+(b+frac)*spb,(b%porCompasso===0&&i===0));
     });
   });
 }
@@ -6548,14 +6594,42 @@ function earResponde(v){
   renderEar();
   setPlayUI(false);          // the button becomes the next question
 }
-/* What the answer buttons offer. Exactly what is in play, so an answer you are
-   given is an answer that could have been asked. */
+/* How many answers are offered. Everything in play was fine while what was in
+   play was four or five things; switch every scale on — which is now one tap —
+   and it was thirty buttons, which is not a question, it is a list. The right
+   answer and a few others drawn from what is in play, and how few is the level:
+   four to choose from is easy, eight is not. */
+function earQuantasOpcoes(){
+  const n=state.ear.nivel||'medio';
+  return n==='facil'?4:n==='dificil'?8:6;
+}
+/* Drawn once when the question is asked and kept on it, so playing it again
+   does not shuffle the answers under the finger. */
+function earSorteiaOpcoes(todas,certa){
+  const max=earQuantasOpcoes();
+  if(todas.length<=max)return todas.slice();
+  const outras=todas.filter(function(o){return String(o.v)!==String(certa);});
+  for(let i=outras.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));
+    const t=outras[i];outras[i]=outras[j];outras[j]=t;}
+  const escolhidas=outras.slice(0,max-1);
+  const certaObj=todas.find(function(o){return String(o.v)===String(certa);});
+  if(certaObj)escolhidas.push(certaObj);
+  for(let i=escolhidas.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));
+    const t=escolhidas[i];escolhidas[i]=escolhidas[j];escolhidas[j]=t;}
+  return escolhidas;
+}
+/* What the answer buttons offer: the ones this question was given. */
 function earOpcoes(){
+  const k=earKind();
+  if(k==='rhythm'&&earQ)return earQ.opcoes.map(function(b){return {v:b.join('|'),svg:earRitmoSVG(b)};});
+  if(earQ&&earQ.opcoes)return earQ.opcoes;
+  return earTodasAsOpcoes();
+}
+function earTodasAsOpcoes(){
   const k=earKind();
   if(k==='intervals')return earOn().map(function(n){return {v:n,label:intervalLabel(n)};});
   if(k==='scales')return earScalesOn().map(function(x){return {v:x[1],label:scaleLabel(x[1])};});
   if(k==='chords')return earChordsOn().map(function(x){return {v:x[1],label:chordLabel(x[1])};});
-  if(k==='rhythm'&&earQ)return earQ.opcoes.map(function(b){return {v:b.join('|'),svg:earRitmoSVG(b)};});
   return [];
 }
 function earNomeDaCerta(){
@@ -6579,17 +6653,24 @@ function earNomeDoDito(){
    draws itself from the same list of fractions the sound is made from — so what
    is written and what is heard cannot drift apart. */
 function earRitmoSVG(beats){
-  const W=60,H=42,base=30,haste=13,g=[],w=W*4;
+  /* The cells are narrower now that there are eight of them, and a bar line
+     stands between the two bars — without it two bars read as one long one. */
+  const W=44,H=42,base=30,haste=13,g=[],w=W*beats.length;
   g.push('<line x1="4" y1="'+base+'" x2="'+(w-4)+'" y2="'+base+'" class="ear-linha"/>');
+  const porCompasso=earCelulasPorCompasso();
+  for(let b=porCompasso;b<beats.length;b+=porCompasso){
+    const x=(b*W+4).toFixed(1);
+    g.push('<line x1="'+x+'" y1="'+(base-16)+'" x2="'+x+'" y2="'+(base+6)+'" class="ear-linha"/>');
+  }
   beats.forEach(function(f,b){
     const frac=earFigsTab()[f]||[];
-    const x0=b*W+10;
+    const x0=b*W+8;
     if(f==='r'){
-      const x=x0+14,y=base-13;
+      const x=x0+9,y=base-13;
       g.push('<path d="M'+x+' '+y+' l6 7 -6 7 7 6" class="ear-tinta" fill="none" stroke-width="1.8"/>');
       return;
     }
-    const xs=frac.map(function(fr){return x0+fr*(W-14);});
+    const xs=frac.map(function(fr){return x0+fr*(W-16);});
     xs.forEach(function(x){
       g.push('<ellipse cx="'+x.toFixed(1)+'" cy="'+base+'" rx="3.4" ry="2.6" class="ear-cheia"/>');
       g.push('<line x1="'+(x+3.2).toFixed(1)+'" y1="'+base+'" x2="'+(x+3.2).toFixed(1)+'" y2="'+(base-haste)+'" class="ear-tinta"/>');
