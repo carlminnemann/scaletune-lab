@@ -613,8 +613,14 @@ body.jogo .ear-head{margin-bottom:var(--s2)}
 body.jogo .ear-score{font-size:14px}
 body.jogo #ear-answers{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;
   align-content:stretch;gap:var(--s2)}
+/* Two across, whatever the builder asked for: four narrow columns turned
+   "Aumentado" into three syllables down a strip. And an odd one at the end goes
+   to the middle, as it does everywhere else. */
+body.jogo #ear-answers:not(.ritmo){grid-template-columns:1fr 1fr!important}
+body.jogo #ear-answers:not(.ritmo)>.pick-btn:last-child:nth-child(odd){
+  grid-column:1 / -1;justify-self:center;width:calc(50% - var(--s2)/2)}
 body.jogo #ear-answers .pick-btn{font-size:clamp(17px,3vh,26px);border-radius:14px;
-  min-height:clamp(52px,10vh,110px)}
+  min-height:clamp(52px,10vh,110px);padding:6px 10px}
 /* A written bar is a picture, so it keeps its own height and grows with the
    room rather than stretching the drawing out of shape. */
 body.jogo #ear-answers.ritmo .pick-btn{min-height:0;padding:8px}
@@ -5447,7 +5453,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11b';
+const APP_VERSION='lab-2026-09-11c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
