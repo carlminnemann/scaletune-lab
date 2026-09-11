@@ -1976,6 +1976,14 @@ body.sub #poly-block #poly-row-b{margin-bottom:var(--s3)}
    what leaves its box, so the room is taken here as padding and the circles are
    worked out inside it. */
 #pulse-wrap{display:none}
+/* The pages above a page are block flow so that a tall one can scroll, and a
+   block hands no height down — which left the circles pinned to the top of an
+   empty screen. This one screen holds a single row and cannot overflow, so it
+   takes the flex chain back and the circles sit in the middle again. */
+body.bolinhas .scroll{display:flex!important;flex-direction:column;
+  flex:1 1 auto;min-height:0;height:auto}
+body.bolinhas details.sec::details-content{display:flex!important;flex-direction:column;
+  flex:1 1 auto;min-height:0;height:auto}
 body.bolinhas .scroll>*:not(#metro-section){display:none!important}
 body.bolinhas #metro-section{display:flex!important;flex-direction:column;
   flex:1 1 auto;min-height:min-content;border:0;background:none;margin:0}
@@ -5638,7 +5646,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11n';
+const APP_VERSION='lab-2026-09-11o';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
