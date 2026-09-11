@@ -629,6 +629,17 @@ body.earx .ear-panel{margin-top:auto;flex:0 0 auto}
    In play there is nothing on the screen but the question and the answers, and
    the answers are the screen: a quiz, not a form. */
 body.jogo #sec-sound,body.jogo #ear-opts{display:none!important}
+/* All of them or none of them: a pair of small words above a list, not two more
+   of the things in it. */
+/* Two answers on a page of the ear's own take it the way they do everywhere
+   else: one above the other. */
+body.earpag #ear-page .btn-wrap:not(.ear-todos):has(>button:nth-child(2):last-child){
+  grid-template-columns:1fr!important}
+#ear-page .ear-todos{display:flex!important;justify-content:center;gap:var(--s2);
+  margin-bottom:var(--s3);flex:0 0 auto}
+body.earpag #ear-page .ear-todos>button{min-height:30px;height:30px;font-size:12px;
+  border-radius:8px;padding:0 16px;width:auto;background:var(--bg2);
+  border:1px solid var(--border2);color:var(--text2);cursor:pointer}
 /* And the other way round: the question and its answers are the game. On the
    screen where the exercise is set up they were a panel at the foot showing
    what would be asked, which reads as an instruction nobody asked for. */
@@ -3309,7 +3320,15 @@ let state={
        scales:{'Ionian':true,'Dorian':true,'Mixolydian':true,'Aeolian':true},
        chords:{'Major':true,'Minor':true,'Augmented':true,'Diminished':true},
        chordHow:'up',
-       figs:{'4':true,'8':true,'3':true,'16':true,'r':true},bpm:84},
+       figs:{'4':true,'8':true,'3':true,'16':true,'r':true},bpm:84,
+       /* A scale can be asked going up, coming down, or both — and at the speed
+          that makes it hard. Which of them is what most of the difference
+          between an easy exercise and a hard one is made of. */
+       scaleDir:'updown',scaleVel:0.34,
+       /* Which of the three sets of settings was last asked for. It is a
+          shortcut, not a mode: everything it sets stays where it can be
+          changed by hand afterwards. */
+       nivel:'medio'},
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   /* Whether a free set of notes takes its first note again an octave up before
      it turns back. C E G with it is C E G C; without it the line is the three
@@ -5529,7 +5548,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11f';
+const APP_VERSION='lab-2026-09-11g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6365,7 +6384,9 @@ function earNova(){
     const pool=earScalesOn();
     if(!pool.length)return earFaltam();
     const par=earSorteia(pool);
-    earQ={kind:k,group:par[0],name:par[1],base:earBase(12)};
+    let dir=state.ear.scaleDir||'updown';
+    if(dir==='mix')dir=earSorteia(['up','down','updown']);
+    earQ={kind:k,group:par[0],name:par[1],base:earBase(12),dir:dir};
   } else if(k==='chords'){
     const pool=earChordsOn();
     if(!pool.length)return earFaltam();
@@ -6436,12 +6457,16 @@ function earToca(){
       else{scheduleTone(baixo,t,dur);scheduleTone(alto,t+gap,dur);}
     } else if(earQ.kind==='scales'){
       /* Up and then back down: a mode is as much its way home as its way out,
-         and the sixth and the seventh are what tell two of them apart. */
+         and the sixth and the seventh are what tell two of them apart. Coming
+         down only is the same scale and a different exercise — the ear has
+         nothing to lean on but the intervals themselves. */
       const graus=(degreesOf(earQ.group,earQ.name)||[0]).concat([12]);
-      const passo=0.34;
-      graus.forEach(function(d,i){scheduleTone(earQ.base+d,t+i*passo,passo*1.15);});
-      const volta=graus.slice(0,-1).reverse();
-      volta.forEach(function(d,i){scheduleTone(earQ.base+d,t+(graus.length+i)*passo,passo*1.15);});
+      const passo=state.ear.scaleVel||0.34;
+      const dir=earQ.dir||'updown';
+      let linha=graus.slice();
+      if(dir==='down')linha=graus.slice().reverse();
+      else if(dir==='updown')linha=graus.concat(graus.slice(0,-1).reverse());
+      linha.forEach(function(d,i){scheduleTone(earQ.base+d,t+i*passo,passo*1.15);});
     } else if(earQ.kind==='chords'){
       const notas=(CHORDS[earQ.group]&&CHORDS[earQ.group][earQ.name])||[0];
       if(earQ.how==='block')notas.forEach(function(d){scheduleTone(earQ.base+d,t,1.6);});
@@ -6610,31 +6635,119 @@ function earLigadasNaFam(g){
 function earLigadasNaFamAcorde(g){
   return Object.keys(CHORDS[g]||{}).filter(function(n){return state.ear.chords[n];}).length;
 }
+function earNivelCaixa(){
+  return {k:'nivel',nome:function(){return tr('ear.level','Level');},
+          diz:function(){return earNivelLabel(state.ear.nivel||'medio');}};
+}
 function earPaginas(){
   const k=earKind();
   if(k==='intervals')return [
+    earNivelCaixa(),
     {k:'sel', nome:function(){return tr('ear.which','What is in play');},
      diz:function(){return tr('ear.count',{one:'{n} interval',other:'{n} intervals'},{n:earOn().length});}},
     {k:'how', nome:function(){return tr('ear.how','Played');},
      diz:function(){return earComoDiz(state.ear.how);}},
     {k:'from',nome:function(){return tr('ear.from','From');},
      diz:function(){return state.ear.roam?tr('ear.roam','Anywhere'):tr('ear.fixed','One note');}}];
-  if(k==='scales')return earScaleFams().map(function(g){
+  if(k==='scales')return [
+    earNivelCaixa(),
+    {k:'tudo',nome:function(){return tr('ear.allScales','All the scales');},
+     diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earScalesOn().length});}},
+    {k:'dir', nome:function(){return tr('ear.how','Played');},
+     diz:function(){return earDirDiz(state.ear.scaleDir);}},
+    {k:'vel', nome:function(){return tr('ear.speed','Speed');},
+     diz:function(){return earVelDiz(state.ear.scaleVel);}}]
+    .concat(earScaleFams().map(function(g){
     return {k:'fam:'+g,nome:function(){return famNome(g);},
             diz:function(){const n=earLigadasNaFam(g);
-              return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};});
-  if(k==='chords')return earChordFams().map(function(g){
+              return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};}));
+  if(k==='chords')return [
+    earNivelCaixa(),
+    {k:'tudo',nome:function(){return tr('ear.allChords','All the chords');},
+     diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earChordsOn().length});}},
+    {k:'how',nome:function(){return tr('ear.how','Played');},
+     diz:function(){return earComoDiz(state.ear.chordHow);}}]
+    .concat(earChordFams().map(function(g){
     return {k:'fam:'+g,nome:function(){return famNome(g);},
             diz:function(){const n=earLigadasNaFamAcorde(g);
-              return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};})
-    .concat([{k:'how',nome:function(){return tr('ear.how','Played');},
-      diz:function(){return earComoDiz(state.ear.chordHow);}}]);
+              return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};}));
   if(k==='rhythm')return [
+    earNivelCaixa(),
     {k:'figs',nome:function(){return tr('ear.figures','Figures');},
      diz:function(){return earFigsOn().map(earFigLabel).join(' · ');}},
     {k:'bpm', nome:function(){return tr('tempo','Tempo');},
      diz:function(){return (state.ear.bpm||84)+' BPM';}}];
   return [];
+}
+function earDirDiz(v){
+  return {up:tr('ear.up','Up'),down:tr('ear.down','Down'),
+          updown:tr('ear.upAndDown','Up and back down'),
+          mix:tr('ear.mixed','Mixed')}[v]||v;
+}
+function earVelDiz(v){
+  const x=v||0.34;
+  return x>=0.38?tr('ear.slow','Slow'):x<=0.24?tr('ear.fast','Fast'):tr('ear.middling','Middling');
+}
+/* ---------- easy, medium, hard ----------
+   One tap that sets the exercise's own settings, each of them still a box of
+   its own underneath. What changes is what actually makes an exercise hard: how
+   many things are in play, which way they go, and how fast. */
+const EAR_NIVEIS=['facil','medio','dificil'];
+function earNivelLabel(n){
+  return {facil:tr('ear.easy','Easy'),medio:tr('ear.medium','Medium'),
+          dificil:tr('ear.hard','Hard')}[n]||n;
+}
+function ligaSo(mapa,chaves){
+  Object.keys(mapa).forEach(function(k){delete mapa[k];});
+  chaves.forEach(function(k){mapa[k]=true;});
+}
+function earAplicaNivel(n){
+  const E=state.ear,k=earKind();
+  E.nivel=n;
+  if(k==='intervals'){
+    if(n==='facil'){ligaSo(E.sel,[4,5,7,12]);E.how='up';E.roam=false;}
+    else if(n==='medio'){ligaSo(E.sel,[1,2,3,4,5,7,12]);E.how='updown';E.roam=false;}
+    else{ligaSo(E.sel,[1,2,3,4,5,6,7,8,9,10,11,12]);E.how='mix';E.roam=true;}
+  } else if(k==='scales'){
+    if(n==='facil'){E.scaleDir='updown';E.scaleVel=0.42;}
+    else if(n==='medio'){E.scaleDir='updown';E.scaleVel=0.30;}
+    else{E.scaleDir='mix';E.scaleVel=0.20;}
+  } else if(k==='chords'){
+    if(n==='facil'){E.chordHow='block';ligaSo(E.chords,['Major','Minor']);}
+    else if(n==='medio'){E.chordHow='mix';ligaSo(E.chords,['Major','Minor','Augmented','Diminished']);}
+    else{E.chordHow='up';
+      const todos=[];Object.keys(CHORDS).forEach(function(g){
+        Object.keys(CHORDS[g]).forEach(function(x){todos.push(x);});});
+      ligaSo(E.chords,todos);}
+  } else if(k==='rhythm'){
+    if(n==='facil'){ligaSo(E.figs,['4','8','r']);E.bpm=72;}
+    else if(n==='medio'){ligaSo(E.figs,['4','8','3','16','r']);E.bpm=84;}
+    else{ligaSo(E.figs,['4','8','3','16','d','r']);E.bpm=120;}
+  }
+  earMexeu();
+}
+/* Everything on, or everything off — for one family, or for all of them. Twenty
+   eight modes switched on one at a time is not a choice, it is a chore. */
+function earTodasEscalas(liga){
+  const m=state.ear.scales;
+  Object.keys(m).forEach(function(k){delete m[k];});
+  if(liga)Object.keys(SCALES).forEach(function(g){
+    Object.keys(SCALES[g]).forEach(function(n){m[n]=true;});});
+  earMexeu();
+}
+function earTodosAcordes(liga){
+  const m=state.ear.chords;
+  Object.keys(m).forEach(function(k){delete m[k];});
+  if(liga)Object.keys(CHORDS).forEach(function(g){
+    Object.keys(CHORDS[g]).forEach(function(n){m[n]=true;});});
+  earMexeu();
+}
+function earFamToda(g,liga,acordes){
+  const tabela=acordes?CHORDS:SCALES;
+  const m=acordes?state.ear.chords:state.ear.scales;
+  Object.keys(tabela[g]||{}).forEach(function(n){
+    if(liga)m[n]=true;else delete m[n];});
+  earMexeu();
 }
 function earComoDiz(v){
   return {up:tr('ear.up','Up'),down:tr('ear.down','Down'),updown:tr('ear.updown','Up or down'),
@@ -6651,7 +6764,20 @@ function earFechaPagina(){earPag=null;buildEarOpts();renderEar();pintaCasa();}
    the round again: answering with a button that is no longer offered would be
    answering a question that can no longer be asked. */
 function earMexeu(){earQ=null;buildEarOpts();renderEar();setPlayUI(false);}
-function earCaixasToggle(host,itens,ligado,mexe){
+function earCaixasToggle(host,itens,ligado,mexe,todos){
+  if(todos){
+    /* All of them or none of them, above the list rather than inside it: they
+       are not two more of the things being chosen. */
+    const linha=document.createElement('div');
+    linha.className='btn-wrap seg ear-todos';
+    [[tr('ear.allOn','All'),todos.liga],[tr('ear.allOff','None'),todos.desliga]]
+      .forEach(function(par){
+        const b=document.createElement('button');
+        b.type='button';b.textContent=par[0];b.onclick=par[1];
+        linha.appendChild(b);
+      });
+    host.appendChild(linha);
+  }
   const w=document.createElement('div');
   w.className='btn-wrap';
   itens.forEach(function(it){
@@ -6681,10 +6807,28 @@ function buildEarPage(){
   host.innerHTML='';
   const k=earKind();
   if(!earPag)return;
-  if(earPag==='sel'){
+  if(earPag==='nivel'){
+    earCaixasSeg(host,EAR_NIVEIS.map(function(n){return [n,earNivelLabel(n)];}),
+      state.ear.nivel||'medio',function(v){earAplicaNivel(v);});
+  } else if(earPag==='tudo'){
+    const acordes=k==='chords';
+    earCaixasSeg(host,[[true,tr('ear.allOn','Switch them all on')],
+                       [false,tr('ear.allOff','Switch them all off')]],null,
+      function(v){acordes?earTodosAcordes(v):earTodasEscalas(v);});
+  } else if(earPag==='dir'){
+    earCaixasSeg(host,[['updown',tr('ear.upAndDown','Up and back down')],
+      ['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],['mix',tr('ear.mixed','Mixed')]],
+      state.ear.scaleDir||'updown',function(v){state.ear.scaleDir=v;earMexeu();});
+  } else if(earPag==='vel'){
+    earCaixasSeg(host,[[0.42,tr('ear.slow','Slow')],[0.30,tr('ear.middling','Middling')],
+      [0.20,tr('ear.fast','Fast')]],state.ear.scaleVel||0.34,
+      function(v){state.ear.scaleVel=v;earMexeu();});
+  } else if(earPag==='sel'){
     earCaixasToggle(host,EAR_STEPS.map(function(n){return {n:n,label:intervalLabel(n)};}),
       function(it){return state.ear.sel[it.n];},
-      function(it){state.ear.sel[it.n]=!state.ear.sel[it.n];earMexeu();});
+      function(it){state.ear.sel[it.n]=!state.ear.sel[it.n];earMexeu();},
+      {liga:function(){ligaSo(state.ear.sel,EAR_STEPS);earMexeu();},
+       desliga:function(){ligaSo(state.ear.sel,[]);earMexeu();}});
   } else if(earPag==='how'){
     if(k==='chords')earCaixasSeg(host,
       [['up',tr('ear.oneByOne','One by one')],['block',tr('ear.together','Together')],
@@ -6701,7 +6845,9 @@ function buildEarPage(){
   } else if(earPag==='figs'){
     earCaixasToggle(host,EAR_FIG_ORDER.map(function(f){return {f:f,label:earFigLabel(f)};}),
       function(it){return state.ear.figs[it.f];},
-      function(it){state.ear.figs[it.f]=!state.ear.figs[it.f];earMexeu();});
+      function(it){state.ear.figs[it.f]=!state.ear.figs[it.f];earMexeu();},
+      {liga:function(){ligaSo(state.ear.figs,EAR_FIG_ORDER);earMexeu();},
+       desliga:function(){ligaSo(state.ear.figs,[]);earMexeu();}});
   } else if(earPag==='bpm'){
     earCaixasSeg(host,EAR_BPMS.map(function(n){return [n,String(n)];}),state.ear.bpm||84,
       function(v){state.ear.bpm=v;earMexeu();});
@@ -6710,11 +6856,13 @@ function buildEarPage(){
     if(k==='chords'){
       earCaixasToggle(host,Object.keys(CHORDS[g]||{}).map(function(n){return {n:n,label:chordLabel(n)};}),
         function(it){return state.ear.chords[it.n];},
-        function(it){state.ear.chords[it.n]=!state.ear.chords[it.n];earMexeu();});
+        function(it){state.ear.chords[it.n]=!state.ear.chords[it.n];earMexeu();},
+        {liga:function(){earFamToda(g,true,true);},desliga:function(){earFamToda(g,false,true);}});
     } else {
       earCaixasToggle(host,Object.keys(SCALES[g]||{}).map(function(n){return {n:n,label:scaleLabel(n)};}),
         function(it){return state.ear.scales[it.n];},
-        function(it){state.ear.scales[it.n]=!state.ear.scales[it.n];earMexeu();});
+        function(it){state.ear.scales[it.n]=!state.ear.scales[it.n];earMexeu();},
+        {liga:function(){earFamToda(g,true,false);},desliga:function(){earFamToda(g,false,false);}});
     }
   }
 }

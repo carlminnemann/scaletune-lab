@@ -759,5 +759,18 @@
  "int.12": "八度",
  "set.turn": "轮换颜色",
  "set.turnBack": "反向轮换颜色",
- "groove.shuffle": "摇曳（Shuffle）"
+ "groove.shuffle": "摇曳（Shuffle）",
+ "ear.level": "难度",
+ "ear.easy": "简单",
+ "ear.medium": "中等",
+ "ear.hard": "困难",
+ "ear.allScales": "所有音阶",
+ "ear.allChords": "所有和弦",
+ "ear.allOn": "全部打开",
+ "ear.allOff": "全部关闭",
+ "ear.speed": "速度",
+ "ear.slow": "慢",
+ "ear.middling": "中",
+ "ear.fast": "快",
+ "ear.upAndDown": "上行再下行"
 }

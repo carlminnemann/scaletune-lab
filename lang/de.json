@@ -774,5 +774,18 @@
  "int.12": "Oktave",
  "set.turn": "Farben drehen",
  "set.turnBack": "Farben zurückdrehen",
- "groove.shuffle": "Shuffle"
+ "groove.shuffle": "Shuffle",
+ "ear.level": "Stufe",
+ "ear.easy": "Leicht",
+ "ear.medium": "Mittel",
+ "ear.hard": "Schwer",
+ "ear.allScales": "Alle Tonleitern",
+ "ear.allChords": "Alle Akkorde",
+ "ear.allOn": "Alle an",
+ "ear.allOff": "Alle aus",
+ "ear.speed": "Tempo",
+ "ear.slow": "Langsam",
+ "ear.middling": "Mittel",
+ "ear.fast": "Schnell",
+ "ear.upAndDown": "Hinauf und zurück"
 }

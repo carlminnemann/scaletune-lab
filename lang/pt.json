@@ -774,5 +774,18 @@
  "int.12": "Oitava",
  "set.turn": "Rodar as cores",
  "set.turnBack": "Rodar as cores para trás",
- "groove.shuffle": "Shuffle"
+ "groove.shuffle": "Shuffle",
+ "ear.level": "Nível",
+ "ear.easy": "Fácil",
+ "ear.medium": "Médio",
+ "ear.hard": "Difícil",
+ "ear.allScales": "Todas as escalas",
+ "ear.allChords": "Todos os acordes",
+ "ear.allOn": "Ligar todas",
+ "ear.allOff": "Desligar todas",
+ "ear.speed": "Velocidade",
+ "ear.slow": "Lenta",
+ "ear.middling": "Média",
+ "ear.fast": "Rápida",
+ "ear.upAndDown": "Sobe e desce"
 }

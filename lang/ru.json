@@ -790,5 +790,18 @@
  "int.12": "Октава",
  "set.turn": "Повернуть цвета",
  "set.turnBack": "Повернуть цвета назад",
- "groove.shuffle": "Шаффл"
+ "groove.shuffle": "Шаффл",
+ "ear.level": "Уровень",
+ "ear.easy": "Лёгкий",
+ "ear.medium": "Средний",
+ "ear.hard": "Трудный",
+ "ear.allScales": "Все гаммы",
+ "ear.allChords": "Все аккорды",
+ "ear.allOn": "Включить все",
+ "ear.allOff": "Выключить все",
+ "ear.speed": "Скорость",
+ "ear.slow": "Медленно",
+ "ear.middling": "Средне",
+ "ear.fast": "Быстро",
+ "ear.upAndDown": "Вверх и вниз"
 }

@@ -774,5 +774,18 @@
  "int.12": "Octave",
  "set.turn": "Tourner les couleurs",
  "set.turnBack": "Tourner les couleurs en arrière",
- "groove.shuffle": "Shuffle"
+ "groove.shuffle": "Shuffle",
+ "ear.level": "Niveau",
+ "ear.easy": "Facile",
+ "ear.medium": "Moyen",
+ "ear.hard": "Difficile",
+ "ear.allScales": "Toutes les gammes",
+ "ear.allChords": "Tous les accords",
+ "ear.allOn": "Tout activer",
+ "ear.allOff": "Tout désactiver",
+ "ear.speed": "Vitesse",
+ "ear.slow": "Lente",
+ "ear.middling": "Moyenne",
+ "ear.fast": "Rapide",
+ "ear.upAndDown": "Monte et descend"
 }
