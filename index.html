@@ -648,6 +648,12 @@ body.earpag #ear-page .btn-wrap:not(.ear-todos):has(>button:nth-child(2):last-ch
   grid-template-columns:1fr!important}
 #ear-page .ear-todos{display:flex!important;justify-content:center;gap:var(--s2);
   margin-bottom:var(--s3);flex:0 0 auto}
+/* Two actions, centred on a line of their own. */
+body.earpag #ear-page .ear-acoes{display:flex!important;justify-content:center;
+  align-items:center;flex:0 0 auto!important;gap:var(--s3);margin-top:var(--s5)}
+body.earpag #ear-page .ear-acoes>button{min-height:58px!important;height:58px!important;
+  width:auto!important;flex:0 1 auto;padding:0 22px;font-size:15px;border-radius:13px;
+  align-self:center}
 body.earpag #ear-page .ear-todos>button{min-height:30px;height:30px;font-size:12px;
   border-radius:8px;padding:0 16px;width:auto;background:var(--bg2);
   border:1px solid var(--border2);color:var(--text2);cursor:pointer}
@@ -5616,7 +5622,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11l';
+const APP_VERSION='lab-2026-09-11m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7025,7 +7031,7 @@ function arrumaEscolhasDoOuvido(){
   if(!host)return;
   /* A grid of numbers is not a list of answers: three across is how a number is
      picked, and it stays that way however much room there is. */
-  const linha=host.querySelector('.btn-wrap:not(.ear-todos):not(.notas)');
+  const linha=host.querySelector('.btn-wrap:not(.ear-todos):not(.notas):not(.ear-acoes)');
   if(!linha)return;
   linha.classList.toggle('pilha',cabeEmPilha(linha.children.length));
 }
@@ -7040,9 +7046,13 @@ function buildEarPage(){
       state.ear.nivel||'medio',function(v){earAplicaNivel(v);});
   } else if(earPag==='tudo'){
     const acordes=k==='chords';
-    earCaixasSeg(host,[[true,tr('ear.allOn','Switch them all on')],
-                       [false,tr('ear.allOff','Switch them all off')]],null,
+    earCaixasSeg(host,[[true,tr('ear.allOn','All')],
+                       [false,tr('ear.allOff','None')]],null,
       function(v){acordes?earTodosAcordes(v):earTodasEscalas(v);});
+    /* Two things to do, not two things to choose between: side by side and the
+       size of a button, rather than two slabs one above the other. */
+    const linha=host.querySelector('.btn-wrap');
+    if(linha)linha.classList.add('ear-acoes');
   } else if(earPag==='dir'){
     earCaixasSeg(host,[['updown',tr('ear.upAndDown','Up and back down')],
       ['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],['mix',tr('ear.mixed','Mixed')]],
