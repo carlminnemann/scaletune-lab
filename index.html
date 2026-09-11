@@ -1749,6 +1749,22 @@ body.paginas #pat-mine-head{order:9}
 body.paginas #pat-list{order:10}
 body.paginas #pat-body>.ex-new{order:11}
 body.paginas #pat-mine-info{order:12}
+/* The timbres were the last row of small buttons in the app: a wrapped line of
+   six, inside a panel that has a screen to itself. Two columns of the same
+   buttons everything else is made of, the odd one centred, and the volume under
+   them on a line of its own. */
+body.painel .sec-body .timbre-row{display:grid!important;grid-template-columns:1fr 1fr;
+  gap:var(--s2);width:100%;margin-bottom:var(--s3)}
+body.painel .sec-body .timbre-row>button{min-height:clamp(46px,8vh,72px);
+  font-size:15px;border-radius:13px;padding:0 10px}
+body.painel .sec-body .timbre-row>button:last-child:nth-child(odd){grid-column:1 / -1;
+  justify-self:center;width:calc(50% - var(--s2)/2)}
+/* And the group sits in the middle of the screen it was given, rather than
+   against the top of it. */
+body.painel #sec-sound>.sec-body{justify-content:center}
+body.painel .sec-body .control-row{justify-content:center;gap:var(--s3)}
+body.painel .sec-body .control-row label{min-width:0;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
 /* ---------- no old rows left on a page ----------
    A label on the left and a strip of small pills on the right was how a setting
    was asked before there were pages. On a page the question is the title, the
@@ -5622,7 +5638,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11m';
+const APP_VERSION='lab-2026-09-11n';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
