@@ -727,12 +727,22 @@ body.sub #root-cap-line,body.sub #pitch-info,body.sub #pitch-clear,
 body.sub #blue-line,body.sub #blue-info{flex:0 0 auto}
 body.sub #sec-scales .btn-wrap{flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
 /* The other panels' fronts and pages, filling the same way. */
-body.painel .scroll,body.painel #pitch-section,body.painel #free-section,
-body.painel details.sec,body.painel details.sec>.sec-body{display:flex;
+/* The front of a panel is a grid of boxes that shares out the screen, so its
+   levels are flex and take the height. A page is not: it is as tall as what is
+   on it, and it has to be able to be taller than the screen. Flex columns with
+   min-heights were the way that was done and Safari does not compute
+   min-content on a flex item the way every other engine does — which is why a
+   page taller than an iPhone could not be scrolled to. A page is plain block
+   flow now, inside the one box that scrolls; only the stretching case asks for
+   flex, and that case fits by construction. */
+body.painel:not(.sub) .scroll,
+body.painel:not(.sub) #pitch-section,body.painel:not(.sub) #free-section,
+body.painel:not(.sub) details.sec,
+body.painel:not(.sub) details.sec>.sec-body{display:flex;
   flex-direction:column;flex:1 1 auto;min-height:0}
-body.painel details.sec::details-content{display:flex;flex-direction:column;
+body.painel:not(.sub) details.sec::details-content{display:flex;flex-direction:column;
   flex:1 1 auto;min-height:0;height:auto}
-body.painel .scroll>*{flex:0 0 auto}
+body.painel:not(.sub) .scroll>*{flex:0 0 auto}
 /* The two wrappers hold two panels each — the scales and the range, the free
    notes and their range — and only the one whose panel is open has anything to
    show. Growing both took 121 pixels off the top of the metronome inside Scale
@@ -773,10 +783,13 @@ body.paginas .sec-body>.pagina-aberta{display:block!important;min-height:min-con
    contents hanging below, unreachable, while the scrolling area reported
    nothing to scroll. With a page open the levels claim their content instead,
    and a page that does not fit scrolls, as a page should. */
+/* And with a page open every level above it is block flow: its height is what
+   is on it, and the scrolling area scrolls when that is more than fits. */
+body.painel.sub .scroll,
+body.painel.sub #pitch-section,body.painel.sub #free-section,
 body.painel.sub details.sec,
-body.painel.sub details.sec>.sec-body,
-body.painel.sub details.sec::details-content,
-body.painel.sub #pitch-section,body.painel.sub #free-section{min-height:min-content}
+body.painel.sub details.sec>.sec-body{display:block;min-height:0;height:auto}
+body.painel.sub details.sec::details-content{display:block;min-height:0;height:auto}
 /* A page is one question. What will play next, and the clear for the whole
    mode, belong to the mode and were taking 142 pixels off the top of every page
    in Scale — enough on a small phone to push the tempo into scrolling. They
@@ -1767,7 +1780,17 @@ body.earpag #ear-page .pilha{grid-template-columns:1fr!important;
 body.sub .sec-body .pilha>button,body.earpag #ear-page .pilha>button{
   min-height:76px!important;height:auto!important;font-size:16px;
   width:min(100%,440px)!important;justify-self:center;grid-column:1 / -1!important}
-body.sub .sec-body .estica{display:flex;flex-direction:column;flex:1 1 auto;min-height:min-content}
+body.sub .sec-body .estica{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+/* One question that fits takes the screen, and for that the whole way up has to
+   be a flex column again — but only then, and only when it fits. */
+body.painel.sub.estica-chain .scroll,
+body.painel.sub.estica-chain #pitch-section,body.painel.sub.estica-chain #free-section,
+body.painel.sub.estica-chain details.sec,
+body.painel.sub.estica-chain details.sec>.sec-body{display:flex;flex-direction:column;
+  flex:1 1 auto;min-height:0;height:auto}
+body.painel.sub.estica-chain details.sec::details-content{display:flex;
+  flex-direction:column;flex:1 1 auto;min-height:0;height:auto}
+body.painel.sub.estica-chain .scroll>*{flex:0 0 auto}
 /* The block itself is held to display:block by the rule that decides which
    page is on the screen, and that rule is marked important — so the one page
    that wants to stretch says so louder. */
@@ -1855,8 +1878,13 @@ body.sub .sec-body .info-line{text-align:center}
 .sig-foot .sig-select{font-size:15px!important;padding:2px 8px!important;min-width:0!important}
 .sig-foot .sig-unit{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
 /* The two pills, centred under whichever rows are on the screen. */
-#beats-only-line{display:flex;justify-content:center;gap:var(--s2);
-  margin:var(--s2) 0 var(--s3)}
+/* One at each end of the line, not a pair in the middle: they are two different
+   things — a screen to look at, and a second layer to hear — and side by side
+   they read as a choice between them. */
+#beats-only-line,
+body.paginas .sec-body>#beats-only-line.pagina-aberta{display:flex!important;
+  flex-direction:row!important;justify-content:space-between;align-items:center;
+  gap:var(--s2);margin:var(--s2) 0 var(--s3)}
 #beats-only-line .poly-switch{margin-left:0;padding:5px 14px;font-size:12px}
 /* On this page the polyrhythm has no title of its own — the switch above it is
    the title — and its two rows come first, where the circles they replace were,
@@ -5588,7 +5616,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11k';
+const APP_VERSION='lab-2026-09-11l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6165,6 +6193,7 @@ function cabeEmPilha(n){
 function marcaDuas(){
   document.querySelectorAll('.unica,.pilha').forEach(e=>{e.classList.remove('unica');e.classList.remove('pilha');});
   document.querySelectorAll('.estica').forEach(e=>e.classList.remove('estica'));
+  document.body.classList.remove('estica-chain');
   const linhas=[...document.querySelectorAll('.pagina-aberta .seg,.pagina-aberta .btn-wrap')]
     .filter(r=>r.getClientRects().length&&r.children.length);
   if(linhas.length!==1)return;
@@ -6192,6 +6221,9 @@ function marcaDuas(){
     if(el.classList.contains('pagina-aberta'))break;
     el=el.parentElement;
   }
+  /* And the levels above the page, which are block flow while a page is open so
+     that a tall one can scroll. */
+  document.body.classList.add('estica-chain');
 }
 function abreDobras(el){
   DOBRAS.forEach(([h,b,depois])=>{
@@ -12658,6 +12690,13 @@ const PALETAS=[
   {k:'quadro',  base:'dark', fundo:'#16211b',acento:'#cfd8c6',alerta:'#d98b5f'},
   /* A deeper red than any of the others, and turned once it is the ground. */
   {k:'vinho',   base:'dark', fundo:'#1c1012',acento:'#d9a34a',alerta:'#a12a2a'},
+  /* Darker grounds and stronger colours: the accents are saturated rather than
+     muted, and every ground is near the bottom of the range — which is where a
+     strong colour has the most room to be strong. */
+  {k:'violeta', base:'dark', fundo:'#140c1c',acento:'#a06bff',alerta:'#ff4d6d'},
+  {k:'esmeralda',base:'dark',fundo:'#08140f',acento:'#16c281',alerta:'#e0553f'},
+  {k:'ferrugem',base:'dark', fundo:'#150d0a',acento:'#ff7a29',alerta:'#c81d3c'},
+  {k:'gelo',    base:'dark', fundo:'#0a1016',acento:'#3fd0d8',alerta:'#ff5470'},
 ];
 function paletaDe(k){return PALETAS.find(p=>p.k===k)||PALETAS[0];}
 /* The same three colours can be three themes: which of them is the ground,
@@ -12666,13 +12705,17 @@ function paletaDe(k){return PALETAS.find(p=>p.k===k)||PALETAS[0];}
    no palette here would otherwise have. */
 let ROTACOES={};
 try{ROTACOES=JSON.parse(localStorage.getItem('scaletune-lab-rot')||'{}')||{};}catch(e){ROTACOES={};}
-function rotacaoDe(k){return ((ROTACOES[k]|0)%3+3)%3;}
+/* All six arrangements of three colours, not the three turns of a wheel: turning
+   keeps the third one where it was relative to the other two, and half the
+   themes a palette can make were unreachable. */
+const ARRANJOS=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+function rotacaoDe(k){return ((ROTACOES[k]|0)%ARRANJOS.length+ARRANJOS.length)%ARRANJOS.length;}
 function coresDe(p){
-  const c=[p.fundo,p.acento,p.alerta],r=rotacaoDe(p.k);
-  return [c[r%3],c[(r+1)%3],c[(r+2)%3]];
+  const c=[p.fundo,p.acento,p.alerta],a=ARRANJOS[rotacaoDe(p.k)];
+  return [c[a[0]],c[a[1]],c[a[2]]];
 }
 function rodaPaleta(k,d){
-  ROTACOES[k]=(rotacaoDe(k)+d+3)%3;
+  ROTACOES[k]=(rotacaoDe(k)+d+ARRANJOS.length)%ARRANJOS.length;
   try{localStorage.setItem('scaletune-lab-rot',JSON.stringify(ROTACOES));}catch(e){}
   if(currentTheme()===k)applyTheme(k); else buildThemeRow();
 }
