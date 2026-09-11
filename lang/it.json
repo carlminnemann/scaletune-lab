@@ -394,8 +394,8 @@
  "sum.studyList": "lista di studio",
  "tap-a-beat-accent-it": "tocca un movimento: accentualo, poi silenzialo",
  "tap-a-pulse-accent-it": "tocca una pulsazione: accentuala, poi silenziala",
- "tap-add-or-remove-a": "<span>tocca — aggiungi o togli una nota</span> <span>+/− — ottava</span> <span>più note suonano insieme</span>",
- "tap-toggle-note-on-off": "<span>tocca — accendi o spegni la nota</span> <span>+/− — ottava</span>",
+ "tap-add-or-remove-a": "<span>tocca — aggiungi o togli una nota</span> <span>▲▼ — ottava</span> <span>più note suonano insieme</span>",
+ "tap-toggle-note-on-off": "<span>tocca — accendi o spegni la nota</span> <span>▲▼ — ottava</span>",
  "tap.at": "Batti il tempo · {n}",
  "tap.keepTapping": "Batti il tempo · continua a battere",
  "tap.outOfRange": "Batti il tempo · fuori intervallo",
@@ -754,5 +754,7 @@
  "tuner.cents": "{n} cent",
  "tuner.farOff": "molto lontano",
  "beats.only": "Solo i movimenti",
- "aria.home": "Inizio"
+ "aria.home": "Inizio",
+ "oct.up": "Ottava sopra",
+ "oct.down": "Ottava sotto"
 }

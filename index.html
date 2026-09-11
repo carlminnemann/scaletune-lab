@@ -26,10 +26,14 @@
      the whole span down to black is worth 1.32:1, so the levels have to be won
      by darkening the page rather than by lightening the panels. Even steps of
      about 1.2 now, which is where a surface starts to look like a surface. */
-  --bg:#060606;--bg2:#1d1d1d;--bg3:#2b2b2b;
+  /* The buttons are the app: they were 1.19 brighter than the ground they sit on
+     and the step did not read as an edge on a phone in daylight. The panels come
+     up and the page stays where it was, so the ladder is the same ladder with a
+     longer first rung — 1.45 now, and the lines on it come up with it. */
+  --bg:#060606;--bg2:#262626;--bg3:#343434;
   /* The lines rise with the surfaces they are drawn on, or the panels gain their
      edges only to lose their outlines. */
-  --border:#3a3a3a;--border2:#464646;--border3:#545454;
+  --border:#444;--border2:#585858;--border3:#6a6a6a;
   /* The muted grey was #666, which is 2.8:1 on this ground — under the readable
      minimum, and it carried the group labels and the info lines, which are text
      you have to read. Raised until it clears, with the secondary grey lifted
@@ -98,11 +102,12 @@
   --lift-hi:rgba(255,255,255,.075);--lift-lo:rgba(0,0,0,.20);
   --lift-sh:0 1px 2px rgba(0,0,0,.38),0 5px 12px rgba(0,0,0,.26);
   --lift-in:0 3px 9px rgba(0,0,0,.42) inset;
-  --toque:rgba(255,255,255,.34);
+  --toque:rgba(255,255,255,.5);
   /* The tuner reads at arm's length while both hands are busy, so its two
      answers are the app's own red and green taken up in brightness until they
      carry across a room. Nothing else wears these. */
   --afina-mal:#ff5f52;--afina-bem:#57d98d;
+  --premido:1.22;          /* how much a button brightens under the finger */
 }
 /* Accent colours are darkened for light mode: the same hue that reads as a
    highlight on black becomes unreadable as text on a pale tint. */
@@ -113,8 +118,10 @@
   /* Paper, not a sheet of white: 65% brightness, so coming from the dark theme
      is a change of light and not a flash. The panels and the borders come down
      with it — a bright panel on a dimmed page gives the glare back inverted. */
-  --bg:#ddd3b7;--bg2:#e8dfc6;--bg3:#d1c5a6;
-  --border:#c9bc99;--border2:#b8a983;--border3:#9c8d68;
+  /* The same on paper: the page goes down a shade and the cards come up one, so
+     a button is read as a card and not as a slightly different patch of paper. */
+  --bg:#d6cba8;--bg2:#f2ecd9;--bg3:#e2d8bd;
+  --border:#c0b28c;--border2:#a89777;--border3:#8d7d5c;
   /* The greys come down with the paper. On the old near-white they cleared the
      readable minimum; on this tone the muted grey fell to 3.5:1, so it is
      darkened until it clears again — the paper stays the tone chosen, the text
@@ -151,13 +158,16 @@
   /* On paper the same two have to go the other way to stay bright against a
      warm ground: saturated rather than pale. */
   --afina-mal:#d92b1f;--afina-bem:#1c8f52;
+  --premido:0.92;          /* on paper it darkens instead */
   /* On paper the relief is the other way round in weight: the highlight has to
      be strong enough to read on a warm ground, and the shadows soft, or the
      boxes look printed on top of the page rather than raised out of it. */
-  --lift-hi:rgba(255,255,255,.5);--lift-lo:rgba(0,0,0,.075);
-  --lift-sh:0 1px 2px rgba(60,45,20,.16),0 5px 12px rgba(60,45,20,.12);
-  --lift-in:0 3px 9px rgba(60,45,20,.20) inset;
-  --toque:rgba(255,255,255,.85);
+  --lift-hi:rgba(255,255,255,.6);--lift-lo:rgba(0,0,0,.09);
+  --lift-sh:0 1px 2px rgba(60,45,20,.2),0 5px 12px rgba(60,45,20,.16);
+  --lift-in:0 3px 9px rgba(60,45,20,.24) inset;
+  /* A white bloom on cream is invisible, which is exactly what he saw: on paper
+     the light of a tap is a shadow rather than a light. */
+  --toque:rgba(52,40,18,.34);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* The app is a frame with a scrolling middle: the name and its two buttons, the
@@ -507,9 +517,12 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
                    linear-gradient(0deg,var(--lift-lo),rgba(0,0,0,0) 24px);
   box-shadow:var(--lift-sh);
   transition:transform .11s ease,box-shadow .11s ease,border-color .11s ease}
+/* Pressed, the ground changes too. The travel and the inner shadow alone were
+   nothing on paper, where a shadow is the faintest thing there is. */
 .panel-box:active,.root-box:active,.mode-btn:active,.pick-btn:active,
 .tonic-btn:active,.theme-btn:active,.note-btn:active{
-  transform:translateY(1px) scale(.988);box-shadow:var(--lift-in)}
+  transform:translateY(1px) scale(.985);box-shadow:var(--lift-in);
+  filter:brightness(var(--premido,1.18))}
 .panel-box:active,.root-box:active{border-color:var(--mode)}
 /* The settings are drawn rather than filled, on purpose — they are the quietest
    thing on the home screen. The light along the top edge was enough to make the
@@ -519,11 +532,12 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 /* Drawn on ::after, so nothing inside the button has to move to make room for
    it, and gone in a third of a second. */
 .acende::after{content:'';position:absolute;left:var(--px,50%);top:var(--py,50%);
-  width:180%;aspect-ratio:1;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,var(--toque),rgba(255,255,255,0) 68%);
-  animation:acende .34s ease-out forwards}
+  width:200%;aspect-ratio:1;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--toque),rgba(255,255,255,0) 70%);
+  animation:acende .45s ease-out forwards}
 @keyframes acende{
-  from{opacity:.9;transform:translate(-50%,-50%) scale(.25)}
+  from{opacity:1;transform:translate(-50%,-50%) scale(.2)}
+  60%{opacity:.85}
   to{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 @media(prefers-reduced-motion:reduce){
   .acende::after{display:none}
@@ -556,11 +570,14 @@ body.earpag #ear-page .btn-wrap:not(.seg)>button:last-child:nth-child(odd){
    A fold under your thumb is a small target and a page that grows; a box that
    opens a page of its own is neither. The note everything is built on gets the
    size it deserves, and the families under it are boxes like all the others. */
-.root-box{display:flex;align-items:baseline;justify-content:center;gap:10px;width:100%;
-  min-height:clamp(64px,12vh,96px);margin-bottom:var(--s3);padding:8px 14px;
-  border:1px solid var(--mode);border-radius:14px;background:var(--mode-bg);
-  color:var(--mode-fg);cursor:pointer;touch-action:manipulation}
-.root-box .root-big{font-size:clamp(28px,7vh,44px);font-weight:300;line-height:1}
+/* The note everything is built on: the letter in the middle and its name under
+   it, the way the tempo's number and the word BPM stand — one shape for the one
+   big reading on a screen, wherever it is. */
+.root-box{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;width:100%;min-height:clamp(64px,13vh,110px);margin-bottom:var(--s3);
+  padding:8px 14px;border:1px solid var(--mode);border-radius:14px;
+  background:var(--mode-bg);color:var(--mode-fg);cursor:pointer;touch-action:manipulation}
+.root-box .root-big{font-size:clamp(34px,9vh,62px);font-weight:300;line-height:1}
 .root-box .root-cap{font-size:11px;font-weight:600;text-transform:uppercase;
   letter-spacing:0.08em;opacity:.7}
 #fam-row,#pag-row,#ear-optbox-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
@@ -1329,24 +1346,37 @@ details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 
 .legend{display:flex;gap:12px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap}
 .note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:1.25rem}
-.note-btn{padding:10px 4px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text2);text-align:center;position:relative;user-select:none;-webkit-user-select:none;transition:background 0.12s;touch-action:manipulation}
+.note-btn{padding:8px 4px;font-weight:500;cursor:pointer;border:1px solid var(--border2);
+  border-radius:var(--r);background:var(--bg2);color:var(--text2);text-align:center;
+  position:relative;user-select:none;-webkit-user-select:none;
+  transition:background 0.12s;touch-action:manipulation;
+  display:flex;align-items:stretch;min-height:clamp(48px,8vh,74px)}
+/* The empty column that balances the stepper, so the name is centred in the
+   button and not in the space the stepper left. */
+.note-btn.active::before{content:'';flex:0 0 34px}
 .note-btn.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .note-btn.start{background:transparent;border-color:var(--green);color:var(--green-hi);
   box-shadow:0 0 0 1px var(--green)}
-.note-name{font-size:14px;font-weight:500}
-.free-grid .note-btn{padding:8px 4px 6px}
-.free-grid .note-name{font-size:13px;margin-bottom:4px}
-.oct-controls{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px}
-.oct-btn{width:22px;height:22px;border:1px solid var(--border2);border-radius:4px;background:var(--bg3);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
-.oct-val{font-size:11px;color:var(--text3);min-width:30px;text-align:center}
+.note-name{font-size:clamp(17px,2.8vh,26px);font-weight:500;flex:1 1 auto;
+  display:flex;align-items:center;justify-content:center;min-width:0}
+.free-grid .note-btn{padding:8px 4px}
+.oct-controls{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;flex:0 0 34px}
+.oct-btn{width:32px;height:26px;border:1px solid var(--border2);border-radius:6px;
+  background:var(--bg3);color:var(--text2);font-size:11px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  touch-action:manipulation;padding:0}
+.oct-val{font-size:13px;font-weight:600;color:var(--text2);min-width:0;text-align:center;
+  font-variant-numeric:tabular-nums}
 /* On a narrow phone the stepper is what decides how many notes fit across: at
    its full size only two columns fit, which turns twelve notes into six rows in
    the very mode you scroll least. Trimmed, three fit — and because the column
    count is measured rather than written down, nothing else has to be told. */
 @media (max-width:400px){
-  .oct-val{min-width:22px;font-size:10px}
-  .oct-btn{width:19px;height:19px;font-size:11px}
-  .oct-controls{gap:3px}
+  .oct-val{font-size:12px}
+  .oct-btn{width:26px;height:22px;font-size:10px}
+  .oct-controls{gap:2px;flex:0 0 28px}
+  .note-btn.active::before{flex:0 0 28px}
 }
 .note-btn.active .oct-btn{border-color:var(--blue);color:var(--blue)}
 .note-btn.active .oct-val{color:var(--blue)}
@@ -1544,6 +1574,79 @@ body.paginas #pat-mine-head{order:9}
 body.paginas #pat-list{order:10}
 body.paginas #pat-body>.ex-new{order:11}
 body.paginas #pat-mine-info{order:12}
+/* ---------- no old rows left on a page ----------
+   A label on the left and a strip of small pills on the right was how a setting
+   was asked before there were pages. On a page the question is the title, the
+   answers are buttons the size of a thumb, and both are centred: one shape for
+   every question in the app, so that nothing you open looks like it came from a
+   different one.
+
+   Written here rather than in the dozen builders that make these rows: they all
+   produce the same two shapes — a .seg of pills and a .btn-wrap of buttons — and
+   what changes is only how a page draws them. */
+body.sub .sec-body .head:has(>.seg),
+body.sub .sec-body .head:has(>.btn-wrap){display:flex;flex-direction:column;
+  align-items:stretch;gap:var(--s2);margin-bottom:var(--s3)}
+body.sub .sec-body .head:has(>.seg)>.section-label,
+body.sub .sec-body .head:has(>.btn-wrap)>.section-label,
+body.sub .sec-body .head:has(>.seg)>.group-label,
+body.sub .sec-body .head:has(>.btn-wrap)>.group-label{text-align:center;margin:0}
+body.sub .sec-body .seg{display:grid!important;grid-template-columns:1fr 1fr;
+  gap:var(--s2);width:100%;max-width:none;flex:1 1 auto}
+body.sub .sec-body .seg>button{height:auto;min-height:clamp(46px,8vh,72px);
+  font-size:15px;border-radius:13px;padding:0 10px;white-space:normal;
+  background:var(--bg2);border:1px solid var(--border2);color:var(--text2)}
+body.sub .sec-body .seg>button.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+/* Two answers stand one above the other — where two is the whole question. A
+   page that asks one thing with two answers gives them the width; a page with
+   several rows keeps them side by side, or a page of small settings would
+   become a column of slabs. Which it is, is counted when the page opens. */
+body.sub .sec-body .duas.btn-wrap,body.sub .sec-body .duas.seg,
+body.painel.sub .sec-body .duas.btn-wrap{grid-template-columns:1fr!important}
+/* And they are the page, so they are the size of one: a third of the screen
+   each rather than two bars at the top of an empty one. */
+body.sub .sec-body .duas>button{min-height:clamp(64px,15vh,128px);font-size:16px}
+body.sub .sec-body .estica{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+/* The block itself is held to display:block by the rule that decides which
+   page is on the screen, and that rule is marked important — so the one page
+   that wants to stretch says so louder. */
+body.paginas.sub .sec-body>.pagina-aberta.estica{display:flex!important;
+  flex-direction:column;flex:1 1 auto}
+body.sub .sec-body .unica{flex:1 1 auto;min-height:min-content;
+  grid-auto-rows:1fr;align-content:stretch}
+body.sub .sec-body .seg>button:last-child:nth-child(odd){grid-column:1 / -1;
+  justify-self:center;width:calc(50% - var(--s2)/2)}
+/* The lines that hold a number and a word — so many BPM every so often — are
+   centred and the number is the size of an answer, the way the reference pitch
+   and the polyrhythm already are. */
+body.sub .sec-body .step-row{justify-content:center;align-items:center;
+  flex-wrap:wrap;gap:var(--s2);margin:var(--s3) 0}
+body.sub .sec-body .step-row .step-input,
+body.sub .sec-body .step-row .sig-select,
+body.sub .sec-body .head .sig-select{font-size:clamp(20px,4.2vh,32px);
+  min-width:2.4em;text-align:center;padding:4px 10px;height:auto}
+body.sub .sec-body .step-row .step-unit,
+body.sub .sec-body .step-row .step-lead{font-size:14px;color:var(--text3)}
+body.sub .sec-body .head .sig-fields{justify-content:center}
+body.sub .sec-body .info-line{text-align:center}
+.titulo-repetido{display:none}
+/* ---------- the settings, in three ----------
+   The same boxes the rest of the app is made of, and the same pages behind
+   them: two across with the odd one centred, and answers big enough to hit. */
+#set-boxes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s4)}
+#set-boxes .panel-box:last-child:nth-child(odd){grid-column:1 / -1;
+  justify-self:center;width:calc(50% - var(--s2)/2)}
+#settings-overlay.numa-pagina #set-boxes{display:none}
+#settings-overlay .set-pagina .btn-wrap{display:grid;grid-template-columns:1fr 1fr;
+  gap:var(--s2);margin-top:var(--s3)}
+#settings-overlay .set-pagina .btn-wrap>button{min-height:clamp(46px,8vh,72px);
+  font-size:15px;border-radius:13px;height:auto;width:auto}
+#settings-overlay .set-pagina .btn-wrap>button:last-child:nth-child(odd){
+  grid-column:1 / -1;justify-self:center;width:calc(50% - var(--s2)/2)}
+/* Two answers stand one above the other, as everywhere else. */
+#settings-overlay .set-pagina .btn-wrap:has(>button:nth-child(2):last-child){
+  grid-template-columns:1fr}
+#settings-overlay .set-pagina .info-line{text-align:center;margin-top:var(--s3)}
 /* ---------- the tempo page ----------
    The number is what the page is for, so it is the size of one: centred, large,
    and still the field you tap to type into. Under it, immediately, the circles
@@ -1885,7 +1988,7 @@ body.bolinhas .pulse-bpm{display:none}
   <div class="sec-body">
     <div class="legend" data-t="tap-add-or-remove-a">
       <span>tap — add or remove a note</span>
-      <span>+/− — octave</span>
+      <span>▲▼ — octave</span>
       <span>several notes sound together</span>
     </div>
     <div class="note-grid free-grid" id="drone-grid"></div>
@@ -2004,7 +2107,7 @@ body.bolinhas .pulse-bpm{display:none}
       <div class="btn-wrap" id="free-root-row" style="margin-bottom:var(--s4)"></div>
       <div class="legend" data-t="tap-toggle-note-on-off">
         <span>tap — toggle note on/off</span>
-        <span>+/− — octave</span>
+        <span>▲▼ — octave</span>
       </div>
       <div class="note-grid free-grid" id="free-grid" style="margin-bottom:0"></div>
       <button class="clear-btn" id="free-clear" onclick="clearFree()" data-t="clear-3">✕ Clear</button>
@@ -2180,9 +2283,7 @@ body.bolinhas .pulse-bpm{display:none}
 
   <div class="mgroup" id="groove-block">
     <div class="head" style="margin-bottom:0"><span class="section-label" data-t="accompaniment">Accompaniment</span>
-      <span class="sig-fields">
-        <select class="sig-select" id="groove-sel" data-ta="aria.groove" aria-label="Accompaniment style"></select>
-      </span></div>
+      <span class="btn-wrap" id="groove-row"></span></div>
     <div class="head" id="kit-line" style="display:none;margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="kit">Kit</span>
       <span class="btn-wrap seg" id="kit-row" data-cols="fixed"></span></div>
@@ -2292,10 +2393,7 @@ body.bolinhas .pulse-bpm{display:none}
 
   <div class="mgroup" id="count-block">
     <div class="head" style="margin-bottom:0"><span class="section-label" data-t="count-in">Count In</span>
-      <span class="sig-fields">
-        <select class="sig-select" id="count-bars" data-ta="aria.countBars" aria-label="Bars of count-in"></select>
-        <span class="sig-unit" data-t="bars-2">bars</span>
-      </span></div>
+      <span class="btn-wrap" id="count-bars-row"></span></div>
     <div class="head" id="count-between-line" style="margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="count-again-on">Count again on</span>
       <span class="btn-wrap seg" id="count-between-row" data-cols="fixed"></span></div>
@@ -2595,25 +2693,28 @@ body.bolinhas .pulse-bpm{display:none}
 <!-- Settings: the handful of choices that are about reading rather than
      playing, and that you set once. Kept off the panels for that reason. -->
 <div class="help-overlay" id="settings-overlay" hidden role="dialog" aria-modal="true" aria-label="Settings">
- <button class="theme-btn help-close" onclick="closeSettings()" aria-label="Close">✕</button>
+ <button class="theme-btn help-close" id="set-close" onclick="settingsVolta()" aria-label="Close">✕</button>
  <div class="help-inner">
-  <div class="help-top"><h2 data-t="set.title">Settings</h2></div>
+  <div class="help-top"><h2 id="set-title" data-t="set.title">Settings</h2></div>
 
-  <div class="help-sec">
-    <h3 data-t="set.language">Language</h3>
-    <div class="btn-wrap" id="lang-row" style="--cols:2"></div>
+  <!-- Three questions, three boxes, and each opens onto its own answers — the
+       same shape as everywhere else in the app. Three groups on one screen with
+       thirteen small buttons between them was the last screen still built the
+       old way. -->
+  <div id="set-boxes"></div>
+
+  <div class="help-sec set-pagina" id="set-lang" style="display:none">
+    <div class="btn-wrap" id="lang-row"></div>
     <div class="info-line" data-t="set.language.hint">English is built in; the others are fetched once and then kept, so they work offline too.</div>
   </div>
 
-  <div class="help-sec">
-    <h3 data-t="set.notenames">Note names</h3>
-    <div class="btn-wrap" id="notenames-row" style="--cols:3"></div>
+  <div class="help-sec set-pagina" id="set-notes" style="display:none">
+    <div class="btn-wrap" id="notenames-row"></div>
     <div class="info-line" id="notenames-hint"></div>
   </div>
 
-  <div class="help-sec">
-    <h3 data-t="set.theme">Theme</h3>
-    <div class="btn-wrap" id="theme-row" style="--cols:2"></div>
+  <div class="help-sec set-pagina" id="set-theme" style="display:none">
+    <div class="btn-wrap" id="theme-row"></div>
   </div>
  </div>
 </div>
@@ -5250,7 +5351,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-10p';
+const APP_VERSION='lab-2026-09-11a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5710,7 +5811,7 @@ function paginasDoPainel(){
    a name, so it is taken as words. */
 function soTexto(s){return String(s==null?'':s).replace(/<[^>]*>/g,'').trim();}
 function nomeDaPagina(){
-  const defs=PAGINAS[painelAberto];
+  const defs=paginasDoPainel();
   const d=defs&&defs.find(x=>x.k===subPag);
   return d?soTexto(d.nome()):'';
 }
@@ -5735,6 +5836,11 @@ function arrumaPaginas(){
   if(row.parentNode!==body||row.previousElementSibling!==(pulso&&pulso.parentNode===body?pulso:null))
     body.insertBefore(row,antes);
   const pag=paginasDoPainel().find(d=>d.k===subPag);
+  /* A page can stop existing while you are looking at it — turn the polyrhythm
+     on and the subdivision has nothing to say — and the panel went back to its
+     boxes while the bar at the top still carried the name of the page that had
+     gone. What is not there is not open. */
+  if(!pag&&subPag)subPag=null;
   const naFrente=!pag;
   row.style.display=naFrente?'':'none';
   /* What is on the screen is said in CSS and not by writing style.display on
@@ -5759,6 +5865,10 @@ function arrumaPaginas(){
     }
   });
   document.body.classList.add('sub');
+  /* The bar above the page already says what the page is: the group inside it
+     that says the same word again is one title too many. */
+  escondeTituloRepetido(nomeDaPagina());
+  marcaDuas();
   /* The circles are sized from the room they are in, and the room has just
      changed: on a page they are bigger than in a panel, and the class that says
      so is put on after they were last laid out. */
@@ -5774,6 +5884,47 @@ const DOBRAS=[
   ['mix-head','mix-body',null],
   ['subdiv-head','subdiv-body',null],
 ];
+/* One title, not two. Cleared first so that a label hidden on one page is back
+   on the next — the blocks are shared between panels and modes. */
+function escondeTituloRepetido(nome){
+  document.querySelectorAll('.titulo-repetido').forEach(e=>e.classList.remove('titulo-repetido'));
+  if(!nome)return;
+  const alvo=[...document.querySelectorAll('.pagina-aberta .section-label,.pagina-aberta .group-label')]
+    .find(e=>soTexto(e.textContent).toLowerCase()===String(nome).toLowerCase());
+  if(alvo)alvo.classList.add('titulo-repetido');
+}
+/* One question with two answers gets the full width for each of them. Counted
+   rather than asked in CSS, because what decides it is how many questions the
+   page holds and not how many buttons the row has. */
+function marcaDuas(){
+  document.querySelectorAll('.duas,.unica').forEach(e=>{e.classList.remove('duas');e.classList.remove('unica');});
+  document.querySelectorAll('.estica').forEach(e=>e.classList.remove('estica'));
+  const linhas=[...document.querySelectorAll('.pagina-aberta .seg,.pagina-aberta .btn-wrap')]
+    .filter(r=>r.getClientRects().length&&r.children.length);
+  if(linhas.length!==1)return;
+  const linha=linhas[0];
+  /* And it is only the page's one question if the page holds nothing else to
+     set: the tempo page has a row of two sounds on it and a number, a bar
+     length and two faders besides, and counting rows alone turned those two
+     sounds into the whole screen. */
+  const outros=[...document.querySelectorAll('.pagina-aberta button,.pagina-aberta select,'+
+      '.pagina-aberta input,.pagina-aberta .note-btn')]
+    .filter(e=>e.getClientRects().length&&e.parentElement!==linha
+               &&!e.classList.contains('clear-btn')&&!e.classList.contains('panel-clear'));
+  if(outros.length)return;
+  /* One question on the page: its answers take the page, however many they are.
+     Two of them stand one above the other as well. */
+  linha.classList.add('unica');
+  if(linha.children.length===2)linha.classList.add('duas');
+  /* And the way up from it is opened so it can take the height: the row is
+     inside a label line inside a block, and none of those was asked to grow. */
+  let el=linha.parentElement;
+  while(el&&!el.classList.contains('sec-body')){
+    el.classList.add('estica');
+    if(el.classList.contains('pagina-aberta'))break;
+    el=el.parentElement;
+  }
+}
 function abreDobras(el){
   DOBRAS.forEach(([h,b,depois])=>{
     const head=document.getElementById(h);
@@ -8442,23 +8593,34 @@ function buildGapRow(){
        ? tr('gap.hintOver','Whole to begin with, and thinner as the minutes go by. It keeps counting either way.')
        : tr('gap.hintNow','It keeps counting — come back in where it comes back.'));
 }
+/* A row of choices, drawn the way every page draws one: a button each, the
+   chosen one wearing the selection. Written once because the wheels it replaces
+   were each written out by hand — a menu you have to open to see is the one
+   shape the pages were meant to end. */
+function linhaDeEscolhas(host,itens,ativo,escolhe){
+  if(!host)return;
+  host.innerHTML='';
+  itens.forEach(([v,label])=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(String(ativo)===String(v)?' active':'');
+    b.type='button';
+    b.textContent=label;
+    b.onclick=()=>escolhe(v);
+    host.appendChild(b);
+  });
+  gridify(host);
+}
 function buildCountRow(){
-  const sel=document.getElementById('count-bars');
+  const caixas=document.getElementById('count-bars-row');
   const row=document.getElementById('count-between-row');
   const line=document.getElementById('count-between-line');
-  if(!sel||!row)return;
-  if(!sel.options.length||sel.dataset.lang!==LANG){
-    const liga=!sel.options.length;
-    sel.innerHTML='';sel.dataset.lang=LANG;
-    sel.appendChild(new Option(tr('common.off','Off'),0));
-    for(let i=1;i<=COUNT_MAX;i++)sel.appendChild(new Option(i,i));
-    if(liga)sel.addEventListener('change',()=>{
-      state.countBars=parseInt(sel.value,10)||0;
-      buildCountRow();refreshSectionSummaries();
-    });
-  }
-  sel.value=String(state.countBars||0);
-  sel.classList.toggle('active',state.countBars>0);
+  if(!caixas||!row)return;
+  const opcoes=[[0,tr('common.off','Off')]];
+  for(let i=1;i<=COUNT_MAX;i++)opcoes.push([i,String(i)]);
+  linhaDeEscolhas(caixas,opcoes,state.countBars||0,v=>{
+    state.countBars=parseInt(v,10)||0;
+    buildCountRow();refreshSectionSummaries();
+  });
   // nothing to ask about if there is no count-in, and nothing to count between
   // if the notes never hand over
   const canBetween=state.countBars>0&&!notesSilent();
@@ -9023,19 +9185,12 @@ function renderPolyBeats(){
 /* Click, or one of the styles. A style is not a second thing playing over the
    click: it takes its place, because two timekeepers are one too many. */
 function buildGrooveRow(){
-  const sel=document.getElementById('groove-sel');
-  if(!sel)return;
-  // refilled when the language changes: an <option> carries its own words
-  if(!sel.options.length||sel.dataset.lang!==LANG){
-    const wire=!sel.options.length;
-    sel.innerHTML='';sel.dataset.lang=LANG;
-    sel.appendChild(new Option(tr('groove.click','Click'),'click'));
-    Object.keys(GROOVES).forEach(k=>sel.appendChild(new Option(grooveLabel(k),k)));
-    sel.appendChild(new Option(tr('groove.custom','Custom'),'custom'));   // the player's own
-    if(wire)sel.addEventListener('change',()=>setGroove(sel.value));
-  }
-  sel.value=state.groove;
-  sel.classList.toggle('active',grooveOn());
+  const row=document.getElementById('groove-row');
+  if(!row)return;
+  const opcoes=[['click',tr('groove.click','Click')]]
+    .concat(Object.keys(GROOVES).map(k=>[k,grooveLabel(k)]))
+    .concat([['custom',tr('groove.custom','Custom')]]);   // the player's own
+  linhaDeEscolhas(row,opcoes,state.groove,v=>setGroove(v));
   // the bar is the style's while one is playing, so it cannot be typed over
   const q=document.getElementById('sig-4');
   if(q){
@@ -11003,14 +11158,20 @@ function fitWordmark(){
 
 /* The octave stepper, in one place, because how wide it is decides how many
    notes fit across and that has to be measured from the real thing. */
+/* The octave, on the right of the note and standing up: an arrow above the
+   number and an arrow below it, each in a box of its own and big enough to hit
+   without looking. Plus and minus said arithmetic; an arrow says which way the
+   note goes. A note that is not chosen has no octave to set, so it has nothing
+   there — and the empty column on the other side is what keeps its name in the
+   middle of the button rather than in the middle of what is left of it. */
 function octControlsHTML(on,val){
   return on
     ? '<div class="oct-controls">'+
-        '<button class="oct-btn" data-oct="-1">−</button>'+
-        '<span class="oct-val">'+tr('oct.short','Oct')+' '+val+'</span>'+
-        '<button class="oct-btn" data-oct="1">+</button>'+
+        '<button class="oct-btn" data-oct="1" aria-label="'+tr('oct.up','Octave up')+'">\u25B2</button>'+
+        '<span class="oct-val">'+val+'</span>'+
+        '<button class="oct-btn" data-oct="-1" aria-label="'+tr('oct.down','Octave down')+'">\u25BC</button>'+
       '</div>'
-    : '<div class="oct-controls"><span class="oct-val">—</span></div>';
+    : '';
 }
 /* How wide a note needs to be once it is ON. A note that is off is 40px; the
    moment it is armed the stepper appears and it becomes 92, and four of those
@@ -11907,15 +12068,68 @@ function buildSettings(){
     });
   }
   paintNoteHint();
+  buildSetBoxes();
 }
 function paintNoteHint(){
   const h=document.getElementById('notenames-hint');
   if(h)h.textContent=noteHint();
 }
+/* Which of the three is open, or the three themselves. */
+let setPag=null;
+const SET_PAGS=[
+  {k:'lang', nome:()=>tr('set.language','Language'),
+   diz:()=>{const l=LANGS.find(x=>x.code===LANG);return l?l.label:LANG;}},
+  {k:'notes',nome:()=>tr('set.notenames','Note names'),
+   diz:()=>noteStyleLabel(state.noteNames)},
+  {k:'theme',nome:()=>tr('set.theme','Theme'),
+   diz:()=>currentTheme()==='light'?tr('set.theme.light','Light'):tr('set.theme.dark','Dark')},
+];
+function buildSetBoxes(){
+  const row=document.getElementById('set-boxes');
+  if(!row)return;
+  row.innerHTML='';
+  SET_PAGS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='panel-box';b.type='button';
+    const nome=soTexto(d.nome());
+    const t=document.createElement('span');t.textContent=nome;
+    b.appendChild(t);
+    let diz='';try{diz=soTexto(d.diz());}catch(e){}
+    if(diz){const u=document.createElement('span');u.className='sub';u.textContent=diz;b.appendChild(u);}
+    b.setAttribute('aria-label',diz?nome+' — '+diz:nome);
+    b.onclick=()=>abreSetPag(d.k);
+    row.appendChild(b);
+  });
+}
+function abreSetPag(k){setPag=k;pintaSettings();
+  const o=document.getElementById('settings-overlay');if(o)o.scrollTop=0;}
+/* The one button in the corner is both ways out: back to the three, and then
+   out of the settings altogether. */
+function settingsVolta(){
+  if(setPag){setPag=null;pintaSettings();return;}
+  closeSettings();
+}
+function pintaSettings(){
+  const o=document.getElementById('settings-overlay');
+  if(!o)return;
+  o.classList.toggle('numa-pagina',!!setPag);
+  SET_PAGS.forEach(d=>{
+    const el=document.getElementById('set-'+d.k);
+    if(el)el.style.display=(setPag===d.k)?'':'none';
+  });
+  const t=document.getElementById('set-title');
+  const d=SET_PAGS.find(x=>x.k===setPag);
+  if(t)t.textContent=d?soTexto(d.nome()):tr('set.title','Settings');
+  const x=document.getElementById('set-close');
+  if(x)x.textContent=setPag?'\u2039':'\u2715';
+  buildSetBoxes();
+}
 function openSettings(){
   const o=document.getElementById('settings-overlay');
   if(!o)return;
+  setPag=null;
   buildSettings();
+  pintaSettings();
   o.hidden=false;o.scrollTop=0;
   document.body.style.overflow='hidden';
 }

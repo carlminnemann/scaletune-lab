@@ -394,8 +394,8 @@
  "sum.studyList": "Übungsliste",
  "tap-a-beat-accent-it": "auf einen Schlag tippen: akzentuieren, dann stummschalten",
  "tap-a-pulse-accent-it": "auf einen Puls tippen: akzentuieren, dann stummschalten",
- "tap-add-or-remove-a": "<span>tippen — Ton hinzufügen oder wegnehmen</span> <span>+/− — Oktave</span> <span>mehrere Töne klingen zusammen</span>",
- "tap-toggle-note-on-off": "<span>tippen — Ton an oder aus</span> <span>+/− — Oktave</span>",
+ "tap-add-or-remove-a": "<span>tippen — Ton hinzufügen oder wegnehmen</span> <span>▲▼ — Oktave</span> <span>mehrere Töne klingen zusammen</span>",
+ "tap-toggle-note-on-off": "<span>tippen — Ton an oder aus</span> <span>▲▼ — Oktave</span>",
  "tap.at": "Tempo klopfen · {n}",
  "tap.keepTapping": "Tempo klopfen · weiterklopfen",
  "tap.outOfRange": "Tempo klopfen · außer Reichweite",
@@ -754,5 +754,7 @@
  "tuner.cents": "{n} Cent",
  "tuner.farOff": "weit daneben",
  "beats.only": "Nur die Schläge",
- "aria.home": "Start"
+ "aria.home": "Start",
+ "oct.up": "Oktave höher",
+ "oct.down": "Oktave tiefer"
 }

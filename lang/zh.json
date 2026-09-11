@@ -381,8 +381,8 @@
  "sum.studyList": "练习清单",
  "tap-a-beat-accent-it": "点一下某拍：先重音，再静音",
  "tap-a-pulse-accent-it": "点一下某个脉冲：先重音，再静音",
- "tap-add-or-remove-a": "点一下——加上或去掉一个音 +/− — 八度 多个音同时发声",
- "tap-toggle-note-on-off": "点一下——开关这个音 +/− — 八度",
+ "tap-add-or-remove-a": "点一下——加上或去掉一个音 ▲▼ — 八度 多个音同时发声",
+ "tap-toggle-note-on-off": "点一下——开关这个音 ▲▼ — 八度",
  "tap.at": "敲击定速 · {n}",
  "tap.keepTapping": "敲击定速 · 继续敲",
  "tap.outOfRange": "敲击定速 · 超出范围",
@@ -739,5 +739,7 @@
  "tuner.cents": "{n} 音分",
  "tuner.farOff": "相差很远",
  "beats.only": "只看拍子",
- "aria.home": "首页"
+ "aria.home": "首页",
+ "oct.up": "高八度",
+ "oct.down": "低八度"
 }

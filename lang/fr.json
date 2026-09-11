@@ -394,8 +394,8 @@
  "sum.studyList": "liste de travail",
  "tap-a-beat-accent-it": "touchez un temps : accentuez-le, puis rendez-le muet",
  "tap-a-pulse-accent-it": "touchez une pulsation : accentuez-la, puis rendez-la muette",
- "tap-add-or-remove-a": "<span>touchez — ajouter ou retirer une note</span> <span>+/− — octave</span> <span>plusieurs notes sonnent ensemble</span>",
- "tap-toggle-note-on-off": "<span>touchez — note active ou non</span> <span>+/− — octave</span>",
+ "tap-add-or-remove-a": "<span>touchez — ajouter ou retirer une note</span> <span>▲▼ — octave</span> <span>plusieurs notes sonnent ensemble</span>",
+ "tap-toggle-note-on-off": "<span>touchez — note active ou non</span> <span>▲▼ — octave</span>",
  "tap.at": "Battre le tempo · {n}",
  "tap.keepTapping": "Battre le tempo · continuez à battre",
  "tap.outOfRange": "Battre le tempo · hors limites",
@@ -754,5 +754,7 @@
  "tuner.cents": "{n} cents",
  "tuner.farOff": "très loin",
  "beats.only": "Seulement les temps",
- "aria.home": "Accueil"
+ "aria.home": "Accueil",
+ "oct.up": "Octave au-dessus",
+ "oct.down": "Octave en dessous"
 }
