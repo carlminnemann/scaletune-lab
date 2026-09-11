@@ -666,6 +666,11 @@ body.earpag #ear-page .ear-todos>button{min-height:44px!important;height:44px!im
    in the middle of the screen with a step either side. The short list of usual
    tempos was a column of slabs under it and is gone: what is wanted is the
    number. */
+/* The fader under the voices, centred under them and not stretched into one. */
+body.earpag #ear-page .ear-vol{display:flex;align-items:center;justify-content:center;
+  gap:var(--s3);flex:0 0 auto;margin-top:var(--s4);width:100%}
+body.earpag #ear-page .ear-vol label{min-width:0;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
 body.earpag #ear-page .tuner-a4-now.so-numero{margin:auto 0;flex:0 0 auto}
 body.earpag #ear-page .tuner-a4-now.so-numero .val{font-size:clamp(52px,13vh,104px);
   flex:0 1 auto;min-width:0}
@@ -5660,7 +5665,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11p';
+const APP_VERSION='lab-2026-09-11q';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6863,7 +6868,21 @@ function earNivelCaixa(){
   return {k:'nivel',nome:function(){return tr('ear.level','Level');},
           diz:function(){return earNivelLabel(state.ear.nivel||'medio');}};
 }
+/* The voice the exercise is played in. It was the app's old fold, left standing
+   above the boxes on this one screen — a bar with a chevron among a grid of
+   cards, and on a phone, where the scales fill the screen with ten boxes, it
+   was pushed off it altogether. It is a choice like the others, so it is a box
+   like the others. A rhythm has no timbre and does not get one. */
+function earCaixaSom(){
+  return {k:'som',nome:function(){return tr('sec.timbre','Timbre');},
+          diz:function(){return timbreLabel(state.timbre);}};
+}
 function earPaginas(){
+  const k=earKind();
+  if(k!=='rhythm'&&k)return earPaginasBase().concat([earCaixaSom()]);
+  return earPaginasBase();
+}
+function earPaginasBase(){
   const k=earKind();
   if(k==='intervals')return [
     earNivelCaixa(),
@@ -6876,7 +6895,9 @@ function earPaginas(){
   if(k==='scales')return [
     earNivelCaixa(),
     {k:'tudo',nome:function(){return tr('ear.allScales','All the scales');},
-     diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earScalesOn().length});}},
+     diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earScalesOn().length});},
+     liga:function(){return earScalesOn().length>=earQuantasEscalas();},
+     faz:function(){earTodasEscalas(!(earScalesOn().length>=earQuantasEscalas()));}},
     {k:'dir', nome:function(){return tr('ear.how','Played');},
      diz:function(){return earDirDiz(state.ear.scaleDir);}},
     {k:'vel', nome:function(){return tr('ear.speed','Speed');},
@@ -6888,7 +6909,9 @@ function earPaginas(){
   if(k==='chords')return [
     earNivelCaixa(),
     {k:'tudo',nome:function(){return tr('ear.allChords','All the chords');},
-     diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earChordsOn().length});}},
+     diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earChordsOn().length});},
+     liga:function(){return earChordsOn().length>=earQuantosAcordes();},
+     faz:function(){earTodosAcordes(!(earChordsOn().length>=earQuantosAcordes()));}},
     {k:'how',nome:function(){return tr('ear.how','Played');},
      diz:function(){return earComoDiz(state.ear.chordHow);}}]
     .concat(earChordFams().map(function(g){
@@ -6955,6 +6978,14 @@ function earAplicaNivel(n){
 }
 /* Everything on, or everything off — for one family, or for all of them. Twenty
    eight modes switched on one at a time is not a choice, it is a chore. */
+/* How many there are altogether, which is what "all of them" means: the box
+   that turns them all on is a switch, and a switch has to know when it is on. */
+function earQuantasEscalas(){
+  return Object.keys(SCALES).reduce(function(n,g){return n+Object.keys(SCALES[g]).length;},0);
+}
+function earQuantosAcordes(){
+  return Object.keys(CHORDS).reduce(function(n,g){return n+Object.keys(CHORDS[g]).length;},0);
+}
 function earTodasEscalas(liga){
   const m=state.ear.scales;
   Object.keys(m).forEach(function(k){delete m[k];});
@@ -7072,15 +7103,6 @@ function buildEarPage(){
   if(earPag==='nivel'){
     earCaixasSeg(host,EAR_NIVEIS.map(function(n){return [n,earNivelLabel(n)];}),
       state.ear.nivel||'medio',function(v){earAplicaNivel(v);});
-  } else if(earPag==='tudo'){
-    const acordes=k==='chords';
-    earCaixasSeg(host,[[true,tr('ear.allOn','All')],
-                       [false,tr('ear.allOff','None')]],null,
-      function(v){acordes?earTodosAcordes(v):earTodasEscalas(v);});
-    /* Two things to do, not two things to choose between: side by side and the
-       size of a button, rather than two slabs one above the other. */
-    const linha=host.querySelector('.btn-wrap');
-    if(linha)linha.classList.add('ear-acoes');
   } else if(earPag==='dir'){
     earCaixasSeg(host,[['updown',tr('ear.upAndDown','Up and back down')],
       ['up',tr('ear.up','Up')],['down',tr('ear.down','Down')],['mix',tr('ear.mixed','Mixed')]],
@@ -7123,6 +7145,20 @@ function buildEarPage(){
         ligaSo(state.ear.figs,earComposto()?['4','8','16','r']:['4','8','3','16','r']);
         earMexeu();
       });
+  } else if(earPag==='som'){
+    earCaixasSeg(host,availableTimbres().map(function(t){return [t.k,timbreLabel(t.k)];}),
+      state.timbre,function(v){setTimbre(v);earMexeu();});
+    /* The fader belongs with the voice it carries, and it is the same one the
+       rest of the app writes to — the panel's readout is written by hand here
+       because the panel is not on this screen. */
+    const vol=document.createElement('div');vol.className='control-row ear-vol';
+    const lab=document.createElement('label');lab.textContent=tr('volume','Volume');
+    const sl=document.createElement('input');sl.type='range';sl.min='0';sl.max='1';
+    sl.step='0.05';sl.value=String(state.volume);sl.style.flex='1';
+    const out=document.createElement('span');out.textContent=Math.round(state.volume*100)+'%';
+    sl.oninput=function(){updateVol(this.value);out.textContent=Math.round(this.value*100)+'%';};
+    vol.appendChild(lab);vol.appendChild(sl);vol.appendChild(out);
+    host.appendChild(vol);
   } else if(earPag==='bpm'){
     earTempoLivre(host);
   } else if(earPag.indexOf('fam:')===0){
@@ -7152,7 +7188,17 @@ function buildEarOptRow(){
     let diz='';try{diz=soTexto(d.diz?d.diz():'');}catch(e){}
     b.setAttribute('aria-label',diz?nome+' — '+diz:nome);
     b.appendChild(t);
-    b.onclick=function(){earAbrePagina(d.k);};
+    /* Most boxes ask a question and open a page with it. One of them is not a
+       question at all — all of them or none of them is a switch, and a switch
+       that opens a page to be flicked is a door in front of a light switch. */
+    if(d.faz){
+      const ligado=d.liga&&d.liga();
+      b.classList.toggle('tem',!!ligado);
+      b.setAttribute('aria-pressed',ligado?'true':'false');
+      b.onclick=function(){d.faz();buildEarOpts();renderEar();pintaCasa();};
+    }else{
+      b.onclick=function(){earAbrePagina(d.k);};
+    }
     row.appendChild(b);
   });
 }
@@ -7180,10 +7226,10 @@ function earVoltaMenu(){
   renderEar();pintaCasa();setPlayUI(false);
 }
 function buildEarOpts(){
-  /* A rhythm has no timbre: it is a drum, and the panel that chooses a voice
-     for the notes has nothing to say about it. */
+  /* The timbre is a box among the boxes now, so the old fold stays down on this
+     screen whatever the exercise is. */
   const som=document.getElementById('sec-sound');
-  if(som&&state.mode==='ear')som.style.display=(earKind()==='rhythm')?'none':'';
+  if(som&&state.mode==='ear')som.style.display='none';
   const row=document.getElementById('ear-optbox-row');
   const page=document.getElementById('ear-page');
   if(row)row.style.display=earPag?'none':'';
