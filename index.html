@@ -5708,7 +5708,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-12a';
+const APP_VERSION='lab-2026-09-12b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -11910,7 +11910,59 @@ function travaCaixas(){
     row.style.gridAutoRows=rows;
     row.style.flexGrow=cresce;
     row.style.minHeight=h>0?h+'px':'';
+    /* And if a box still cannot fit its own words — two lines where the
+       measurement counted one — the row takes the difference. */
+    let falta=0;
+    [...row.children].forEach(c=>{falta=Math.max(falta,c.scrollHeight-c.clientHeight);});
+    if(falta>1&&h>0)row.style.minHeight=(h+falta)+'px';
   });
+  travaBlocos();
+}
+/* Holding the row to its minimum only moved the crush up a level: the block
+   around it went on shrinking, and the row — which now would not — spilled out
+   of it and over the rotation. So the way up is held to its minimum too, and
+   the screen scrolls, which is what a screen with more on it than fits does.
+   Only where the rotation is on the screen: everywhere else the panels have
+   room, and a floor nobody needs is a floor that can go wrong. */
+function travaBlocos(){
+  const sc=document.getElementById('scroll-area');
+  document.querySelectorAll('[data-travado]').forEach(e=>{
+    e.style.minHeight='';e.removeAttribute('data-travado');});
+  if(!sc)return;
+  const rot=document.getElementById('rotation-panel');
+  if(!rot||!rot.offsetParent)return;
+  /* From the inside out: a box only knows how tall it has to be once the boxes
+     inside it have said so. Every level between a row and the screen counts —
+     one of them, the scale panel's own wrapper, clips what it cannot fit, which
+     is why the boxes did not spill but simply went out of reach. */
+  const alvos=new Set();
+  document.querySelectorAll(LINHAS_TRAVADAS).forEach(row=>{
+    if(!row.offsetParent)return;
+    let el=row.parentElement;
+    while(el&&el!==sc&&el!==document.body){alvos.add(el);el=el.parentElement;}
+  });
+  sc.querySelectorAll('.sec-body,.panel').forEach(e=>alvos.add(e));
+  [...sc.children].forEach(e=>alvos.add(e));
+  const fundo=[...alvos].filter(el=>el&&el!==rot&&!rot.contains(el)&&el.offsetParent)
+    .map(el=>{let d=0,p=el;while(p){d++;p=p.parentElement;}return [d,el];})
+    .sort((a,b)=>b[0]-a[0]);
+  fundo.forEach(([,el])=>{
+    el.style.minHeight='0px';
+    const h=el.scrollHeight;
+    if(h>0){el.style.minHeight=h+'px';el.setAttribute('data-travado','1');}
+    else el.style.minHeight='';
+  });
+  /* Once, and then again: given its floor, a box can lay its contents out
+     differently — a row of buttons that wraps, a line of text that no longer
+     does — and come out a few pixels taller than it measured. Two passes settle
+     it; a third has never had anything to do. */
+  for(let volta=0;volta<2;volta++){
+    let mexeu=false;
+    fundo.forEach(([,el])=>{
+      if(el.scrollHeight>el.clientHeight+1){el.style.minHeight=el.scrollHeight+'px';mexeu=true;}
+    });
+    if(!mexeu)break;
+  }
 }
 var travaPendente=0;
 function travaCaixasSoon(){
