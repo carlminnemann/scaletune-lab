@@ -5708,7 +5708,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-11r';
+const APP_VERSION='lab-2026-09-12a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5980,6 +5980,7 @@ function buildFamRow(){
     b.onclick=()=>abreSub(fam);
     row.appendChild(b);
   });
+  travaCaixasSoon();
 }
 /* Choosing puts you back where you chose from — unless a study list is being
    built, where the whole point is to tap several. */
@@ -6432,6 +6433,7 @@ function buildPagRow(){
     b.onclick=()=>abreSub(d.k);
     row.appendChild(b);
   });
+  travaCaixasSoon();
 }
 
 /* Which panel of the mode is on the screen, or nothing for the boxes. Only
@@ -6523,6 +6525,7 @@ function buildPanelRow(){
     b.onclick=()=>abrePainel(id);
     row.appendChild(b);
   });
+  travaCaixasSoon();
 }
 /* Which sections are on the screen: all of them as before where a mode has no
    boxes, the chosen one alone where it has. */
@@ -7330,6 +7333,7 @@ function buildEarOptRow(){
     }
     row.appendChild(b);
   });
+  travaCaixasSoon();
 }
 function buildEarRow(){
   const row=document.getElementById('ear-row');
@@ -8718,6 +8722,8 @@ function updateRotationPanel(){
   const isPitch=state.mode==='scale'||state.mode==='arpeggio';
   const progressing=isPitch&&(listEnabled()||subdivListOn()||state.practice.rootMove==='fourths');
   panel.style.display=progressing?'':'none';
+  /* The boxes above it have just been given less room, or more. */
+  if(typeof travaCaixasSoon==='function')travaCaixasSoon();
   if(!progressing)return;
   const p=rotationPreview();
   const rc=document.getElementById('rot-clear');
@@ -11883,7 +11889,35 @@ function centreMetro(){
 const SPREAD_MAX=64;
 /* Whatever was just opened is aimed at again here, at the end, because this is
    where the layout stops moving. */
-function spreadPanels(){shareOutRoom();bringRevealed();}
+/* A grid of boxes shares the screen with whatever else is on it, and gives up
+   room until it has none left to give. "None left" was written as
+   min-height:min-content, which Safari does not honour on a flex item — so on a
+   phone, and on a tablet held sideways, the boxes were squeezed past their own
+   content and painted over the rotation under them. The minimum is measured
+   instead and pinned in pixels, which every engine obeys: past that point the
+   screen scrolls rather than the boxes shrinking into each other. */
+const LINHAS_TRAVADAS='#panel-row,#pag-row,#fam-row,#ear-optbox-row';
+function travaCaixas(){
+  document.querySelectorAll(LINHAS_TRAVADAS).forEach(row=>{
+    if(!row.offsetParent||!row.children.length){row.style.minHeight='';return;}
+    const rows=row.style.gridAutoRows,cresce=row.style.flexGrow;
+    /* Growing has to be turned off as well as the floor taken away, or what is
+       measured is the room it was given and not the room it needs. */
+    row.style.minHeight='0px';
+    row.style.flexGrow='0';
+    row.style.gridAutoRows='min-content';
+    const h=row.scrollHeight;
+    row.style.gridAutoRows=rows;
+    row.style.flexGrow=cresce;
+    row.style.minHeight=h>0?h+'px':'';
+  });
+}
+var travaPendente=0;
+function travaCaixasSoon(){
+  if(travaPendente)return;
+  travaPendente=setTimeout(()=>{travaPendente=0;travaCaixas();},0);
+}
+function spreadPanels(){shareOutRoom();travaCaixas();bringRevealed();}
 function shareOutRoom(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
