@@ -2781,6 +2781,7 @@ body.bolinhas .pulse-bpm{display:none}
       <button type="button" id="pass-more" data-ta="aria.passMore" aria-label="One more">+</button>
     </div>
     <div class="btn-wrap" id="pass-unit-row"></div>
+    <div class="info-line" id="pass-info"></div>
   </div>
   <div class="mgroup" id="poly-block">
   <div class="head"><span class="section-label" data-t="polyrhythm">Polyrhythm</span>
@@ -2806,6 +2807,20 @@ body.bolinhas .pulse-bpm{display:none}
   </div>
   <!-- No Clear here: it cleared nothing, it only turned the polyrhythm off, and
        the button that turns it on turns it off again. -->
+  </div>
+  <!-- The polyrhythm that moves on by itself. The same shape as the table of
+       time above it: pick the ones you want, say which way round they go, and
+       they hand over on the turn — at the end of a round where there are notes,
+       and every so many bars where there is only a pulse. -->
+  <div class="mgroup" id="polylist-block">
+    <div class="head" style="margin-bottom:var(--s2)">
+      <span class="section-label" data-t="poly.which">Which polyrhythms</span></div>
+    <div class="btn-wrap" id="polylist-row"></div>
+    <div class="head" id="polydir-line" style="margin-top:var(--s3);margin-bottom:0">
+      <span class="section-label" data-t="direction">Direction</span>
+      <span class="btn-wrap seg" id="polydir-row" data-cols="fixed"></span></div>
+    <div class="info-line" id="polylist-info"></div>
+    <button class="clear-btn panel-clear" data-panel="polyroda" onclick="limpaPainel('polyroda')">✕ Clear</button>
   </div>
   </div>
 </details>
@@ -3569,6 +3584,11 @@ let state={
        two modes relate, so it cannot belong to either of them. */
     listLinked:true,
             useSubdivList:false,subdivList:[],subdivDir:'up',
+            /* The same idea one floor up: a handful of polyrhythms that hand
+               over to each other as the practice goes round. Two or more of
+               them is what makes it a rotation; one is just a way of setting
+               the pair from here. */
+            polyList:[],polyDir:'up',
             /* The tempo can change on its own two ways: in steps, so many BPM at
                a time, or as a ramp that slides from where you are to where you
                want to be over so many minutes. 'every' is either a pass — one
@@ -4976,6 +4996,44 @@ function currentSubdiv(){
   if(subdivListOn()){const o=subdivOrder();return o[subdivIdx%o.length];}
   return state.subdiv;
 }
+/* ---------- the polyrhythm that moves on by itself ----------
+   The pairs worth practising: the three-against-two family and what comes after
+   it. Written as they are said — the first number is the layer the accent leads
+   with, the second the one it pulls against. */
+const POLY_PARES=['3:2','4:3','5:4','5:3','7:4','7:5'];
+let polyIdx=0;
+function polyListOn(){return !!state.poly.on&&state.practice.polyList.length>1;}
+function polyOrder(){
+  const l=state.practice.polyList;
+  if(l.length<2)return l.slice();
+  if(state.practice.polyDir==='down')return l.slice().reverse();
+  /* There and back without playing the turn twice at the join — the same rule
+     the table of time follows, for the same reason. */
+  if(state.practice.polyDir==='updown')
+    return l.concat(l.slice(runsOnce()?0:1,-1).reverse());
+  return l.slice();
+}
+function polyPar(k){const p=String(k).split(':');return [parseInt(p[0],10),parseInt(p[1],10)];}
+function aplicaPoly(k){
+  if(!k)return;
+  const [a,b]=polyPar(k);
+  if(!a||!b)return;
+  state.poly.a=Math.max(POLY_MIN,Math.min(POLY_MAX,a));
+  state.poly.b=Math.max(POLY_MIN,Math.min(POLY_MAX,b));
+  buildPolyBeats();
+}
+function polyAgora(){
+  if(!polyListOn())return state.poly.a+':'+state.poly.b;
+  const o=polyOrder();return o[polyIdx%o.length];
+}
+function avancaPoly(){
+  if(!polyListOn())return false;
+  const o=polyOrder();
+  polyIdx=(polyIdx+1)%o.length;
+  aplicaPoly(o[polyIdx]);
+  buildPolyListRow();
+  return polyIdx===0;          // it has come round
+}
 
 /* ---------- sequence building ---------- */
 /* A scale's notes, with the blue note folded in where it applies. Everything
@@ -5243,6 +5301,9 @@ function startPlayback(){
     armTempoOverTime(nextBeatTime);
     gapArm(nextBeatTime);
     beginCount();
+    /* A rotation of polyrhythms starts on the first of them, whatever the two
+       numbers on the tempo page happened to be left at. */
+    if(polyListOn()){polyIdx=0;aplicaPoly(polyOrder()[0]);buildPolyListRow();}
     if(state.poly.on)buildPolyBeats();
     if(subdivListOn())subdivIdx=0;
     if(metroScheduler)clearInterval(metroScheduler);
@@ -5714,7 +5775,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-12c';
+const APP_VERSION='lab-2026-09-12e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6188,8 +6249,14 @@ const PAGINAS={
      quando:()=>state.mode==='metro'||state.mode==='drone',
      mexeu:difP('gapMode','gapMinutes','gapKeepOne'),
      diz:()=>gapModeLabel()},
+    /* A rotation of polyrhythms, only where there is a polyrhythm to rotate. */
+    {k:'polyroda',bloco:'polylist-block',nome:()=>tr('poly.change','Polyrhythm Change'),fica:true,
+     quando:()=>!!state.poly.on,mexeu:difP('polyList','polyDir'),
+     diz:()=>polyDiz()},
+    /* With a polyrhythm on this is how often it hands over, so it belongs on
+       the screen there too — it used to go away with everything else. */
     {k:'pass',  bloco:'pass-block',    nome:()=>tr('advance-every','Advance Every'),fica:true,
-     quando:()=>pulseOnly()&&!state.poly.on,mexeu:difP('passCount','passUnit'),
+     quando:()=>pulseOnly(),mexeu:difP('passCount','passUnit'),
      diz:()=>passLabel()},
   ],
   'sec-rhythm':[
@@ -8163,7 +8230,12 @@ function passUnit(){
 /* One cycle is already the polyrhythm's own pass — it is the point at which the
    two layers come back together — so there is nothing to choose there. */
 function passCount(){
-  if(!pulseOnly()||state.poly.on)return 1;
+  if(!pulseOnly())return 1;
+  /* Under a polyrhythm the thing being counted is the cycle — the point where
+     the two layers come back together — and counting four of them is what a
+     drummer asks for: four cycles of three against two, then four of four
+     against three. It used to be fixed at one, which made the rotation change
+     every time round. */
   return Math.max(1,state.practice.passCount|0);
 }
 /* One word for what the tempo waits for. Where something is in rotation that
@@ -8175,7 +8247,13 @@ function passWord(){
 function passLabel(){
   const u=passUnit(),n=passCount();
   if(u==='pass')return passWord();
-  return n===1?u:(n+' '+u+'s');
+  /* It used to read "4 bars" in every language: the unit was the key itself
+     with an s put on the end. Now the box says it in the language the app is
+     being read in. */
+  if(u==='cycle')return tr('pass.cycleCount',{one:'{n} cycle',other:'{n} cycles'},{n:n});
+  return u==='beat'
+    ? tr('pass.beatCount',{one:'{n} beat',other:'{n} beats'},{n:n})
+    : tr('pass.barCount',{one:'{n} bar',other:'{n} bars'},{n:n});
 }
 
 // One pass of the metronome on its own: the figure moves on, then the tempo.
@@ -8272,7 +8350,7 @@ const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol','cl
   'blueNotes','listKind',
   'freeRoot','freeSpan','freeSpanWanted','freeDirection','freeTop'];
 const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
-  'passCount','passUnit','useSubdivList','subdivDir',
+  'passCount','passUnit','useSubdivList','subdivDir','polyDir',
   'rootMove','repeat','modesTour','useList',
   'gapMode','gapMinutes','gapKeepOne'];
 const metroPerMode={};
@@ -8295,6 +8373,7 @@ function metroSnapshot(){
   METRO_MINE_P.forEach(k=>o.p[k]=state.practice[k]);
   o.accents=(state.accents||[]).slice();
   o.p.subdivList=(state.practice.subdivList||[]).slice();
+  o.p.polyList=(state.practice.polyList||[]).slice();
   o.p.list=clonar(state.practice.list||[]);
   o.poly=clonar(state.poly);
   o.seqCustom=(state.seqCustom||[]).slice();
@@ -8308,6 +8387,7 @@ function metroRestore(o){
   METRO_MINE_P.forEach(k=>{if(k in o.p)state.practice[k]=o.p[k];});
   state.accents=(o.accents||[]).slice();
   state.practice.subdivList=(o.p.subdivList||[]).slice();
+  state.practice.polyList=(o.p.polyList||[]).slice();
   state.practice.list=clonar(o.p.list||[]);
   state.poly=clonar(o.poly);
   state.seqCustom=(o.seqCustom||[]).slice();
@@ -8462,6 +8542,7 @@ const PANEL_FIELDS={
   gap:{p:['gapMode','gapMinutes','gapKeepOne']},
   subdiv:{s:['subdiv','clickFollowsFigure'],p:['useSubdivList','subdivDir'],arrP:['subdivList']},
   poly:{s:['polyVol'],obj:['poly']},
+  polyroda:{p:['polyDir'],arrP:['polyList']},
   /* Metro's own, which live in the other fresh bundle: the accompaniment
      exists in one mode, so clearing that mode has to clear it too. */
   accomp:{g:['kit','density','balladHat','groove']},
@@ -8558,6 +8639,7 @@ function redrawMetro(){
   buildClickSoundRow();pintaPolySwitch();
   buildNoteLenRow();buildSubdivRow();buildClickModeRow();buildAlignRow();
   buildSpeedControls();buildCountRow();buildGapRow();buildPassRow();buildMetroOnRow();
+  buildPolyListRow();
   panelLabels();
   updateSupersededControls();
 }
@@ -8568,6 +8650,10 @@ function metroPass(){
     subdivIdx=(subdivIdx+1)%subdivOrder().length;
     buildSubdivRow();
   }
+  /* With no notes there is nothing to come round, so what moves the rotation on
+     is the same thing that moves the tempo: Advance Every. Four bars of three
+     against two, four of four against three. */
+  avancaPoly();
   stepTempo();
 }
 
@@ -8614,6 +8700,15 @@ function advancePass(){
     wrapped=(subdivIdx===0);
     figureChanged=true;
     buildSubdivRow();
+  }
+  /* Then the polyrhythm, one ring further out: the whole table of time is heard
+     against three-against-two before it is heard against four-against-three.
+     Moving both at once would leave neither of them audible — and it counts as
+     a change of figure, because the grid the phrase is drifting against has
+     just been redrawn. */
+  if(!segura&&wrapped&&polyListOn()){
+    wrapped=avancaPoly();
+    figureChanged=true;
   }
   const list=activeList();
   let itemChange=false,keyChange=false;
@@ -8726,7 +8821,7 @@ function updateRotationPanelSoon(){setTimeout(updateRotationPanel,0);}
 function updateRotationPanel(){
   const panel=document.getElementById('rotation-panel');if(!panel)return;
   const isPitch=state.mode==='scale'||state.mode==='arpeggio';
-  const progressing=isPitch&&(listEnabled()||subdivListOn()||state.practice.rootMove==='fourths');
+  const progressing=isPitch&&(listEnabled()||subdivListOn()||polyListOn()||state.practice.rootMove==='fourths');
   panel.style.display=progressing?'':'none';
   /* The boxes above it have just been given less room, or more. */
   if(typeof travaCaixasSoon==='function')travaCaixasSoon();
@@ -9095,6 +9190,75 @@ function tapTempo(){
    a real choice. A table of time goes round and round, and on a loop Down-Up is
    Up-Down entered at a different point — the same cycle described twice. It is
    offered for the notes and not here. */
+/* The polyrhythms in play, and which way round they go. Tapping one puts it in
+   or takes it out, and the number on it says where it comes in the round; the
+   one sounding is green, as the figures are. With one chosen there is nothing
+   to rotate, so it simply sets the pair — the grid doubles as a quick way to
+   reach 5:4 without two rollers. */
+function buildPolyListRow(){
+  const row=document.getElementById('polylist-row');
+  if(!row)return;
+  row.innerHTML='';
+  const list=state.practice.polyList;
+  const agora=polyAgora();
+  POLY_PARES.forEach(k=>{
+    const b=document.createElement('button');
+    const i=list.indexOf(k);
+    const soando=i>=0&&k===agora&&state.playing&&polyListOn();
+    b.className='pick-btn'+(i>=0?(soando?' now':' active'):'');
+    b.type='button';
+    if(i>=0&&list.length>1){
+      b.classList.add('numbered');
+      b.innerHTML='<span class="idx">'+(i+1)+'</span>'+k;
+    } else b.textContent=k;
+    b.setAttribute('aria-label',tr('poly.against','{a} against {b}',
+      {a:polyPar(k)[0],b:polyPar(k)[1]}));
+    b.onclick=()=>{
+      const at=list.indexOf(k);
+      if(at>=0)list.splice(at,1);else list.push(k);
+      polyIdx=0;
+      if(list.length)aplicaPoly(polyOrder()[0]);
+      buildPolyListRow();buildPolyDirRow();polyListInfo();
+      updatePracticeInfo();refreshSectionSummaries();updateRotationPanel();
+    };
+    row.appendChild(b);
+  });
+  buildPolyDirRow();
+  polyListInfo();
+}
+function buildPolyDirRow(){
+  const row=document.getElementById('polydir-row');
+  const line=document.getElementById('polydir-line');
+  if(!row)return;
+  const muitos=state.practice.polyList.length>1;
+  if(line)line.style.display=muitos?'':'none';
+  row.innerHTML='';
+  if(!muitos)return;
+  if(state.practice.polyDir==='downup')state.practice.polyDir='updown';
+  SUBDIV_DIRS.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='pick-btn'+(d.k===state.practice.polyDir?' active':'');
+    b.textContent=lab('subdivdir',d.k,d.label);
+    b.onclick=()=>{state.practice.polyDir=d.k;polyIdx=0;
+      buildPolyListRow();updatePracticeInfo();refreshSectionSummaries();};
+    row.appendChild(b);
+  });
+}
+function polyListInfo(){
+  const el=document.getElementById('polylist-info');
+  if(!el)return;
+  const n=state.practice.polyList.length;
+  el.textContent=n>1
+    ? tr('poly.rotating','{n} in turn, {dir}',
+        {n:polyOrder().length,dir:dirLabel(state.practice.polyDir).toLowerCase()})
+    : (n===1?tr('poly.justOne','one chosen — nothing to hand over to')
+            :tr('poly.pickTwo','choose two or more and they hand over as you go'));
+}
+function polyDiz(){
+  const n=state.practice.polyList.length;
+  if(n>1)return tr('poly.count',{one:'{n} polyrhythm',other:'{n} polyrhythms'},{n:polyOrder().length});
+  return tr('common.off','Off');
+}
 const SUBDIV_DIRS=DIRECTIONS.filter(d=>d.k!=='downup');
 function buildSubdivDirRow(){
   const row=document.getElementById('subdivdir-row');row.innerHTML='';
@@ -9493,12 +9657,19 @@ function buildPassRow(){
   /* Only a pulse without notes needs to be told what a pass is — Metro, and now
      Drone, where the metronome runs over a held note and nothing comes round on
      its own either. */
-  if(block)block.style.display=(pulseOnly()&&!state.poly.on)?'':'none';
+  if(block)block.style.display=pulseOnly()?'':'none';
   const menos=document.getElementById('pass-less'),mais=document.getElementById('pass-more');
   if(menos&&!menos.onclick)menos.onclick=()=>poePassCount(passCount()-1);
   if(mais&&!mais.onclick)mais.onclick=()=>poePassCount(passCount()+1);
   num.textContent=String(passCount());
   row.innerHTML='';
+  /* Under a polyrhythm there is nothing to choose: what is counted is the
+     cycle. The two words go, and a line says what the number means. */
+  const ciclos=passUnit()==='cycle';
+  const info=document.getElementById('pass-info');
+  if(info)info.textContent=ciclos?tr('pass.cycles','cycles of the polyrhythm'):'';
+  row.style.display=ciclos?'none':'';
+  if(ciclos)return;
   [['bar',tr('pass.bars','Bars')],['beat',tr('pass.beats','Beats')]].forEach(([k,label])=>{
     const b=document.createElement('button');
     b.className='pick-btn'+(state.practice.passUnit===k?' active':'');
@@ -9536,6 +9707,11 @@ function updatePracticeInfo(){
              {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
         : tr('modes.running','{n} modes of {key}, one octave each, closing on the first an octave up',
              {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})));
+  if(polyListOn())
+    bits.push(tr('practice.polys',
+      {one:'{n} polyrhythm ({dir}) across the round',
+       other:'{n} polyrhythms ({dir}) across the round'},
+      {n:polyOrder().length,dir:dirLabel(state.practice.polyDir).toLowerCase()}));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(tr('practice.figures',
       {one:'{n} rhythmic figure ({dir}) within each mode',
@@ -10676,6 +10852,9 @@ function applyExercise(x){
     state.practice.subdivList=Array.isArray(p.subdivList)
       ? p.subdivList.filter(k=>SUBDIVS.some(d=>d.k===k)).slice(0,8) : [];
     state.practice.subdivDir=oneOf(p.subdivDir,SUBDIV_DIRS.map(d=>d.k))||'up';
+    state.practice.polyList=Array.isArray(p.polyList)
+      ? p.polyList.filter(k=>POLY_PARES.indexOf(k)>=0).slice(0,6) : [];
+    state.practice.polyDir=oneOf(p.polyDir,SUBDIV_DIRS.map(d=>d.k))||'up';
     state.practice.tempoMode=oneOf(p.tempoMode,['off','up','down','ramp'])||'off';
     const st=num(p.tempoStep,1,TEMPO_STEP_MAX); if(st)state.practice.tempoStep=st;
     state.practice.tempoEvery=(p.tempoEvery==='pass')?'pass':(num(p.tempoEvery,1,30)||'pass');
@@ -11530,6 +11709,9 @@ function updateSupersededControls(){
      asked again here, where every panel's visibility is decided. */
   buildBothWaysRow();
   pintaPolySwitch();
+  /* What a pass is depends on whether a polyrhythm is on, and this is where
+     that is decided. */
+  buildPassRow();
   arrumaPaginas();      // the pages have the last word on what is on the screen
   // and in Metro the pulses take the place the bar has just left
   splitMetro(state.mode!=='tuner');

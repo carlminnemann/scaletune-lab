@@ -795,5 +795,32 @@
  "ear.faster": "Plus rapide",
  "pat.grid": "La grille",
  "aria.passLess": "Un de moins",
- "aria.passMore": "Un de plus"
+ "aria.passMore": "Un de plus",
+ "poly.change": "Changement de polyrythmie",
+ "poly.which": "Quelles polyrythmies",
+ "poly.against": "{a} contre {b}",
+ "poly.rotating": "{n} tour à tour, {dir}",
+ "poly.justOne": "un seul choisi — personne à qui passer",
+ "poly.pickTwo": "choisis-en deux ou plus et ils se passent le tour",
+ "poly.count": {
+  "one": "{n} polyrythmie",
+  "other": "{n} polyrythmies"
+ },
+ "practice.polys": {
+  "one": "{n} polyrythmie ({dir}) sur le tour",
+  "other": "{n} polyrythmies ({dir}) sur le tour"
+ },
+ "pass.barCount": {
+  "one": "{n} mesure",
+  "other": "{n} mesures"
+ },
+ "pass.beatCount": {
+  "one": "{n} temps",
+  "other": "{n} temps"
+ },
+ "pass.cycles": "cycles de la polyrythmie",
+ "pass.cycleCount": {
+  "one": "{n} cycle",
+  "other": "{n} cycles"
+ }
 }

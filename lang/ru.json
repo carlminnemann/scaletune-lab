@@ -811,5 +811,32 @@
  "ear.faster": "Быстрее",
  "pat.grid": "Сетка",
  "aria.passLess": "На один меньше",
- "aria.passMore": "На один больше"
+ "aria.passMore": "На один больше",
+ "poly.change": "Смена полиритма",
+ "poly.which": "Какие полиритмы",
+ "poly.against": "{a} против {b}",
+ "poly.rotating": "{n} по очереди, {dir}",
+ "poly.justOne": "выбран один — некому передать",
+ "poly.pickTwo": "выберите два и больше — они будут сменять друг друга",
+ "poly.count": {
+  "one": "{n} полиритм",
+  "other": "{n} полиритмов"
+ },
+ "practice.polys": {
+  "one": "{n} полиритм ({dir}) за круг",
+  "other": "{n} полиритмов ({dir}) за круг"
+ },
+ "pass.barCount": {
+  "one": "{n} такт",
+  "other": "{n} тактов"
+ },
+ "pass.beatCount": {
+  "one": "{n} доля",
+  "other": "{n} долей"
+ },
+ "pass.cycles": "циклы полиритма",
+ "pass.cycleCount": {
+  "one": "{n} цикл",
+  "other": "{n} циклов"
+ }
 }

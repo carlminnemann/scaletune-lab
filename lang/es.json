@@ -795,5 +795,32 @@
  "ear.faster": "Más rápido",
  "pat.grid": "La rejilla",
  "aria.passLess": "Uno menos",
- "aria.passMore": "Uno más"
+ "aria.passMore": "Uno más",
+ "poly.change": "Cambio de polirritmo",
+ "poly.which": "Qué polirritmos",
+ "poly.against": "{a} contra {b}",
+ "poly.rotating": "{n} por turno, {dir}",
+ "poly.justOne": "solo uno elegido: no hay a quién pasar",
+ "poly.pickTwo": "elige dos o más y se van pasando el turno",
+ "poly.count": {
+  "one": "{n} polirritmo",
+  "other": "{n} polirritmos"
+ },
+ "practice.polys": {
+  "one": "{n} polirritmo ({dir}) a lo largo de la vuelta",
+  "other": "{n} polirritmos ({dir}) a lo largo de la vuelta"
+ },
+ "pass.barCount": {
+  "one": "{n} compás",
+  "other": "{n} compases"
+ },
+ "pass.beatCount": {
+  "one": "{n} pulso",
+  "other": "{n} pulsos"
+ },
+ "pass.cycles": "ciclos de la polirritmia",
+ "pass.cycleCount": {
+  "one": "{n} ciclo",
+  "other": "{n} ciclos"
+ }
 }

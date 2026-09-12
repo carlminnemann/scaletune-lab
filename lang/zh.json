@@ -780,5 +780,32 @@
  "ear.faster": "更快",
  "pat.grid": "网格",
  "aria.passLess": "减一",
- "aria.passMore": "加一"
+ "aria.passMore": "加一",
+ "poly.change": "复节奏变化",
+ "poly.which": "哪些复节奏",
+ "poly.against": "{a} 对 {b}",
+ "poly.rotating": "{n} 个轮流，{dir}",
+ "poly.justOne": "只选了一个 — 没有可交接的",
+ "poly.pickTwo": "选两个或更多，它们会依次交替",
+ "poly.count": {
+  "one": "{n} 个复节奏",
+  "other": "{n} 个复节奏"
+ },
+ "practice.polys": {
+  "one": "每轮 {n} 个复节奏（{dir}）",
+  "other": "每轮 {n} 个复节奏（{dir}）"
+ },
+ "pass.barCount": {
+  "one": "{n} 小节",
+  "other": "{n} 小节"
+ },
+ "pass.beatCount": {
+  "one": "{n} 拍",
+  "other": "{n} 拍"
+ },
+ "pass.cycles": "复节奏的循环",
+ "pass.cycleCount": {
+  "one": "{n} 个循环",
+  "other": "{n} 个循环"
+ }
 }
