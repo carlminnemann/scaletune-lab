@@ -796,20 +796,7 @@
  "pat.grid": "La griglia",
  "aria.passLess": "Uno in meno",
  "aria.passMore": "Uno in più",
- "poly.change": "Cambio di poliritmo",
- "poly.which": "Quali poliritmi",
- "poly.against": "{a} contro {b}",
- "poly.rotating": "{n} a turno, {dir}",
- "poly.justOne": "solo uno scelto — non c'è a chi passare",
- "poly.pickTwo": "scegline due o più e si passano il turno",
- "poly.count": {
-  "one": "{n} poliritmo",
-  "other": "{n} poliritmi"
- },
- "practice.polys": {
-  "one": "{n} poliritmo ({dir}) lungo il giro",
-  "other": "{n} poliritmi ({dir}) lungo il giro"
- },
+ "pass.cycles": "cicli del poliritmo",
  "pass.barCount": {
   "one": "{n} battuta",
   "other": "{n} battute"
@@ -818,9 +805,15 @@
   "one": "{n} movimento",
   "other": "{n} movimenti"
  },
- "pass.cycles": "cicli del poliritmo",
  "pass.cycleCount": {
   "one": "{n} ciclo",
   "other": "{n} cicli"
- }
+ },
+ "poly.swap": "Alterna",
+ "poly.swapping": "alternando strato",
+ "poly.changeEvery": "Cambia ogni",
+ "poly.eachPass": "Passata",
+ "poly.eachRound": "Giro intero",
+ "practice.swapPass": "le note cambiano strato a ogni passata",
+ "practice.swapRound": "le note cambiano strato a ogni giro intero"
 }

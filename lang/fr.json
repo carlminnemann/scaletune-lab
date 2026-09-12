@@ -796,20 +796,7 @@
  "pat.grid": "La grille",
  "aria.passLess": "Un de moins",
  "aria.passMore": "Un de plus",
- "poly.change": "Changement de polyrythmie",
- "poly.which": "Quelles polyrythmies",
- "poly.against": "{a} contre {b}",
- "poly.rotating": "{n} tour à tour, {dir}",
- "poly.justOne": "un seul choisi — personne à qui passer",
- "poly.pickTwo": "choisis-en deux ou plus et ils se passent le tour",
- "poly.count": {
-  "one": "{n} polyrythmie",
-  "other": "{n} polyrythmies"
- },
- "practice.polys": {
-  "one": "{n} polyrythmie ({dir}) sur le tour",
-  "other": "{n} polyrythmies ({dir}) sur le tour"
- },
+ "pass.cycles": "cycles de la polyrythmie",
  "pass.barCount": {
   "one": "{n} mesure",
   "other": "{n} mesures"
@@ -818,9 +805,15 @@
   "one": "{n} temps",
   "other": "{n} temps"
  },
- "pass.cycles": "cycles de la polyrythmie",
  "pass.cycleCount": {
   "one": "{n} cycle",
   "other": "{n} cycles"
- }
+ },
+ "poly.swap": "Alterne",
+ "poly.swapping": "en changeant de couche",
+ "poly.changeEvery": "Change à chaque",
+ "poly.eachPass": "Passage",
+ "poly.eachRound": "Tour complet",
+ "practice.swapPass": "les notes changent de couche à chaque passage",
+ "practice.swapRound": "les notes changent de couche à chaque tour complet"
 }

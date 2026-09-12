@@ -796,20 +796,7 @@
  "pat.grid": "Das Raster",
  "aria.passLess": "Eins weniger",
  "aria.passMore": "Eins mehr",
- "poly.change": "Polyrhythmus-Wechsel",
- "poly.which": "Welche Polyrhythmen",
- "poly.against": "{a} gegen {b}",
- "poly.rotating": "{n} der Reihe nach, {dir}",
- "poly.justOne": "nur einer gewählt — niemand zum Übergeben",
- "poly.pickTwo": "wähle zwei oder mehr, dann lösen sie einander ab",
- "poly.count": {
-  "one": "{n} Polyrhythmus",
-  "other": "{n} Polyrhythmen"
- },
- "practice.polys": {
-  "one": "{n} Polyrhythmus ({dir}) über die Runde",
-  "other": "{n} Polyrhythmen ({dir}) über die Runde"
- },
+ "pass.cycles": "Zyklen des Polyrhythmus",
  "pass.barCount": {
   "one": "{n} Takt",
   "other": "{n} Takte"
@@ -818,9 +805,15 @@
   "one": "{n} Schlag",
   "other": "{n} Schläge"
  },
- "pass.cycles": "Zyklen des Polyrhythmus",
  "pass.cycleCount": {
   "one": "{n} Zyklus",
   "other": "{n} Zyklen"
- }
+ },
+ "poly.swap": "Wechselt",
+ "poly.swapping": "Ebene wechselnd",
+ "poly.changeEvery": "Wechselt je",
+ "poly.eachPass": "Durchgang",
+ "poly.eachRound": "Ganze Runde",
+ "practice.swapPass": "die Noten wechseln bei jedem Durchgang die Ebene",
+ "practice.swapRound": "die Noten wechseln bei jeder ganzen Runde die Ebene"
 }

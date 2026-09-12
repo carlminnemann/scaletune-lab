@@ -796,20 +796,7 @@
  "pat.grid": "La rejilla",
  "aria.passLess": "Uno menos",
  "aria.passMore": "Uno más",
- "poly.change": "Cambio de polirritmo",
- "poly.which": "Qué polirritmos",
- "poly.against": "{a} contra {b}",
- "poly.rotating": "{n} por turno, {dir}",
- "poly.justOne": "solo uno elegido: no hay a quién pasar",
- "poly.pickTwo": "elige dos o más y se van pasando el turno",
- "poly.count": {
-  "one": "{n} polirritmo",
-  "other": "{n} polirritmos"
- },
- "practice.polys": {
-  "one": "{n} polirritmo ({dir}) a lo largo de la vuelta",
-  "other": "{n} polirritmos ({dir}) a lo largo de la vuelta"
- },
+ "pass.cycles": "ciclos de la polirritmia",
  "pass.barCount": {
   "one": "{n} compás",
   "other": "{n} compases"
@@ -818,9 +805,15 @@
   "one": "{n} pulso",
   "other": "{n} pulsos"
  },
- "pass.cycles": "ciclos de la polirritmia",
  "pass.cycleCount": {
   "one": "{n} ciclo",
   "other": "{n} ciclos"
- }
+ },
+ "poly.swap": "Alterna",
+ "poly.swapping": "alternando de capa",
+ "poly.changeEvery": "Cambia cada",
+ "poly.eachPass": "Pasada",
+ "poly.eachRound": "Vuelta entera",
+ "practice.swapPass": "las notas cambian de capa en cada pasada",
+ "practice.swapRound": "las notas cambian de capa en cada vuelta entera"
 }
