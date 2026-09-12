@@ -1371,7 +1371,13 @@ details.sec[open] details.mfold>summary>.sec-sum{display:inline}
 details.sec[open] details.mfold[open]>summary>.sec-sum{display:none}
 /* What is sounding and what comes next. With the family boxes closed there is
    otherwise no way to see where you are in a rotation. */
-.rot-panel{padding:0.85rem 1rem}
+/* The rotation is a card of its own, and a card under a panel needs a line of
+   air above it: a Clear at the foot of the panel was sitting on its lid. */
+.rot-panel{padding:0.85rem 1rem;margin-top:var(--s3)}
+/* And that Clear gets a foot of its own, so the floor measured under the panel
+   leaves room for it instead of ending on its border. */
+body.painel .sec-body>.clear-btn:last-child,
+#pitch-section .sec-body>.clear-btn:last-child{margin-bottom:var(--s2)}
 .rot-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .rot-clear{margin-top:0;flex:0 0 auto}
 /* The one row of choices that was left as a wrapped flex line, and it showed:
@@ -5708,7 +5714,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-12b';
+const APP_VERSION='lab-2026-09-12c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -11946,9 +11952,19 @@ function travaBlocos(){
   const fundo=[...alvos].filter(el=>el&&el!==rot&&!rot.contains(el)&&el.offsetParent)
     .map(el=>{let d=0,p=el;while(p){d++;p=p.parentElement;}return [d,el];})
     .sort((a,b)=>b[0]-a[0]);
+  /* The floor has to leave room for the last thing standing on it. A box's
+     scrollHeight stops at its last child's border, so a Clear at the foot of a
+     panel ended exactly on the edge — glued to the rotation under it, and with
+     its own bottom line shaved off by a wrapper that clips. Its margin is
+     counted in. */
+  const margemFinal=el=>{
+    const filhos=[...el.children].filter(c=>c.getClientRects().length);
+    const ult=filhos[filhos.length-1];
+    return ult?(parseFloat(getComputedStyle(ult).marginBottom)||0):0;
+  };
   fundo.forEach(([,el])=>{
     el.style.minHeight='0px';
-    const h=el.scrollHeight;
+    const h=el.scrollHeight+margemFinal(el);
     if(h>0){el.style.minHeight=h+'px';el.setAttribute('data-travado','1');}
     else el.style.minHeight='';
   });
