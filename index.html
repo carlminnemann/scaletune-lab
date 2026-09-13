@@ -3837,6 +3837,15 @@ const NOTE_LENS=[{k:'sub',label:'Per figure'},{k:'beat',label:'Per beat'},{k:'ba
 let sequence=[];
 const FREE_DEFAULT_OCT=3,DRONE_DEFAULT_OCT=3;
 let audioCtx=null,masterGain=null;
+/* Whether a finger has landed on the page yet. An AudioContext built before the
+   first one is a context WebKit 15 never grants playback to: it resumes, it
+   reports "running", its clock advances, everything scheduled on it is
+   scheduled — and not a sound comes out. Nothing may build one before this is
+   true. The list of events is deliberately generous: a device that fired none
+   of them would have an app that never makes a sound. */
+let houveGesto=false;
+['pointerdown','mousedown','touchstart','touchend','keydown','click'].forEach(ev=>
+  document.addEventListener(ev,()=>{houveGesto=true;},{passive:true,capture:true}));
 let liveNodes=[];          // continuously-sounding drone nodes
 let schedNodes=[];         // nodes scheduled for upcoming beats
 let schedPiano=[];
@@ -3955,6 +3964,10 @@ function keepRunning(){
 
 function initAudio(){
   if(!audioCtx){
+    /* The one rule this file has about the context: it is built inside a
+       gesture or not at all. Built cold it is silent for the life of the page
+       on WebKit 15, and nothing later can repair it. */
+    if(!houveGesto)return Promise.resolve();
     claimAudioSession();
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     masterGain=audioCtx.createGain();
@@ -5783,7 +5796,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13f';
+const APP_VERSION='lab-2026-09-13g';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7591,7 +7604,11 @@ function setMode(m){
   if(!availableTimbres().some(t=>t.k===state.timbre))
     state.timbre=isDrone?DEFAULT_DRONE:DEFAULT_WAVE;
   buildTimbreRow();
-  if(!isMetro&&isSampled(state.timbre)&&!samplerReady(state.timbre)&&!samplerFor(state.timbre).loading)
+  /* Not before the first tap: this runs once at startup too, and loading a
+     voice builds the audio context to decode into. Pressing Start loads it
+     anyway, and by then there has been a gesture. */
+  if(!isMetro&&isSampled(state.timbre)&&!samplerReady(state.timbre)&&!samplerFor(state.timbre).loading
+     &&(audioCtx||houveGesto))
     loadSampler(state.timbre);
   if(isPitch){studyIdx=0;renderPitchPickers();updatePracticeInfo();revealActiveFamily();}
   if(m==='free')buildFreeGrid();
