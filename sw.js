@@ -8,7 +8,7 @@
    localhost). Served over plain http:// on a LAN address it will not install,
    and the app still works — just without the offline cache. */
 
-const CACHE = 'scaletune-lab-v48';
+const CACHE = 'scaletune-lab-v49';
 const ASSETS = [
   './',
   './index.html',
@@ -27,6 +27,7 @@ const ASSETS = [
   './vendor/drums/hho.wav',
   './vendor/drums/hhp.wav',
   './vendor/drums/clave.wav',
+  './icons/marca-figura.svg',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',

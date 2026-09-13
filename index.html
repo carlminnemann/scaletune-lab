@@ -259,6 +259,14 @@ h1.wordmark{font-family:Optima,'Gill Sans','Gill Sans MT',Candara,'Trebuchet MS'
 /* The capitals are a proportion of the name, not a size of their own, so
    shrinking the name keeps its shape instead of flattening it. */
 h1.wordmark .cap{font-size:1.65em;color:var(--brand)}
+/* Carl's own mark, at the head of his own name. Drawn as a mask rather than an
+   image so it takes the colour the capitals take, and follows the theme with
+   them. The figure alone: the two marks of the clock that the icon carries are
+   dust at this size. */
+h1.wordmark .logo-marca{display:inline-block;width:1.5em;height:1.5em;
+  vertical-align:-0.36em;margin-right:0.16em;background:var(--brand);
+  -webkit-mask:url(icons/marca-figura.svg) center/contain no-repeat;
+          mask:url(icons/marca-figura.svg) center/contain no-repeat}
 /* Everywhere but on the home screen the name is the way back to it. */
 body:not(.home) h1.wordmark{cursor:pointer;touch-action:manipulation;
   -webkit-user-select:none;user-select:none;transition:opacity .12s}
@@ -2191,7 +2199,7 @@ body.bolinhas .pulse-bpm{display:none}
        the six modes: tapping the name goes there from anywhere. -->
   <h1 class="wordmark" id="wordmark" role="button" tabindex="0"
       onclick="casaJa()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();casaJa();}"
-      data-ta="aria.home" aria-label="Home"><span class="cap">S</span>cale<span class="cap tuck">T</span>une<span class="lab-mark">lab</span></h1>
+      data-ta="aria.home" aria-label="Home"><span class="logo-marca" aria-hidden="true"></span><span class="cap">S</span>cale<span class="cap tuck">T</span>une<span class="lab-mark">lab</span></h1>
   <span class="head-btns">
     <!-- Where the saved exercises live. A drawer is not a setting of the mode,
          so it stopped being a panel among the panels and became a place you go.
@@ -5796,7 +5804,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13h';
+const APP_VERSION='lab-2026-09-14a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -12242,6 +12250,8 @@ const WORDMARK_MIN=13;
 function fitWordmark(){
   const w=document.querySelector('.wordmark'),h=document.querySelector('.header');
   if(!w||!h)return;
+  const marca=w.querySelector('.logo-marca');
+  if(marca)marca.style.display='';
   h.style.removeProperty('--wordmark-fit');
   w.style.fontSize='';
   const room=()=>w.clientWidth-w.scrollWidth;
@@ -12250,6 +12260,18 @@ function fitWordmark(){
   while(size>WORDMARK_MIN&&room()<0){
     size-=0.5;
     w.style.fontSize=size+'px';
+  }
+  /* And if the name still does not fit at the smallest it is allowed to be,
+     the mark goes rather than the name: a name cut in half is worse than a
+     name without its mark beside it. Measured, not guessed at a width. */
+  if(marca&&room()<0){
+    marca.style.display='none';
+    w.style.fontSize='';
+    size=parseFloat(getComputedStyle(w).fontSize)||23;
+    while(size>WORDMARK_MIN&&room()<0){
+      size-=0.5;
+      w.style.fontSize=size+'px';
+    }
   }
 }
 
