@@ -811,9 +811,10 @@
  },
  "poly.swap": "Alterne",
  "poly.swapping": "en changeant de couche",
- "poly.changeEvery": "Change à chaque",
- "poly.eachPass": "Passage",
- "poly.eachRound": "Tour complet",
- "practice.swapPass": "les notes changent de couche à chaque passage",
- "practice.swapRound": "les notes changent de couche à chaque tour complet"
+ "poly.changeEvery": "Change toutes les",
+ "aria.followBars": "Mesures sur chaque couche",
+ "practice.swapBars": {
+  "one": "les notes changent de couche à chaque mesure",
+  "other": "les notes changent de couche toutes les {n} mesures"
+ }
 }

@@ -2802,10 +2802,17 @@ body.bolinhas .pulse-bpm{display:none}
     <div class="head" id="polynotes-block" style="margin-top:var(--s3);margin-bottom:0">
       <span class="section-label" data-t="notes-follow">Notes follow</span>
       <span class="btn-wrap seg" id="polynotes-row" data-cols="fixed"></span></div>
-    <!-- Only where the layer changes hands: how often it does. -->
-    <div class="head" id="followevery-line" style="margin-top:var(--s2);margin-bottom:0;display:none">
-      <span class="section-label" data-t="poly.changeEvery">Change every</span>
-      <span class="btn-wrap seg" id="followevery-row" data-cols="fixed"></span></div>
+    <!-- Only where the layer changes hands: how many bars it stays on each.
+         A bar is one turn of the base layer, so on a 5 against 7 it is the
+         five. -->
+    <div class="sig-foot" id="followevery-line" style="display:none">
+      <span class="sig-unit" data-t="poly.changeEvery">Change every</span>
+      <span class="sig-fields">
+        <select class="sig-select active" id="follow-bars" data-ta="aria.followBars"
+                aria-label="Bars on each layer"></select>
+      </span>
+      <span class="sig-unit" data-t="bars">bars</span>
+    </div>
     <!-- named, because it is not the only clear in this panel: it puts the two
          rows of pulses back to plain and leaves the numbers alone -->
     <button class="clear-btn" id="polyacc-clear" onclick="clearPolyAccents()" data-t="clear.accents">✕ Clear accents</button>
@@ -3576,9 +3583,9 @@ let state={
     listLinked:true,
             useSubdivList:false,subdivList:[],subdivDir:'up',
             /* When the notes are set to change layer under a polyrhythm, this
-               is how often they do it: every pass, or once the whole rotation
-               has been round. */
-            followEvery:'pass',
+               is how many bars they stay on each of them — a bar being one turn
+               of the base layer, whatever it has been set to. */
+            followBars:1,
             /* The tempo can change on its own two ways: in steps, so many BPM at
                a time, or as a ramp that slides from where you are to where you
                want to be over so many minutes. 'every' is either a pass — one
@@ -4963,11 +4970,26 @@ let polyLado='a';
 function polySegue(){
   return state.poly.notesFollow==='alt'?polyLado:state.poly.notesFollow;
 }
-function polyTrocaLado(){
+/* How many turns of the base layer the notes stay on one side. A bar here is
+   one cycle of the polyrhythm — the base is whichever count layer A has, so on
+   a 5 against 7 the bar is the five. */
+function followBars(){return Math.max(1,Math.min(8,state.practice.followBars|0));}
+let polyCiclos=0;
+function polyTrocaLado(quando){
   if(state.poly.notesFollow!=='alt')return;
   polyLado=(polyLado==='a')?'b':'a';
-  renderPolyBeats();
-  refreshSectionSummaries();
+  /* The flip has to happen now, because this cycle is being scheduled now; what
+     is drawn belongs to the moment it is heard, which is up to a lookahead
+     later. */
+  const atraso=(quando&&audioCtx)?Math.max(0,(quando-audioCtx.currentTime)*1000):0;
+  setTimeout(()=>{renderPolyBeats();refreshSectionSummaries();},atraso);
+}
+/* Called once for every cycle about to be scheduled, before it is: the side it
+   asks for is the side that cycle will be played on. */
+function polyPassoCiclo(quando){
+  if(state.poly.notesFollow!=='alt'){polyCiclos=0;return;}
+  if(polyCiclos>=followBars()){polyCiclos=0;polyTrocaLado(quando);}
+  polyCiclos++;
 }
 
 // Which subdivision is in force right now — a fixed choice, or the current
@@ -5269,7 +5291,7 @@ function startPlayback(){
     armTempoOverTime(nextBeatTime);
     gapArm(nextBeatTime);
     beginCount();
-    if(state.poly.on){polyLado='a';buildPolyBeats();}
+    if(state.poly.on){polyLado='a';polyCiclos=0;buildPolyBeats();}
     if(subdivListOn())subdivIdx=0;
     if(metroScheduler)clearInterval(metroScheduler);
     metroScheduler=setInterval(schedulerTick,schedInterval);
@@ -5372,6 +5394,7 @@ function polySchedulerTick(){
   while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<8){
     tempoOverTime(nextBeatTime,countTicks>0);
     const len=polyCycleLen();
+    if(countTicks<=0)polyPassoCiclo(nextBeatTime);
     schedulePolyCycle(nextBeatTime);
     nextBeatTime+=len;
     if(notesSilent()&&countTicks<=0&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
@@ -5740,7 +5763,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-12f';
+const APP_VERSION='lab-2026-09-13a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6172,7 +6195,7 @@ const PAGINAS={
         between Metro and the note modes, so comparing the array marked the box
         the moment the mode was entered. */
      mexeu:ou(dif('bpm','clickVol','clickSound','sig','accentsTouched'),
-              dif('poly','polyVol'),difP('followEvery')),
+              dif('poly','polyVol'),difP('followBars')),
      diz:()=>tr('sum.bpm','{n} BPM',{n:state.bpm})+' · '
             +(state.poly.on?tr('sum.against','{a} against {b}',{a:state.poly.a,b:state.poly.b})
                            :tr('sum.beatsPerBar','{n} beats per bar',{n:state.sig}))},
@@ -8308,7 +8331,7 @@ const METRO_MINE=['bpm','sig','subdiv','noteLen','accentsTouched','clickVol','cl
   'blueNotes','listKind',
   'freeRoot','freeSpan','freeSpanWanted','freeDirection','freeTop'];
 const METRO_MINE_P=['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom',
-  'passCount','passUnit','useSubdivList','subdivDir','followEvery',
+  'passCount','passUnit','useSubdivList','subdivDir','followBars',
   'rootMove','repeat','modesTour','useList',
   'gapMode','gapMinutes','gapKeepOne'];
 const metroPerMode={};
@@ -8497,7 +8520,7 @@ const PANEL_FIELDS={
   speed:{p:['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom']},
   gap:{p:['gapMode','gapMinutes','gapKeepOne']},
   subdiv:{s:['subdiv','clickFollowsFigure'],p:['useSubdivList','subdivDir'],arrP:['subdivList']},
-  poly:{s:['polyVol'],obj:['poly'],p:['followEvery']},
+  poly:{s:['polyVol'],obj:['poly'],p:['followBars']},
   /* Metro's own, which live in the other fresh bundle: the accompaniment
      exists in one mode, so clearing that mode has to clear it too. */
   accomp:{g:['kit','density','balladHat','groove']},
@@ -8632,13 +8655,7 @@ function advancePass(){
   }
   roundsInFigure=0;
   passTick++;                    // one pass done, whichever way it went
-  const fechou=markPassDone();
-  /* The layer changes hands here, where a pass is known to have finished — and
-     on the round setting only where that pass finished a round, which is the
-     same moment the count-in hangs on. */
-  if(state.practice.followEvery==='round'){if(roundJustWrapped)polyTrocaLado();}
-  else polyTrocaLado();
-  if(fechou)return false;
+  if(markPassDone())return false;
 
   // Then the outer loops: modes, then the figure, then the key.
   let wrapped=true,figureChanged=false;
@@ -9311,7 +9328,9 @@ function buildTempoStepRow(){buildSpeedControls();}
 /* A count-in is a whole number of bars of click before the notes come in, and
    it can be asked for again whenever a pass hands over to the next key or the
    next mode — which is the moment you need to find the new starting note. */
-const COUNT_MAX=8;
+/* One bar or two. Eight was a number nobody used and a row of boxes nobody
+   read. */
+const COUNT_MAX=2;
 /* ---------- the roller ----------
    Every <select> in the app keeps holding the value and firing the change; it
    just stops being the thing you press. See the note by .roller-host. */
@@ -9495,6 +9514,9 @@ function buildCountRow(){
   const row=document.getElementById('count-between-row');
   const line=document.getElementById('count-between-line');
   if(!caixas||!row)return;
+  /* A count-in kept from before this was one bar or two — or read out of a
+     saved exercise written then — would have no button to change it back. */
+  if((state.countBars|0)>COUNT_MAX)state.countBars=COUNT_MAX;
   const opcoes=[[0,tr('common.off','Off')]];
   for(let i=1;i<=COUNT_MAX;i++)opcoes.push([i,String(i)]);
   linhaDeEscolhas(caixas,opcoes,state.countBars||0,v=>{
@@ -9586,9 +9608,9 @@ function updatePracticeInfo(){
         : tr('modes.running','{n} modes of {key}, one octave each, closing on the first an octave up',
              {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})));
   if(state.poly.on&&state.poly.notesFollow==='alt')
-    bits.push(state.practice.followEvery==='round'
-      ? tr('practice.swapRound','the notes change layer each round')
-      : tr('practice.swapPass','the notes change layer each pass'));
+    bits.push(tr('practice.swapBars',
+      {one:'the notes change layer every bar',
+       other:'the notes change layer every {n} bars'},{n:followBars()}));
   if(subdivListOn()&&state.practice.subdivList.length>1)
     bits.push(tr('practice.figures',
       {one:'{n} rhythmic figure ({dir}) within each mode',
@@ -10729,7 +10751,7 @@ function applyExercise(x){
     state.practice.subdivList=Array.isArray(p.subdivList)
       ? p.subdivList.filter(k=>SUBDIVS.some(d=>d.k===k)).slice(0,8) : [];
     state.practice.subdivDir=oneOf(p.subdivDir,SUBDIV_DIRS.map(d=>d.k))||'up';
-    state.practice.followEvery=oneOf(p.followEvery,['pass','round'])||'pass';
+    const fb=num(p.followBars,1,FOLLOW_BARS_MAX); state.practice.followBars=fb||1;
     state.practice.tempoMode=oneOf(p.tempoMode,['off','up','down','ramp'])||'off';
     const st=num(p.tempoStep,1,TEMPO_STEP_MAX); if(st)state.practice.tempoStep=st;
     state.practice.tempoEvery=(p.tempoEvery==='pass')?'pass':(num(p.tempoEvery,1,30)||'pass');
@@ -11519,28 +11541,23 @@ function buildPolyNotesRow(){
   gridify(row);
   buildFollowEveryRow();
 }
-/* And when it changes hands, how often. A pass is one traversal of the line as
-   the Direction sets it — up, down, or up and back; a round is everything in
-   rotation gone by once. With nothing in rotation the two are the same thing,
-   and the line under them says so. */
+/* And how long it stays on each side, counted in bars of the base layer. */
+const FOLLOW_BARS_MAX=8;
 function buildFollowEveryRow(){
-  const row=document.getElementById('followevery-row');
+  const sel=document.getElementById('follow-bars');
   const line=document.getElementById('followevery-line');
-  if(!row)return;
+  if(!sel)return;
   const mostra=state.poly.on&&!notesSilent()&&state.poly.notesFollow==='alt';
   if(line)line.style.display=mostra?'':'none';
-  row.innerHTML='';
-  if(!mostra)return;
-  [['pass',tr('poly.eachPass','Each pass')],['round',tr('poly.eachRound','Each round')]]
-    .forEach(([k,label])=>{
-      const b=document.createElement('button');
-      b.className='pick-btn'+(state.practice.followEvery===k?' active':'');
-      b.textContent=label;
-      b.onclick=()=>{state.practice.followEvery=k;buildFollowEveryRow();
-        updatePracticeInfo();refreshSectionSummaries();};
-      row.appendChild(b);
+  if(!sel.options.length){
+    for(let i=1;i<=FOLLOW_BARS_MAX;i++)sel.appendChild(new Option(i,i));
+    sel.addEventListener('change',()=>{
+      state.practice.followBars=Math.max(1,Math.min(FOLLOW_BARS_MAX,parseInt(sel.value,10)||1));
+      polyCiclos=0;
+      buildFollowEveryRow();updatePracticeInfo();refreshSectionSummaries();
     });
-  gridify(row);
+  }
+  sel.value=String(followBars());
 }
 
 const POLY_MIN=2,POLY_MAX=16;

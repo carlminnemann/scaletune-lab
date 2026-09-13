@@ -796,9 +796,10 @@
  },
  "poly.swap": "交替",
  "poly.swapping": "交替声部",
- "poly.changeEvery": "每次交换",
- "poly.eachPass": "每遍",
- "poly.eachRound": "整轮",
- "practice.swapPass": "音符每遍交换声部",
- "practice.swapRound": "音符每整轮交换声部"
+ "poly.changeEvery": "每隔",
+ "aria.followBars": "每个声部的小节数",
+ "practice.swapBars": {
+  "one": "音符每小节交换声部",
+  "other": "音符每 {n} 小节交换声部"
+ }
 }

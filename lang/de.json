@@ -811,9 +811,10 @@
  },
  "poly.swap": "Wechselt",
  "poly.swapping": "Ebene wechselnd",
- "poly.changeEvery": "Wechselt je",
- "poly.eachPass": "Durchgang",
- "poly.eachRound": "Ganze Runde",
- "practice.swapPass": "die Noten wechseln bei jedem Durchgang die Ebene",
- "practice.swapRound": "die Noten wechseln bei jeder ganzen Runde die Ebene"
+ "poly.changeEvery": "Wechselt alle",
+ "aria.followBars": "Takte je Ebene",
+ "practice.swapBars": {
+  "one": "die Noten wechseln jeden Takt die Ebene",
+  "other": "die Noten wechseln alle {n} Takte die Ebene"
+ }
 }

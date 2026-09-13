@@ -812,8 +812,9 @@
  "poly.swap": "Alterna",
  "poly.swapping": "alternando strato",
  "poly.changeEvery": "Cambia ogni",
- "poly.eachPass": "Passata",
- "poly.eachRound": "Giro intero",
- "practice.swapPass": "le note cambiano strato a ogni passata",
- "practice.swapRound": "le note cambiano strato a ogni giro intero"
+ "aria.followBars": "Battute su ogni strato",
+ "practice.swapBars": {
+  "one": "le note cambiano strato a ogni battuta",
+  "other": "le note cambiano strato ogni {n} battute"
+ }
 }

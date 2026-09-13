@@ -827,9 +827,10 @@
  },
  "poly.swap": "Чередует",
  "poly.swapping": "меняя слой",
- "poly.changeEvery": "Меняет каждый",
- "poly.eachPass": "Проход",
- "poly.eachRound": "Полный круг",
- "practice.swapPass": "ноты меняют слой каждый проход",
- "practice.swapRound": "ноты меняют слой каждый полный круг"
+ "poly.changeEvery": "Меняет каждые",
+ "aria.followBars": "Тактов на каждом слое",
+ "practice.swapBars": {
+  "one": "ноты меняют слой каждый такт",
+  "other": "ноты меняют слой каждые {n} такта"
+ }
 }

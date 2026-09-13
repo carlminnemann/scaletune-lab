@@ -812,8 +812,9 @@
  "poly.swap": "Alterna",
  "poly.swapping": "a alternar de plano",
  "poly.changeEvery": "Troca a cada",
- "poly.eachPass": "Passagem",
- "poly.eachRound": "Volta inteira",
- "practice.swapPass": "as notas trocam de plano a cada passagem",
- "practice.swapRound": "as notas trocam de plano a cada volta inteira"
+ "aria.followBars": "Compassos em cada plano",
+ "practice.swapBars": {
+  "one": "as notas trocam de plano a cada compasso",
+  "other": "as notas trocam de plano a cada {n} compassos"
+ }
 }
