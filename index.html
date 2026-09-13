@@ -4982,7 +4982,7 @@ function polyTrocaLado(quando){
      is drawn belongs to the moment it is heard, which is up to a lookahead
      later. */
   const atraso=(quando&&audioCtx)?Math.max(0,(quando-audioCtx.currentTime)*1000):0;
-  setTimeout(()=>{renderPolyBeats();refreshSectionSummaries();},atraso);
+  setTimeout(()=>{marcaQuemCarrega();refreshSectionSummaries();},atraso);
 }
 /* Called once for every cycle about to be scheduled, before it is: the side it
    asks for is the side that cycle will be played on. */
@@ -5763,7 +5763,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13a';
+const APP_VERSION='lab-2026-09-13b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -10059,6 +10059,18 @@ function buildPolyBeats(){
   renderPolyBeats();
 }
 
+/* Which of the two rows is carrying the notes, said the same way on the page
+   where it is set and on the screen the metronome runs on — where, until now,
+   the layer could change hands and nothing on the screen said so. */
+function marcaQuemCarrega(){
+  const leva=state.poly.on&&!pulseOnly();
+  [['poly-row-a','pulse-poly-a','a'],['poly-row-b','pulse-poly-b','b']].forEach(([x,y,lado])=>{
+    [x,y].forEach(id=>{
+      const e=document.getElementById(id);
+      if(e)e.classList.toggle('carries',leva&&polySegue()===lado);
+    });
+  });
+}
 function renderPolyBeats(){
   const P=state.poly;
   document.getElementById('poly-controls').style.display=P.on?'':'none';
@@ -10076,7 +10088,6 @@ function renderPolyBeats(){
   [['a',P.a,P.accA],['b',P.b,P.accB]].forEach(([layer,n,acc])=>{
     const row=document.getElementById('poly-row-'+layer);
     row.innerHTML='';
-    row.classList.toggle('carries',!notesSilent()&&polySegue()===layer);
     for(let i=0;i<n;i++){
       const d=document.createElement('div');
       d.className='beat-dot'+(layer==='b'?' poly':'')+' acc-'+acc[i];
@@ -10090,6 +10101,7 @@ function renderPolyBeats(){
     }
     layoutBeats(row);
   });
+  marcaQuemCarrega();
   renderPulse();     // the two layers changed, and the running display shows them
 }
 
@@ -11520,8 +11532,11 @@ function buildPolyNotesRow(){
   const row=document.getElementById('polynotes-row');if(!row)return;
   // There are only two layers to choose between under a polyrhythm, and nothing
   // to follow either of them when the metronome plays alone.
+  /* Nothing to follow either layer where there is no line to follow it: the
+     metronome plays alone, and a drone holds its own note and plays no
+     sequence — the control was there in Drone doing nothing at all. */
   const block=document.getElementById('polynotes-block');
-  if(block)block.style.display=(state.poly.on&&!notesSilent())?'':'none';
+  if(block)block.style.display=(state.poly.on&&!pulseOnly())?'':'none';
   row.innerHTML='';
   /* Three answers, not two: either layer, or let it change hands by itself. */
   [['a',tr('poly.the','the {n}',{n:state.poly.a})],
@@ -11547,7 +11562,7 @@ function buildFollowEveryRow(){
   const sel=document.getElementById('follow-bars');
   const line=document.getElementById('followevery-line');
   if(!sel)return;
-  const mostra=state.poly.on&&!notesSilent()&&state.poly.notesFollow==='alt';
+  const mostra=state.poly.on&&!pulseOnly()&&state.poly.notesFollow==='alt';
   if(line)line.style.display=mostra?'':'none';
   if(!sel.options.length){
     for(let i=1;i<=FOLLOW_BARS_MAX;i++)sel.appendChild(new Option(i,i));
@@ -11735,6 +11750,7 @@ function renderPulse(){
     pulsoDots(b,0,()=>'high');
   }
   pintaPulsoBpm();
+  marcaQuemCarrega();
 }
 /* The one number worth reading while it runs. It is written here and nowhere
    else on a running screen — the box that used to carry it says only its name
