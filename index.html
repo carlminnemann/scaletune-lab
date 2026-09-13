@@ -1631,6 +1631,16 @@ input[type=range]:active::-moz-range-thumb{background:var(--fader);border-color:
 .roller-host:has(>.sig-select.active)::after{color:var(--blue)}
 .roller-host:has(>.sig-select:disabled)::after{opacity:.3}
 .sig-select.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
+/* A roller holding a word rather than a number: a word is read, not glanced at,
+   so it takes reading size. At the display size the tempo page uses for its
+   numbers, "passagem" ran out of its own box and the marks sat on top of it. */
+.sig-select.palavra{font-size:15px!important;font-weight:600;
+  min-width:0!important;padding:13px 22px 13px 12px!important}
+/* And in the small rollers at the foot of a page the marks go beside the box
+   rather than inside it: there is no room in there for both. */
+.sig-foot .roller-host{margin-right:14px}
+.sig-foot .roller-host::after{right:-13px}
+.sig-foot .roller-host>.sig-select{padding-right:8px!important}
 /* A select renders its own text on some platforms and ignores the parent
    colour, so state the colour on the options too or the number goes blank. */
 .sig-select option{background:var(--bg2);color:var(--text)}
@@ -5773,7 +5783,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13d';
+const APP_VERSION='lab-2026-09-13e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -9290,6 +9300,7 @@ function buildSpeedControls(){
   }
   const everyUnit=document.getElementById('speed-every-unit');
   if(everyUnit)everyUnit.style.display=(P.tempoEvery==='pass')?'none':'';
+  if(every)every.classList.toggle('palavra',P.tempoEvery==='pass');
   const rmin=document.getElementById('ramp-min');
   if(rmin&&!rmin.options.length){
     for(let i=1;i<=RAMP_MAX_MIN;i++)rmin.appendChild(new Option(i,i));
