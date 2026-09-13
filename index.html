@@ -1961,6 +1961,10 @@ body.sub .sec-body .info-line{text-align:center}
   margin-top:var(--s3);opacity:.8}
 .sig-foot .sig-select{font-size:15px!important;padding:2px 8px!important;min-width:0!important}
 .sig-foot .sig-unit{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+/* How long the bar is, under a polyrhythm, is the first of the two numbers —
+   so the picker that used to set it has nothing left to say and goes. It is the
+   only thing on the tempo page that was still there doing nothing. */
+body.compoly .sig-foot{display:none}
 /* The two pills, centred under whichever rows are on the screen. */
 /* One at each end of the line, not a pair in the middle: they are two different
    things — a screen to look at, and a second layer to hear — and side by side
@@ -5763,7 +5767,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13b';
+const APP_VERSION='lab-2026-09-13c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
