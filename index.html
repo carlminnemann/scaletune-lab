@@ -5783,7 +5783,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13e';
+const APP_VERSION='lab-2026-09-13f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13160,6 +13160,17 @@ const PALETAS=[
   {k:'esmeralda',base:'dark',fundo:'#08140f',acento:'#16c281',alerta:'#e0553f'},
   {k:'ferrugem',base:'dark', fundo:'#150d0a',acento:'#ff7a29',alerta:'#c81d3c'},
   {k:'gelo',    base:'dark', fundo:'#0a1016',acento:'#3fd0d8',alerta:'#ff5470'},
+  /* Six triads out of Sanzo Wada's dictionary of colour combinations, 1933 —
+     the values as they circulate in the digitised edition, which is not the
+     book. They are the only palettes here not built around a near-black ground:
+     the ground is one of his own colours, so the generator has to work for its
+     surfaces, and what comes out still looks like him. */
+  {k:'wada-ouro',     base:'dark', fundo:'#4d6659',acento:'#c19a3b',alerta:'#9c3f36'},
+  {k:'wada-hortensia',base:'light',fundo:'#6c7fa8',acento:'#d7a49a',alerta:'#8d8f89'},
+  {k:'wada-terracota',base:'dark', fundo:'#3f7a6a',acento:'#b4573b',alerta:'#d9bb8a'},
+  {k:'wada-pavao',    base:'dark', fundo:'#1d6a7a',acento:'#d6452c',alerta:'#c9902f'},
+  {k:'wada-ameixa',   base:'dark', fundo:'#4a2b46',acento:'#7a7a3c',alerta:'#d98f9a'},
+  {k:'wada-cosmos',   base:'dark', fundo:'#20406b',acento:'#e8b0a6',alerta:'#e0c15a'},
 ];
 function paletaDe(k){return PALETAS.find(p=>p.k===k)||PALETAS[0];}
 /* The same three colours can be three themes: which of them is the ground,
