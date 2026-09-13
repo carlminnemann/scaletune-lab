@@ -1964,7 +1964,7 @@ body.sub .sec-body .info-line{text-align:center}
 /* How long the bar is, under a polyrhythm, is the first of the two numbers —
    so the picker that used to set it has nothing left to say and goes. It is the
    only thing on the tempo page that was still there doing nothing. */
-body.compoly .sig-foot{display:none}
+body.compoly #click-block>.sig-foot{display:none}
 /* The two pills, centred under whichever rows are on the screen. */
 /* One at each end of the line, not a pair in the middle: they are two different
    things — a screen to look at, and a second layer to hear — and side by side
@@ -3886,10 +3886,15 @@ function freqOf(s){return 440*Math.pow(2,(s-semitone('A',4))/12);}
 function stdName(s){const map={'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};const pc=pcOf(s);return(map[pc]||pc)+octOf(s);}
 /* The line is not there while it has nothing to say, so saying something makes
    the panels above it move: they are asked to give the room back. */
-function setStatus(m){
+/* A line that asks for something is true until it is given: it stayed on the
+   screen after the scale had been picked, which reads as the app not having
+   noticed. Marked here, cleared where the asking stops being true. */
+let faltaAlgo=false;
+function setStatus(m,pedido){
   const el=document.getElementById('status-bar');
   const had=el.textContent!=='';
   el.textContent=m;
+  faltaAlgo=!!(m&&pedido);
   if(had!==(m!==''))spreadPanelsSoon();
 }
 
@@ -5268,6 +5273,7 @@ function refreshSequence(){
   clampRange();
   seqCloses=false;
   sequence=buildSequence();
+  if(sequence.length&&faltaAlgo)setStatus('');
   updateAlignInfo();
   refreshSectionSummaries();
 }
@@ -5657,10 +5663,10 @@ function togglePlay(){
   // Prime the context synchronously inside the gesture — iOS refuses to resume
   // one later, from the piano-loading callback.
   initAudio();
-  if(state.mode==='drone'&&!droneSemitones().length){setStatus(tr('need.note','Pick at least one note first.'));return;}
+  if(state.mode==='drone'&&!droneSemitones().length){setStatus(tr('need.note','Pick at least one note first.'),true);return;}
   if(state.mode!=='drone'&&state.mode!=='metro'){
     refreshSequence();
-    if(!sequence.length){setStatus(state.mode==='free'?tr('need.notes','Select some notes first.'):tr('need.scale','Pick a scale or chord first.'));return;}
+    if(!sequence.length){setStatus(state.mode==='free'?tr('need.notes','Select some notes first.'):tr('need.scale','Pick a scale or chord first.'),true);return;}
   }
   // Metro plays no notes, so it must not wait on an instrument to load
   if(state.mode!=='metro'&&isSampled(state.timbre)&&!samplerReady(state.timbre)){
@@ -5767,7 +5773,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-13c';
+const APP_VERSION='lab-2026-09-13d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7604,6 +7610,9 @@ function setMode(m){
 }
 
 /* ---------- drone UI ---------- */
+function droneJaTem(){
+  if(faltaAlgo&&state.mode==='drone'&&droneSemitones().length)setStatus('');
+}
 function buildDroneGrid(){
   const grid=document.getElementById('drone-grid');grid.innerHTML='';
   NOTES.forEach(n=>{
@@ -7639,6 +7648,7 @@ function toggleDrone(n){
   if(n in state.droneSelected)delete state.droneSelected[n];
   else state.droneSelected[n]=DRONE_DEFAULT_OCT;
   buildDroneGrid();
+  droneJaTem();
   refreshDrone();
 }
 
