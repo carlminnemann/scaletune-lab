@@ -815,5 +815,6 @@
  "practice.swapBars": {
   "one": "les notes changent de couche à chaque mesure",
   "other": "les notes changent de couche toutes les {n} mesures"
- }
+ },
+ "ear.ext": "Extensions"
 }

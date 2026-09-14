@@ -815,5 +815,6 @@
  "practice.swapBars": {
   "one": "le note cambiano strato a ogni battuta",
   "other": "le note cambiano strato ogni {n} battute"
- }
+ },
+ "ear.ext": "Estensioni"
 }

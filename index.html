@@ -3435,6 +3435,27 @@ const CHORDS={
   }
 };
 
+/* ---------- extensions, for the ear ----------
+   One at a time, and only where it does not fight what is under it: no natural
+   eleventh over a major third, no thirteenth over a raised or flattened fifth,
+   and never a note the chord already has. The numbers are what a musician writes, and the
+   semitones are an octave above the degree — an extension is heard above the
+   chord, not inside it. */
+const EAR_EXTS=[[9,14],[11,17],[13,21]];
+function earExtensoesDe(notas){
+  const pcs=(notas||[]).map(function(n){return ((n%12)+12)%12;});
+  const tem=function(p){return pcs.indexOf(p)>=0;};
+  const fora=[];
+  if(!tem(2))fora.push(9);
+  if(!tem(4)&&!tem(5))fora.push(11);
+  if(!tem(8)&&!tem(9)&&!tem(6))fora.push(13);
+  return fora;
+}
+function earSemisDaExt(n){
+  const x=EAR_EXTS.find(function(e){return e[0]===n;});
+  return x?x[1]:null;
+}
+
 // Spelling used only where there is no key to derive one from: the Drone and
 // Free note pickers. Flats by preference, with F# the single exception — that
 // is the one pitch class where the flat spelling wins nothing (F# major and Gb
@@ -3506,6 +3527,10 @@ let state={
        scales:{'Ionian':true,'Dorian':true,'Mixolydian':true,'Aeolian':true},
        chords:{'Major':true,'Minor':true,'Augmented':true,'Diminished':true},
        chordHow:'up',
+       /* Whether a chord may arrive with an extension on it. Switched on, it is
+          a coin toss each time: not knowing whether there is one is the whole
+          difficulty. */
+       chordExt:false,
        figs:{'4':true,'8':true,'3':true,'16':true,'r':true},bpm:84,
        /* A scale can be asked going up, coming down, or both — and at the speed
           that makes it hard. Which of them is what most of the difference
@@ -5791,7 +5816,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-14g';
+const APP_VERSION='lab-2026-09-15a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6776,8 +6801,16 @@ function earNova(){
     const par=earSorteia(pool);
     let how=state.ear.chordHow;
     if(how==='mix')how=earSorteia(['up','block']);
-    earQ={kind:k,group:par[0],name:par[1],how:how,base:earBase(12)};
-    earQ.opcoes=earSorteiaOpcoes(earTodasAsOpcoes(),par[1]);
+    /* A coin toss, and only among the extensions this chord can carry. */
+    let ext=null;
+    if(state.ear.chordExt){
+      const podem=earExtensoesDe(CHORDS[par[0]]&&CHORDS[par[0]][par[1]]);
+      if(podem.length&&Math.random()<0.5)ext=earSorteia(podem);
+    }
+    earQ={kind:k,group:par[0],name:par[1],how:how,ext:ext,base:earBase(12)};
+    earQ.opcoes=state.ear.chordExt
+      ? earSorteiaOpcoesAcordes(earTodasAsOpcoes(),earChaveAcorde(par[1],ext))
+      : earSorteiaOpcoes(earTodasAsOpcoes(),par[1]);
   } else if(k==='rhythm'){
     const pool=earFigsOn();
     if(pool.length<2)return earFaltam();
@@ -6868,7 +6901,9 @@ function earToca(){
       else if(dir==='updown')linha=graus.concat(graus.slice(0,-1).reverse());
       linha.forEach(function(d,i){scheduleTone(earQ.base+d,t+i*passo,passo*1.15);});
     } else if(earQ.kind==='chords'){
-      const notas=(CHORDS[earQ.group]&&CHORDS[earQ.group][earQ.name])||[0];
+      let notas=(CHORDS[earQ.group]&&CHORDS[earQ.group][earQ.name])||[0];
+      const semis=earQ.ext?earSemisDaExt(earQ.ext):null;
+      if(semis!==null&&semis!==undefined)notas=notas.concat([semis]);
       if(earQ.how==='block')notas.forEach(function(d){scheduleTone(earQ.base+d,t,1.6);});
       else notas.forEach(function(d,i){scheduleTone(earQ.base+d,t+i*0.3,1.6-i*0.15);});
     } else if(earQ.kind==='rhythm'){
@@ -6920,6 +6955,7 @@ function earCerta(){
   if(!earQ)return null;
   if(earQ.kind==='intervals')return earQ.semis;
   if(earQ.kind==='rhythm')return earQ.beats.join('|');
+  if(earQ.kind==='chords')return earChaveAcorde(earQ.name,earQ.ext);
   return earQ.name;
 }
 function earResponde(v){
@@ -6944,6 +6980,37 @@ function earQuantasOpcoes(){
 }
 /* Drawn once when the question is asked and kept on it, so playing it again
    does not shuffle the answers under the finger. */
+/* A chord's answer is the chord and whatever is sitting on top of it: with
+   extensions on, "Dominant 7" and "Dominant 7 (9)" are two different answers,
+   because telling them apart is the exercise. */
+function earChaveAcorde(nome,ext){return ext?nome+'|'+ext:nome;}
+function earNomeAcorde(chave){
+  const p=String(chave).split('|');
+  return p.length>1?chordLabel(p[0])+' ('+p[1]+')':chordLabel(p[0]);
+}
+/* Two of each, at least. One option carrying an extension while the rest do not
+   answers the question on its own — and so does one without, the other way
+   round. Where the pool allows it, both kinds are always on the screen. */
+function earSorteiaOpcoesAcordes(todas,certa){
+  const max=earQuantasOpcoes();
+  const baralha=function(a){
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));
+      const t=a[i];a[i]=a[j];a[j]=t;}
+    return a;};
+  const temExt=function(o){return String(o.v).indexOf('|')>=0;};
+  const certaObj=todas.find(function(o){return String(o.v)===String(certa);});
+  const resto=todas.filter(function(o){return String(o.v)!==String(certa);});
+  const com=baralha(resto.filter(temExt));
+  const sem=baralha(resto.filter(function(o){return !temExt(o);}));
+  const out=certaObj?[certaObj]:[];
+  let precisaCom=2-((certaObj&&temExt(certaObj))?1:0);
+  let precisaSem=2-((certaObj&&!temExt(certaObj))?1:0);
+  while(precisaCom-->0&&com.length&&out.length<max)out.push(com.shift());
+  while(precisaSem-->0&&sem.length&&out.length<max)out.push(sem.shift());
+  const sobra=baralha(com.concat(sem));
+  while(out.length<max&&sobra.length)out.push(sobra.shift());
+  return baralha(out);
+}
 function earSorteiaOpcoes(todas,certa){
   const max=earQuantasOpcoes();
   if(todas.length<=max)return todas.slice();
@@ -6968,21 +7035,34 @@ function earTodasAsOpcoes(){
   const k=earKind();
   if(k==='intervals')return earOn().map(function(n){return {v:n,label:intervalLabel(n)};});
   if(k==='scales')return earScalesOn().map(function(x){return {v:x[1],label:scaleLabel(x[1])};});
-  if(k==='chords')return earChordsOn().map(function(x){return {v:x[1],label:chordLabel(x[1])};});
+  if(k==='chords'){
+    const base=earChordsOn();
+    if(!state.ear.chordExt)
+      return base.map(function(x){return {v:x[1],label:chordLabel(x[1])};});
+    const out=[];
+    base.forEach(function(x){
+      out.push({v:x[1],label:chordLabel(x[1])});
+      earExtensoesDe(CHORDS[x[0]]&&CHORDS[x[0]][x[1]]).forEach(function(e){
+        const v=earChaveAcorde(x[1],e);
+        out.push({v:v,label:earNomeAcorde(v)});
+      });
+    });
+    return out;
+  }
   return [];
 }
 function earNomeDaCerta(){
   if(!earQ)return '';
   if(earQ.kind==='intervals')return intervalLabel(earQ.semis);
   if(earQ.kind==='scales')return scaleLabel(earQ.name);
-  if(earQ.kind==='chords')return chordLabel(earQ.name);
+  if(earQ.kind==='chords')return earNomeAcorde(earChaveAcorde(earQ.name,earQ.ext));
   return '';
 }
 function earNomeDoDito(){
   if(!earQ||earQ.said===null)return '';
   if(earQ.kind==='intervals')return intervalLabel(earQ.said);
   if(earQ.kind==='scales')return scaleLabel(earQ.said);
-  if(earQ.kind==='chords')return chordLabel(earQ.said);
+  if(earQ.kind==='chords')return earNomeAcorde(earQ.said);
   return '';
 }
 
@@ -7131,6 +7211,12 @@ function earPaginasBase(){
               return n?tr('ear.on',{one:'{n} on',other:'{n} on'},{n:n}):tr('ear.noneShort','none chosen');}};}));
   if(k==='chords')return [
     earNivelCaixa(),
+    /* A switch, like all-of-them above it: on or off is not a question that
+       needs a page of its own. */
+    {k:'ext',nome:function(){return tr('ear.ext','Extensions');},
+     diz:function(){return state.ear.chordExt?tr('common.on','On'):tr('common.off','Off');},
+     liga:function(){return !!state.ear.chordExt;},
+     faz:function(){state.ear.chordExt=!state.ear.chordExt;earMexeu();}},
     {k:'tudo',nome:function(){return tr('ear.allChords','All the chords');},
      diz:function(){return tr('ear.on',{one:'{n} on',other:'{n} on'},{n:earChordsOn().length});},
      liga:function(){return earChordsOn().length>=earQuantosAcordes();},
@@ -7191,6 +7277,8 @@ function earAplicaNivel(n){
       const todos=[];Object.keys(CHORDS).forEach(function(g){
         Object.keys(CHORDS[g]).forEach(function(x){todos.push(x);});});
       ligaSo(E.chords,todos);}
+    /* Hard is where not knowing whether there is an extension belongs. */
+    E.chordExt=(n==='dificil');
   } else if(k==='rhythm'){
     const comp=earComposto();
     if(n==='facil'){ligaSo(E.figs,['4','8','r']);E.bpm=72;}

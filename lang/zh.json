@@ -800,5 +800,6 @@
  "practice.swapBars": {
   "one": "音符每小节交换声部",
   "other": "音符每 {n} 小节交换声部"
- }
+ },
+ "ear.ext": "延伸音"
 }

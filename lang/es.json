@@ -815,5 +815,6 @@
  "practice.swapBars": {
   "one": "las notas cambian de capa cada compás",
   "other": "las notas cambian de capa cada {n} compases"
- }
+ },
+ "ear.ext": "Extensiones"
 }

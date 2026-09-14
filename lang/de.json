@@ -815,5 +815,6 @@
  "practice.swapBars": {
   "one": "die Noten wechseln jeden Takt die Ebene",
   "other": "die Noten wechseln alle {n} Takte die Ebene"
- }
+ },
+ "ear.ext": "Optionstöne"
 }
