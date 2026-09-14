@@ -5791,7 +5791,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-14d';
+const APP_VERSION='lab-2026-09-14f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6296,6 +6296,20 @@ function nomeDaPagina(){
 function arrumaPaginas(){
   const defs=PAGINAS[painelAberto];
   const row=document.getElementById('pag-row');
+  /* The drawer is a screen of its own, not a panel with pages in it. In Metro
+     the metronome's panel is pinned open, so the body still carried 'paginas'
+     while the drawer was up — and the rule that decides which block a page
+     shows was hiding the drawer's own name field and its two buttons. There was
+     no way to save anything in Metro at all. */
+  if(pastaAberta){
+    if(row)row.style.display='none';
+    document.body.classList.remove('paginas','sub','estica-chain','centra-pagina');
+    document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
+    document.querySelectorAll('.unica,.pilha').forEach(e=>{e.classList.remove('unica');e.classList.remove('pilha');});
+    document.querySelectorAll('.estica').forEach(e=>e.classList.remove('estica'));
+    olhaPagina(false);
+    return;
+  }
   if(!defs){
     if(row)row.style.display='none';
     document.body.classList.remove('paginas');
@@ -6609,7 +6623,11 @@ function arrumaPaineis(){
   if(row)row.style.display=(menu&&!emCasa)?'':'none';
   document.body.classList.toggle('caixas',!!(menu&&!emCasa&&ids));
   document.body.classList.toggle('painel',!!painelAberto&&!pastaAberta);
-  if(!ids)return;
+  /* Metro is the one mode with no menu of panels — the metronome is the mode —
+     so this returned here without ever reaching the pages, and nothing cleared
+     what the pages had left on the body. Which is why the drawer's own name
+     field and buttons were hidden there, and only there. */
+  if(!ids){arrumaPaginas();return;}
   ids.forEach(id=>{
     const d=document.getElementById(id);
     if(!d)return;
