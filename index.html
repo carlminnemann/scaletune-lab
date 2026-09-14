@@ -2761,6 +2761,7 @@ body.bolinhas .pulse-bpm{display:none}
       <span class="sig-fields">
         <span class="sig-unit" data-t="gap.over">reaches the level</span>
         <select class="sig-select" id="gap-mins" data-ta="aria.gapMins" aria-label="Minutes to reach the level"></select>
+        <span class="sig-unit" id="gap-mins-unit" data-t="min">min</span>
       </span>
       <span class="btn-wrap seg" id="gap-one-row" data-cols="fixed"></span></div>
     <div class="info-line" id="gap-info"></div>
@@ -5796,7 +5797,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-14b';
+const APP_VERSION='lab-2026-09-14c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -9506,16 +9507,24 @@ function buildGapRow(){
   if(mins&&(!mins.options.length||mins.dataset.lang!==LANG)){
     const liga=!mins.options.length;
     mins.innerHTML='';mins.dataset.lang=LANG;
-    /* The line has to read as a sentence whichever way it is set. "over: at
-       once" is not one, and being asked what it meant is how I found out. */
+    /* The number in the roller and the word beside it, the way the ramp reads
+       and every other roller in the app now reads. The first option is not a
+       number of minutes, so the word steps aside for it. */
     mins.appendChild(new Option(tr('gap.now','at once'),'0'));
-    [2,5,10,15,20,30].forEach(n=>mins.appendChild(new Option(tr('gap.in','in {n} min',{n:n}),String(n))));
+    [2,5,10,15,20,30].forEach(n=>mins.appendChild(new Option(String(n),String(n))));
     if(liga)mins.addEventListener('change',()=>{
       P.gapMinutes=parseInt(mins.value,10)||0;
       buildGapRow();refreshSectionSummaries();
     });
   }
-  if(mins)mins.value=String(P.gapMinutes|0);
+  if(mins){
+    mins.value=String(P.gapMinutes|0);
+    /* A roller holding a word takes reading size, not the display size the
+       numbers take. */
+    mins.classList.toggle('palavra',(P.gapMinutes|0)===0);
+    const u=document.getElementById('gap-mins-unit');
+    if(u)u.style.display=((P.gapMinutes|0)===0)?'none':'';
+  }
   const one=document.getElementById('gap-one-row');
   if(one){
     one.innerHTML='';
