@@ -1784,16 +1784,10 @@ body.paginas #pat-mine-head{order:9}
 body.paginas #pat-list{order:10}
 body.paginas #pat-body>.ex-new{order:11}
 body.paginas #pat-mine-info{order:12}
-/* The pattern is two questions and they are two pages: what the bars are made
-   of, and the bars themselves. Each page shows its own half. */
-body.so-padrao #pattern-block #pat-level-line,body.so-padrao #pattern-block #pat-bar-row,
-body.so-padrao #pattern-block .pat-scroll,body.so-padrao #pattern-block #pat-copy-line,
-body.so-padrao #pattern-block #pat-body>.step-row,
-body.so-padrao #pattern-block #pat-info{display:none!important}
-body.so-grelha #pattern-block #pat-time-line,body.so-grelha #pattern-block #pat-loop-line,
-body.so-grelha #pattern-block #pat-mine-head,body.so-grelha #pattern-block #pat-list,
-body.so-grelha #pattern-block #pat-body>.ex-new,
-body.so-grelha #pattern-block #pat-mine-info{display:none!important}
+/* The pattern was split across two pages for a while, because the grid would
+   not fit and the page would not scroll. Both of those are fixed, and the two
+   halves were never two questions: what the bars are made of governs what the
+   grid shows, so they belong on one screen, the grid at the top of it. */
 /* Advance Every is a number and what it counts: the number written the size a
    metronome writes one, the two words under it the size every other answer in
    the app is, and the pair of them together in the middle of the screen. */
@@ -5797,7 +5791,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-14c';
+const APP_VERSION='lab-2026-09-14d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6250,12 +6244,6 @@ const PAGINAS={
     {k:'pat',   bloco:'pattern-block', nome:()=>tr('pattern','Pattern'),fica:true,
      quando:()=>grooveAllowed()&&!state.poly.on,
      mexeu:difG('custom'),diz:()=>resumoDe('pat-sum')},
-    /* The bars you write are a screen of their own. On one page with everything
-       else the grid was the part that would not fit, and on a tablet held
-       sideways it was cut off with no way to reach the rest of it. */
-    {k:'grid',  bloco:'pattern-block', nome:()=>tr('pat.grid','The grid'),fica:true,
-     quando:()=>grooveAllowed()&&!state.poly.on,
-     mexeu:difG('custom'),diz:()=>resumoDe('pat-sum')},
     {k:'mix',   bloco:'mixer-block',   nome:()=>tr('mixer','Mixer'),fica:true,
      quando:()=>grooveAllowed()&&!state.poly.on,
      mexeu:difG('mix'),diz:()=>resumoDe('mix-sum')},
@@ -6319,7 +6307,7 @@ function arrumaPaginas(){
     olhaPagina(false);
     document.querySelectorAll('.unica,.pilha').forEach(e=>{e.classList.remove('unica');e.classList.remove('pilha');});
     document.querySelectorAll('.estica').forEach(e=>e.classList.remove('estica'));
-    document.body.classList.remove('estica-chain','so-padrao','so-grelha');
+    document.body.classList.remove('estica-chain');
     centraSeCabe();
     return;
   }
@@ -6349,7 +6337,6 @@ function arrumaPaginas(){
   [...body.children].forEach(c=>c.classList.remove('pagina-aberta'));
   if(naFrente){
     olhaPagina(false);
-    document.body.classList.remove('so-padrao','so-grelha');
     buildPagRow();pintaClears();return;
   }
   /* A page is usually one block, and sometimes two that answer one question —
@@ -6366,12 +6353,6 @@ function arrumaPaginas(){
     }
   });
   document.body.classList.add('sub');
-  /* Two pages out of one block: the pattern's settings, and the bars themselves.
-     Scoped to the metronome, because a page called 'pat' is also the sequence's
-     own in Practice Progressions. */
-  const noMetro=painelAberto==='metro-section';
-  document.body.classList.toggle('so-padrao',noMetro&&pag.k==='pat');
-  document.body.classList.toggle('so-grelha',noMetro&&pag.k==='grid');
   /* The bar above the page already says what the page is: the group inside it
      that says the same word again is one title too many. */
   escondeTituloRepetido(nomeDaPagina());
