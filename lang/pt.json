@@ -816,5 +816,7 @@
   "one": "as notas trocam de plano a cada compasso",
   "other": "as notas trocam de plano a cada {n} compassos"
  },
- "ear.ext": "Extensões"
+ "ear.ext": "Extensões",
+ "modes.eachBoth": "cada modo sobe e desce antes do seguinte",
+ "modes.alternate": "um modo sobe, o seguinte desce"
 }

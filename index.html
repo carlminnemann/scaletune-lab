@@ -613,7 +613,13 @@ body.earpag #ear-page .btn-wrap:not(.seg):not(.notas)>button:last-child:nth-chil
 /* The note everything is built on: the letter in the middle and its name under
    it, the way the tempo's number and the word BPM stand — one shape for the one
    big reading on a screen, wherever it is. */
+/* It never gives up height. The panel around it is a flex column, so the note
+   was being shrunk to its own floor and then clipping the letter it exists to
+   show — at 568px tall the floor is 74px and the letter and its caption need
+   77. A box the size of one reading is not where a screen should find its
+   room. */
 .root-box{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:0 0 auto;
   gap:2px;width:100%;min-height:clamp(64px,13vh,110px);margin-bottom:var(--s3);
   padding:8px 14px;border:1px solid var(--mode);border-radius:14px;
   background:var(--mode-bg);color:var(--mode-fg);cursor:pointer;touch-action:manipulation}
@@ -1207,8 +1213,19 @@ body.earpag #ear-page .btn-wrap.notas>button{min-height:clamp(44px,7vh,64px)}
 
 
 /* The guide itself: a sheet over the app, not another panel inside it. */
-.help-overlay{position:fixed;inset:0;z-index:50;background:var(--bg);
-  overflow-y:auto;
+/* Its height is the height the app measured, not inset:0. A fixed box is laid
+   out against the viewport the browser claims to have, and on a phone held
+   sideways that is the tall one — the browser's own bar is drawn over the foot
+   of it. So the sheet ended below the screen: its scroller reached the end of
+   the text while the last lines were still under the toolbar, and the window
+   could not be scrolled the rest of the way. --app-h is what is actually
+   visible, measured on every turn of the phone, and the frame of the app has
+   been built on it all along; this is the one window that was not.
+   overscroll-behavior keeps a flick at the end of the sheet inside the sheet,
+   rather than handing it to the page underneath. */
+.help-overlay{position:fixed;top:0;left:0;right:0;bottom:auto;
+  height:var(--app-h,100dvh);z-index:50;background:var(--bg);
+  overflow-y:auto;overscroll-behavior:contain;
   padding:calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right))
           calc(3rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))}
 .help-overlay[hidden]{display:none}
@@ -5816,7 +5833,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-15a';
+const APP_VERSION='lab-2026-09-16a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6225,7 +6242,7 @@ const PAGINAS={
      mexeu:difP('rootMove'),
      diz:()=>lab('rootmove',state.practice.rootMove,state.practice.rootMove)},
     {k:'both',  bloco:'bothways-line',  nome:()=>tr('updown.means','Up-Down means'),
-     quando:()=>passesAlternate()&&!modesRunOn(),mexeu:dif('bothWays'),
+     quando:()=>passesAlternate(),mexeu:dif('bothWays'),
      diz:()=>state.bothWays?tr('updown.each','Each both ways'):tr('updown.alternate','Alternate')},
     {k:'rep',   bloco:'repeat-block',   nome:()=>tr('repeat','Repeat'),
      mexeu:difP('repeat'),
@@ -8140,8 +8157,15 @@ let passTick=0;
    and back down, so ionian goes both ways before dorian is reached at all.
    Same hold, one level out — with a figure list running, the figures close
    their own pair first and the item's pair closes around them. */
+/* The run through the modes is asked the same question as every other rotation,
+   and it is the question he asked of it first: does the run take one mode up
+   and the next one down, or does each mode go up and back down before the run
+   moves on? Only what he answers decides it here — the table of time holds a
+   figure across a pair everywhere else, and turning that on by itself would
+   double a run he has not asked to have doubled. */
 function alternationDoubles(){
-  if(!passesAlternate()||modesRunOn())return false;
+  if(!passesAlternate())return false;
+  if(modesRunOn())return !!state.bothWays;
   return (subdivListOn()&&subdivOrder().length>1)||!!state.bothWays;
 }
 function alternationHolds(tick){
@@ -8185,12 +8209,14 @@ function buildTurnRow(lineId,rowId,dirOf){
   gridify(row);
 }
 /* And what Up-Down means to the rotation — which is a question only when there
-   IS a rotation to alternate. The modes tour answers it for itself: its
-   there-and-back is the run turning at the top, not each mode turning. */
+   IS a rotation to alternate. The run through the modes is one of them: The run
+   answers a different question there (how far the run goes — up through the
+   seven, or up and back down through them), and this one says what each mode
+   does on its way past. */
 function buildBothWaysRow(){
   const line=document.getElementById('bothways-line');
   if(!line)return;
-  const show=passesAlternate()&&!modesRunOn();
+  const show=passesAlternate();
   line.style.display=show?'':'none';
   if(!show)return;
   const sig=show+'|'+!!state.bothWays+'|'+LANG;
@@ -8202,7 +8228,11 @@ function buildBothWaysRow(){
       const b=document.createElement('button');
       b.className='pick-btn'+(!!state.bothWays===v?' active':'');
       b.textContent=label;
-      b.onclick=()=>{state.bothWays=v;resetRun();refreshSequence();
+      /* Answering this changes how long a round is, so the round begins again —
+         and where the modes are what is turning, it begins again at the first
+         of them rather than wherever the run had got to. */
+      b.onclick=()=>{state.bothWays=v;resetRun();restartModesRun();refreshSequence();
+        updatePracticeInfo();refreshSectionSummaries();
         updateRotationPanel();renderPitchPickers();restartIfPlaying();};
       row.appendChild(b);
     });
@@ -8928,6 +8958,7 @@ function updateRotationPanel(){
   if(!editable)rotHold=null;
   if(rotHold!=null&&rotHold>=activeList().length)rotHold=null;
   p.items.forEach((it,i)=>{
+    if(!it)return;                 // nothing is drawn for something that is not there
     const d=document.createElement(editable?'button':'span');
     d.className='rot-chip'+(i===p.currentIdx?' now':(i===p.nextIdx&&p.moved?' next':''));
     d.textContent=(i+1)+'. '+itemLabel(it);
@@ -8985,6 +9016,11 @@ function updateRotationPanel(){
         const list=activeList();
         if(rotHold==null){rotHold=i;updateRotationPanel();return;}
         if(rotHold===i){rotHold=null;updateRotationPanel();return;}
+        /* The same guard the cross and the direction mark carry: a chip that is
+           no longer in the list — the list emptied or shortened since it was
+           drawn — has nothing to move, and moving from an index past the end
+           put a hole in the rotation that the next redraw walked into. */
+        if(rotHold>=list.length||i>=list.length){rotHold=null;updateRotationPanel();return;}
         const cur=list[studyIdx];
         const [moved]=list.splice(rotHold,1);
         list.splice(i,0,moved);
@@ -9528,8 +9564,13 @@ function rollerAbre(sel){
   const acima=win.top-b.top;                       // padding above the window
   let esq=r.left+r.width/2-b.width/2;
   let topo=r.top+r.height/2-(acima+48);            // 48 = half of three rows
-  esq=Math.max(8,Math.min(esq,innerWidth-b.width-8));
-  topo=Math.max(8,Math.min(topo,innerHeight-b.height-8));
+  /* Held inside what can be seen, which on a phone is not what innerHeight
+     says: the browser's bar is drawn over the foot of the window, so a wheel
+     opened low on the screen was being pushed down under it. */
+  const vv=window.visualViewport;
+  const janH=vv?vv.height:innerHeight, janW=vv?vv.width:innerWidth;
+  esq=Math.max(8,Math.min(esq,janW-b.width-8));
+  topo=Math.max(8,Math.min(topo,janH-b.height-8));
   box.style.left=Math.round(esq)+'px';
   box.style.top=Math.round(topo)+'px';
   const actual=itens.find(d=>d.dataset.v===sel.value)||itens[0];
@@ -9745,6 +9786,12 @@ function updatePracticeInfo(){
              {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})
         : tr('modes.running','{n} modes of {key}, one octave each, closing on the first an octave up',
              {n:Object.keys(SCALES[state.scaleGroup]).length,key:modesKeyName()})));
+  /* Which of the two Up-Down means here is worth a line of its own: the boxes
+     say Alternate or Each both ways, and this says what that does to the run. */
+  if(modesRunOn()&&modesSnake())
+    bits.push(state.bothWays
+      ? tr('modes.eachBoth','each mode up and back down before the next')
+      : tr('modes.alternate','one mode up, the next one down'));
   if(state.poly.on&&state.poly.notesFollow==='alt')
     bits.push(tr('practice.swapBars',
       {one:'the notes change layer every bar',
@@ -12179,10 +12226,28 @@ function travaCaixas(){
     row.style.flexGrow=cresce;
     row.style.minHeight=h>0?h+'px':'';
     /* And if a box still cannot fit its own words — two lines where the
-       measurement counted one — the row takes the difference. */
-    let falta=0;
-    [...row.children].forEach(c=>{falta=Math.max(falta,c.scrollHeight-c.clientHeight);});
-    if(falta>1&&h>0)row.style.minHeight=(h+falta)+'px';
+       measurement counted one — the row takes the difference. Line by line of
+       the grid, not once for the whole of it: in Portuguese two of the
+       metronome's ten boxes want a second line, and adding those three pixels
+       to the row added them once while five lines of boxes each needed them.
+       "Mudança de andamento" and "Compasso de entrada" were reading with the
+       tail of the second line cut. */
+    const cs=getComputedStyle(row);
+    const cols=Math.max(1,(cs.gridTemplateColumns||'').split(/\s+/).filter(Boolean).length);
+    const gap=parseFloat(cs.rowGap)||0;
+    const filhos=[...row.children].filter(c=>c.getClientRects().length);
+    let precisa=0;
+    for(let i=0;i<filhos.length;i+=cols){
+      let alt=0;
+      for(let j=i;j<Math.min(i+cols,filhos.length);j++){
+        const c=filhos[j];
+        // the content it needs, plus whatever its own border takes
+        alt=Math.max(alt,c.scrollHeight+(c.offsetHeight-c.clientHeight));
+      }
+      precisa+=alt;
+    }
+    if(filhos.length)precisa+=gap*(Math.ceil(filhos.length/cols)-1);
+    if(precisa>h+1)row.style.minHeight=Math.ceil(precisa)+'px';
   });
   travaBlocos();
 }
@@ -12190,15 +12255,33 @@ function travaCaixas(){
    around it went on shrinking, and the row — which now would not — spilled out
    of it and over the rotation. So the way up is held to its minimum too, and
    the screen scrolls, which is what a screen with more on it than fits does.
-   Only where the rotation is on the screen: everywhere else the panels have
-   room, and a floor nobody needs is a floor that can go wrong. */
+   It was done only where the rotation was on the screen, on the reasoning that
+   everywhere else the panels have room and a floor nobody needs is a floor that
+   can go wrong. That reasoning was wrong: on a 320x568 phone the Scales panel
+   was clipping its own Clear in half with the rotation nowhere in sight. So the
+   question asked is the one that matters — is anything being cut off? — and the
+   floors go down wherever the answer is yes, whatever is doing the cutting. */
+/* Text that is meant to stop at one line says so, and a line cut on purpose is
+   not something being cut off. */
+function estaACortar(sc){
+  const els=sc.querySelectorAll('.sec-body,.panel,details.sec,.btn-wrap,.root-box,.panel-box');
+  for(const el of els){
+    if(!el.offsetParent)continue;
+    const cs=getComputedStyle(el);
+    if(cs.overflowY!=='hidden'&&cs.overflowY!=='clip')continue;
+    if(cs.webkitLineClamp&&cs.webkitLineClamp!=='none')continue;
+    if(el.scrollHeight>el.clientHeight+1)return true;
+  }
+  return false;
+}
 function travaBlocos(){
   const sc=document.getElementById('scroll-area');
   document.querySelectorAll('[data-travado]').forEach(e=>{
     e.style.minHeight='';e.removeAttribute('data-travado');});
   if(!sc)return;
   const rot=document.getElementById('rotation-panel');
-  if(!rot||!rot.offsetParent)return;
+  const comRotacao=!!(rot&&rot.offsetParent);
+  if(!comRotacao&&!estaACortar(sc))return;
   /* From the inside out: a box only knows how tall it has to be once the boxes
      inside it have said so. Every level between a row and the screen counts —
      one of them, the scale panel's own wrapper, clips what it cannot fit, which
@@ -12209,9 +12292,19 @@ function travaBlocos(){
     let el=row.parentElement;
     while(el&&el!==sc&&el!==document.body){alvos.add(el);el=el.parentElement;}
   });
-  sc.querySelectorAll('.sec-body,.panel').forEach(e=>alvos.add(e));
+  /* The panel itself counts, not only its body: in Free the notes' own panel is
+     the box that clips, and it is neither a body nor a child of the screen, so
+     nothing held it and the last row of notes was cut through the middle. */
+  sc.querySelectorAll('details.sec,.sec-body,.panel').forEach(e=>alvos.add(e));
   [...sc.children].forEach(e=>alvos.add(e));
-  const fundo=[...alvos].filter(el=>el&&el!==rot&&!rot.contains(el)&&el.offsetParent)
+  /* The rows themselves belong to travaCaixas and are not touched here. It
+     measured one of them as needing five pixels more than its own boxes had
+     been given — a name on two lines where one had been counted — and this ran
+     straight after and pinned the row to the height it was already at, which
+     put the five pixels back. Range & Direction and Practice Progressions were
+     reading with the foot of their second line shaved off. */
+  const fundo=[...alvos].filter(el=>el&&(!rot||(el!==rot&&!rot.contains(el)))&&el.offsetParent
+      &&!el.matches(LINHAS_TRAVADAS))
     .map(el=>{let d=0,p=el;while(p){d++;p=p.parentElement;}return [d,el];})
     .sort((a,b)=>b[0]-a[0]);
   /* The floor has to leave room for the last thing standing on it. A box's
@@ -13074,6 +13167,7 @@ function helpShowAll(){
 function openHelp(anchor){
   const o=document.getElementById('help-overlay');
   if(!o)return;
+  measureViewport();          // same reason as the settings sheet
   o.hidden=false;
   document.body.style.overflow='hidden';
   helpOnlySection(anchor||null);
@@ -13549,6 +13643,9 @@ function openSettings(){
   setPag=null;
   buildSettings();
   pintaSettings();
+  /* The sheet is as tall as the window can be seen to be, and the bar of the
+     browser may have come or gone since anything last measured it. */
+  measureViewport();
   o.hidden=false;o.scrollTop=0;
   document.body.style.overflow='hidden';
 }

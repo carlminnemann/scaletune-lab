@@ -816,5 +816,7 @@
   "one": "las notas cambian de capa cada compás",
   "other": "las notas cambian de capa cada {n} compases"
  },
- "ear.ext": "Extensiones"
+ "ear.ext": "Extensiones",
+ "modes.eachBoth": "cada modo sube y baja antes del siguiente",
+ "modes.alternate": "un modo sube, el siguiente baja"
 }

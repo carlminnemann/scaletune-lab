@@ -816,5 +816,7 @@
   "one": "les notes changent de couche à chaque mesure",
   "other": "les notes changent de couche toutes les {n} mesures"
  },
- "ear.ext": "Extensions"
+ "ear.ext": "Extensions",
+ "modes.eachBoth": "chaque mode monte et redescend avant le suivant",
+ "modes.alternate": "un mode monte, le suivant descend"
 }

@@ -816,5 +816,7 @@
   "one": "le note cambiano strato a ogni battuta",
   "other": "le note cambiano strato ogni {n} battute"
  },
- "ear.ext": "Estensioni"
+ "ear.ext": "Estensioni",
+ "modes.eachBoth": "ogni modo sale e scende prima del successivo",
+ "modes.alternate": "un modo sale, il successivo scende"
 }

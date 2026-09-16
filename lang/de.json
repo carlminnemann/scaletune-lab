@@ -816,5 +816,7 @@
   "one": "die Noten wechseln jeden Takt die Ebene",
   "other": "die Noten wechseln alle {n} Takte die Ebene"
  },
- "ear.ext": "Optionstöne"
+ "ear.ext": "Optionstöne",
+ "modes.eachBoth": "jeder Modus auf und ab, dann der nächste",
+ "modes.alternate": "ein Modus aufwärts, der nächste abwärts"
 }
