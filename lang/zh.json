@@ -803,5 +803,8 @@
  },
  "ear.ext": "延伸音",
  "modes.eachBoth": "每个调式先上行再下行，然后换下一个",
- "modes.alternate": "一个调式上行，下一个下行"
+ "modes.alternate": "一个调式上行，下一个下行",
+ "practice.figuresPlain": {
+  "other": "每个调式内有 {n} 种节奏音型"
+ }
 }

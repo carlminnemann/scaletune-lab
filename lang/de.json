@@ -818,5 +818,9 @@
  },
  "ear.ext": "Optionstöne",
  "modes.eachBoth": "jeder Modus auf und ab, dann der nächste",
- "modes.alternate": "ein Modus aufwärts, der nächste abwärts"
+ "modes.alternate": "ein Modus aufwärts, der nächste abwärts",
+ "practice.figuresPlain": {
+  "one": "{n} rhythmische Figur in jedem Modus",
+  "other": "{n} rhythmische Figuren in jedem Modus"
+ }
 }

@@ -5095,15 +5095,15 @@ function subdivListOn(){return state.practice.useSubdivList&&state.practice.subd
    with one honest answer — so it is no longer asked. */
 function clickFollowsFigure(){return state.clickFollowsFigure||pulseOnly();}
 
-// The order the figures are walked in — the same up / down / up-down choice the
-// notes have, so a table of time can climb and come back down.
-/* Which way the table of time is walked, as the mode in front of you allows.
-   The drone is not offered Down — reading his own order backwards is choosing
-   a different order — and an exercise saved elsewhere with Down on it plays in
-   the order he wrote rather than in one he was never shown. */
+/* The order the figures are walked in. It used to borrow the notes' own three
+   answers — Up, Down, Up-Down — and two of them were never real questions here:
+   the list is one he wrote himself, so Up is the order he wrote and Down is a
+   different order he could write in the same two taps. Only there and back
+   cannot be written as an order, so that is the whole of what is asked: the
+   sequence, or the sequence and back again. Down on an exercise saved before
+   this plays in the order it was written. */
 function subdivDirNow(){
-  const d=state.practice.subdivDir;
-  return (state.mode==='drone'&&d==='down')?'up':d;
+  return state.practice.subdivDir==='updown'?'updown':'up';
 }
 function subdivOrder(){
   const l=state.practice.subdivList;
@@ -5893,7 +5893,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-20a';
+const APP_VERSION='lab-2026-09-20b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -9420,32 +9420,23 @@ function tapTempo(){
   },2200);
 }
 
-/* A scale runs once, from one end to the other, so which end it sets off from is
-   a real choice. A table of time goes round and round, and on a loop Down-Up is
-   Up-Down entered at a different point — the same cycle described twice. It is
-   offered for the notes and not here. */
+/* Still read from a saved exercise, which may carry any of the three the row
+   used to offer; what is played is decided by subdivDirNow. */
 const SUBDIV_DIRS=DIRECTIONS.filter(d=>d.k!=='downup');
-/* In the drone the sequence of figures is the whole exercise, and the order is
-   his: reading it backwards is choosing a different order, which is the same
-   two taps that chose this one. Up and back down is not — no order writes it —
-   so that is the one that stays. */
-function subdivDirsAqui(){
-  return state.mode==='drone'?SUBDIV_DIRS.filter(d=>d.k!=='down'):SUBDIV_DIRS;
-}
+/* One switch, not a row of directions: it turns the return leg on and off. */
 function buildSubdivDirRow(){
   const row=document.getElementById('subdivdir-row');row.innerHTML='';
   if(!state.practice.useSubdivList)return;          // only meaningful for a sequence
-  if(state.practice.subdivDir==='downup')state.practice.subdivDir='updown';
-  /* An answer that is not offered here is not overwritten either: Down chosen
-     in Scale is still Down when you go back to it, and while the drone is in
-     front of you the row lights Up, which is what the drone is playing. */
-  subdivDirsAqui().forEach(d=>{
-    const b=document.createElement('button');
-    b.className='pick-btn'+(d.k===subdivDirNow()?' active':'');
-    b.textContent=lab('subdivdir',d.k,d.label);
-    b.onclick=()=>{state.practice.subdivDir=d.k;subdivIdx=0;buildSubdivRow();updatePracticeInfo();};
-    row.appendChild(b);
-  });
+  const ligado=subdivDirNow()==='updown';
+  const b=document.createElement('button');
+  b.className='pick-btn'+(ligado?' active':'');
+  b.textContent=lab('subdivdir','updown','Up-Down');
+  b.setAttribute('aria-pressed',String(ligado));
+  b.onclick=()=>{
+    state.practice.subdivDir=ligado?'up':'updown';
+    subdivIdx=0;buildSubdivRow();updatePracticeInfo();
+  };
+  row.appendChild(b);
 }
 
 /* Choosing it plays it, once, at the accent's pitch. A click is half a second
@@ -9912,10 +9903,18 @@ function updatePracticeInfo(){
       {one:'the notes change layer every bar',
        other:'the notes change layer every {n} bars'},{n:followBars()}));
   if(subdivListOn()&&state.practice.subdivList.length>1)
-    bits.push(tr('practice.figures',
-      {one:'{n} rhythmic figure ({dir}) within each mode',
-       other:'{n} rhythmic figures ({dir}) within each mode'},
-      {n:subdivOrder().length,dir:dirLabel(subdivDirNow()).toLowerCase()}));
+    /* The way round is named only where there is one to name: with the return
+       leg off, the figures are simply played in the order he wrote them, and
+       "(up)" beside them was answering a question nobody is asked any more. */
+    bits.push(subdivDirNow()==='updown'
+      ? tr('practice.figures',
+          {one:'{n} rhythmic figure ({dir}) within each mode',
+           other:'{n} rhythmic figures ({dir}) within each mode'},
+          {n:subdivOrder().length,dir:dirLabel('updown').toLowerCase()})
+      : tr('practice.figuresPlain',
+          {one:'{n} rhythmic figure within each mode',
+           other:'{n} rhythmic figures within each mode'},
+          {n:subdivOrder().length}));
 
   if(runsOnce())bits.push(roundPasses()>1
     ? tr('practice.onceOf','stops after all {n} passes',{n:roundPasses()})

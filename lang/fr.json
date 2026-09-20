@@ -818,5 +818,9 @@
  },
  "ear.ext": "Extensions",
  "modes.eachBoth": "chaque mode monte et redescend avant le suivant",
- "modes.alternate": "un mode monte, le suivant descend"
+ "modes.alternate": "un mode monte, le suivant descend",
+ "practice.figuresPlain": {
+  "one": "{n} figure rythmique dans chaque mode",
+  "other": "{n} figures rythmiques dans chaque mode"
+ }
 }
