@@ -475,6 +475,15 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 .ear-cheia{fill:currentColor}
 .ear-tinta{stroke:currentColor;stroke-width:1.4}
 .ear-tres{fill:currentColor;font-size:9px;font-style:italic}
+/* The metronome's figures, written rather than named: one beat of notation on
+   the button, and the word only where a value is read back in a line of text.
+   Drawn at the size of the button so that a button grown to fill a screen has
+   a figure you can see from across the room. */
+.fig-desenho{display:block;width:auto;height:clamp(24px,2.6em,42px);max-width:100%;margin:0 auto}
+.pick-btn.numbered .fig-desenho{display:inline-block;vertical-align:middle;margin:0}
+.fig-cheia{fill:currentColor}
+.fig-tinta{stroke:currentColor;stroke-width:1.4}
+.fig-tres{fill:currentColor;font-size:9px;font-style:italic}
 #ear-answers .pick-btn.certo{background:var(--certo-bg);border-color:var(--certo);color:var(--certo-fg)}
 #ear-answers .pick-btn.errado{background:var(--errado-bg);border-color:var(--errado);color:var(--errado-fg)}
 /* ---------- a mode's panels, as boxes ----------
@@ -540,7 +549,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
    a glow from the middle does not belong to a touch that happened in the
    corner. Nothing here is a new colour — it is the same greys with a direction
    for the light. */
-.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn{
+.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn,.timbre-btn{
   position:relative;overflow:hidden;
   /* Measured in pixels and not in percentages: a box that grows to fill a
      screen is 250 tall, and a highlight given as a percentage of that is a wash
@@ -558,7 +567,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
 /* Pressed, the ground changes too. The travel and the inner shadow alone were
    nothing on paper, where a shadow is the faintest thing there is. */
 .panel-box:active,.root-box:active,.mode-btn:active,.pick-btn:active,
-.tonic-btn:active,.theme-btn:active,.note-btn:active{
+.tonic-btn:active,.theme-btn:active,.note-btn:active,.timbre-btn:active{
   transform:translateY(1px) scale(.985);box-shadow:var(--lift-in);
   filter:brightness(var(--premido,1.18))}
 .panel-box:active,.root-box:active{border-color:var(--mode)}
@@ -579,7 +588,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
   to{opacity:0;transform:translate(-50%,-50%) scale(1)}}
 @media(prefers-reduced-motion:reduce){
   .acende::after{display:none}
-  .panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn{transition:none}
+  .panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn,.timbre-btn{transition:none}
 }
 /* The notes of the drone and of Free are a grid of divs rather than of buttons,
    for the octave stepper inside each one — so they are named here as well, or
@@ -1837,6 +1846,12 @@ body.painel .sec-body .timbre-row>button{min-height:clamp(46px,8vh,72px);
   font-size:15px;border-radius:13px;padding:0 10px}
 body.painel .sec-body .timbre-row>button:last-child:nth-child(odd){grid-column:1 / -1;
   justify-self:center;width:calc(50% - var(--s2)/2)}
+/* The drone has three voices, and three in two columns is a pair with an odd
+   one under it — a shape that says the third is an afterthought. Three is a
+   list: one above another, each the full width, each the same. */
+body.painel .sec-body .timbre-row.empilhado{grid-template-columns:1fr}
+body.painel .sec-body .timbre-row.empilhado>button:last-child:nth-child(odd){
+  grid-column:auto;justify-self:stretch;width:auto}
 /* And the group sits in the middle of the screen it was given, rather than
    against the top of it. */
 body.painel #sec-sound>.sec-body{justify-content:center}
@@ -3836,6 +3851,13 @@ function beginCount(landOn){
      before the exercise starts is exactly what it is for. What is still ruled
      out is the drone: it has no bar to count and nothing to come in on. */
   if(!(state.countBars>0)||state.mode==='drone'){countTicks=0;return;}
+  /* Under a polyrhythm there are no subdivision ticks to count in: that clock
+     does not run, the cycle is the only unit there is, and the cycle is the
+     bar — the base layer's own count. So the count is that many cycles, and
+     the poly scheduler pays one off per turn. Nothing lands on the first note
+     there either: the layers begin together at the top of a cycle, which is
+     the downbeat a count-in exists to deliver you to. */
+  if(state.poly.on){countTicks=state.countBars;return;}
   const t=subTicks(activeSubdiv||currentSubdiv());
   const bar=Math.max(1,state.sig*t);
   const into=(beatIdx*t+subIdx)%bar;
@@ -5067,14 +5089,26 @@ function subdivListOn(){return state.practice.useSubdivList&&state.practice.subd
 
 // Silencing the off-beats would leave the figure buttons doing nothing at all
 // when the metronome plays alone, so there the click always follows the figure.
-function clickFollowsFigure(){return state.clickFollowsFigure||notesSilent();}
+/* The drone is the same case and was not covered: a held note has no rhythm of
+   its own, so the click is the only thing the figure can reach. Beats only
+   there meant choosing a figure and hearing nothing change, which is a question
+   with one honest answer — so it is no longer asked. */
+function clickFollowsFigure(){return state.clickFollowsFigure||pulseOnly();}
 
 // The order the figures are walked in — the same up / down / up-down choice the
 // notes have, so a table of time can climb and come back down.
+/* Which way the table of time is walked, as the mode in front of you allows.
+   The drone is not offered Down — reading his own order backwards is choosing
+   a different order — and an exercise saved elsewhere with Down on it plays in
+   the order he wrote rather than in one he was never shown. */
+function subdivDirNow(){
+  const d=state.practice.subdivDir;
+  return (state.mode==='drone'&&d==='down')?'up':d;
+}
 function subdivOrder(){
   const l=state.practice.subdivList;
   if(l.length<2)return l.slice();
-  if(state.practice.subdivDir==='down')return l.slice().reverse();
+  if(subdivDirNow()==='down')return l.slice().reverse();
   /* There and back, with the figure at each end sounding once. The list used to
      end on the first figure as well as begin on it, so that eighths, triplets,
      eighths came round — but the list loops, and looping a list that starts and
@@ -5085,7 +5119,7 @@ function subdivOrder(){
   /* Ending on the first figure as well as beginning on it plays it twice in a
      row at the join — but only if there is a join. Running once there is none,
      and a there-and-back that never gets back has not been there and back. */
-  if(state.practice.subdivDir==='updown')
+  if(subdivDirNow()==='updown')
     return l.concat(l.slice(runsOnce()?0:1,-1).reverse());
   return l.slice();
 }
@@ -5456,6 +5490,19 @@ function schedulePolyCycle(t0){
   }
 }
 
+/* A cycle of count-in: the base layer alone, at the accents it already has, and
+   nothing else. Not both layers — two layers pulling apart is the thing you are
+   being counted into, not a count you can come in on — and no notes, which is
+   what a count-in is for. */
+function scheduleCountCycle(t0){
+  const P=state.poly, len=polyCycleLen();
+  for(let i=0;i<P.a;i++){
+    const t=t0+len*i/P.a;
+    schedulePolyClick(t,polyAccFor('a',i),'a');
+    schedulePolyFlash('a',i,t);
+  }
+}
+
 function polySchedulerTick(){
   if(!audioCtx||audioCtx.state!=='running')return;
   if(runEnding){if(audioCtx.currentTime>=runEndAt)endRunNow();return;}
@@ -5464,10 +5511,23 @@ function polySchedulerTick(){
   while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<8){
     tempoOverTime(nextBeatTime,countTicks>0);
     const len=polyCycleLen();
-    if(countTicks<=0)polyPassoCiclo(nextBeatTime);
-    schedulePolyCycle(nextBeatTime);
+    /* The count was being set and never paid: nothing here ever took a tick
+       off it, so with a polyrhythm running the bars asked for were neither
+       heard nor waited out — the notes came straight in and the counter sat
+       above zero holding the ramp and the passes still. */
+    if(countTicks>0){
+      scheduleCountCycle(nextBeatTime);
+      countTicks--;
+      if(countTicks===0)seqIdx=0;       // the exercise begins on its first note
+    } else {
+      polyPassoCiclo(nextBeatTime);
+      schedulePolyCycle(nextBeatTime);
+      if(notesSilent()&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
+    }
     nextBeatTime+=len;
-    if(notesSilent()&&countTicks<=0&&++metroCycles>=passCount()){metroCycles=0;metroPass();}
+    /* A handover asked for a count-in — a new key, a new mode — and this is the
+       seam it happens at. */
+    if(pendingCount){pendingCount=false;beginCount(null);pendingLanding=null;}
     if(runEnding){runEndAt=nextBeatTime;break;}
   }
   pruneFinishedNodes();
@@ -5833,7 +5893,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-16a';
+const APP_VERSION='lab-2026-09-20a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -5850,6 +5910,8 @@ function availableTimbres(){
 
 function buildTimbreRow(){
   const row=document.getElementById('timbre-row');row.innerHTML='';
+  // three voices stand in a column of their own, not a pair with a spare
+  row.classList.toggle('empilhado',state.mode==='drone');
   availableTimbres().forEach(t=>{
     const b=document.createElement('button');
     b.className='timbre-btn'+(t.k===state.timbre?' active':'');
@@ -6136,7 +6198,7 @@ document.addEventListener('click',e=>{
    rebuilt constantly — every family, every page, every option box — and a light
    that had to be wired on would be lost each time one was. The point of contact
    is written onto the button as two percentages and the animation is CSS's. */
-const ACENDE='.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn';
+const ACENDE='.panel-box,.root-box,.mode-btn,.pick-btn,.tonic-btn,.theme-btn,.note-btn,.timbre-btn';
 document.addEventListener('pointerdown',e=>{
   const b=e.target&&e.target.closest&&e.target.closest(ACENDE);
   if(!b||b.disabled)return;
@@ -6298,8 +6360,11 @@ const PAGINAS={
     {k:'count', bloco:'count-block',   nome:()=>tr('count-in','Count In'),fica:true,
      quando:()=>state.mode!=='drone',mexeu:dif('countBars','countWhen'),
      diz:()=>state.countBars?tr('sum.bars',{one:'{n} bar',other:'{n} bars'},{n:state.countBars}):tr('common.off','Off')},
+    /* The metronome's own. Over a drone there is nothing to keep time against
+       while the click is away — the held note goes on holding — so the silence
+       tests nothing and the box was weight. */
     {k:'gap',   bloco:'gap-block',     nome:()=>tr('gap.title','Dropout'),fica:true,
-     quando:()=>state.mode==='metro'||state.mode==='drone',
+     quando:()=>state.mode==='metro',
      mexeu:difP('gapMode','gapMinutes','gapKeepOne'),
      diz:()=>gapModeLabel()},
     {k:'pass',  bloco:'pass-block',    nome:()=>tr('advance-every','Advance Every'),fica:true,
@@ -6317,10 +6382,20 @@ const PAGINAS={
      diz:()=>state.alignPasses?tr('align.restartEach','Restart each round'):tr('align.drift','Let it drift')},
   ],
 };
+/* In Metro the metronome is not a panel of the exercise, it is the exercise,
+   and ten boxes want an order you can reason about. Everything that is about
+   time comes first — the tempo, the figure, the tempo moving, the count, the
+   silences, how often it moves on — and the band comes after it: the style, the
+   pattern it plays and the levels it plays at. Elsewhere the metronome is one
+   panel among several and keeps the order it has always had. */
+const ORDEM_METRO=['tempo','ondrone','sub','speed','count','gap','pass','acc','pat','mix'];
 function paginasDoPainel(){
   const defs=PAGINAS[painelAberto];
   if(!defs)return null;
-  return defs.filter(d=>!d.quando||d.quando());
+  const vis=defs.filter(d=>!d.quando||d.quando());
+  if(painelAberto!=='metro-section'||state.mode!=='metro')return vis;
+  const onde=k=>{const i=ORDEM_METRO.indexOf(k);return i<0?ORDEM_METRO.length:i;};
+  return vis.slice().sort((a,b)=>onde(a.k)-onde(b.k));
 }
 /* A few keys carry their own markup, because in the markup they fill a whole
    element and not a word — 'bar' is a section label wrapped in a span. Written
@@ -9240,6 +9315,34 @@ function subdivSummary(){
   el.textContent='· '+figureBit();
 }
 
+/* One beat of notation, drawn. A figure is something a player reads, not a word
+   to look up: the buttons said "♩ Quarter" and "♬ 16ths", which is the figure
+   and then the same thing again in words — in seven languages, at a size that
+   pushed two of them onto a second line. The name stays where a name is worth
+   having: on the button's own label, which is what a screen reader says, and in
+   the lines of text that read a setting back. */
+const FIG_POS={'1':[0],'2':[0,1/2],'2s':[0,2/3],'3':[0,1/3,2/3],'4':[0,0.25,0.5,0.75]};
+function subdivSVG(k){
+  const key=String(k);
+  const pos=FIG_POS[key]||[0];
+  const x0=6,beat=18,base=22,topo=9;
+  const xs=pos.map(f=>x0+f*beat);
+  const w=+(xs[xs.length-1]+10).toFixed(1);
+  const g=[];
+  xs.forEach(x=>{
+    g.push('<ellipse cx="'+x.toFixed(1)+'" cy="'+base+'" rx="3.6" ry="2.8" class="fig-cheia"/>');
+    g.push('<line x1="'+(x+3.4).toFixed(1)+'" y1="'+base+'" x2="'+(x+3.4).toFixed(1)+'" y2="'+topo+'" class="fig-tinta"/>');
+  });
+  if(xs.length>1){
+    const a=xs[0]+3.4,z=xs[xs.length-1]+3.4;
+    g.push('<rect x="'+a.toFixed(1)+'" y="'+topo+'" width="'+(z-a).toFixed(1)+'" height="2.6" class="fig-cheia"/>');
+    // sixteenths carry the second beam; the swung pair and the triplet carry a 3
+    if(key==='4')g.push('<rect x="'+a.toFixed(1)+'" y="'+(topo+4.6)+'" width="'+(z-a).toFixed(1)+'" height="2.6" class="fig-cheia"/>');
+    if(key==='3'||key==='2s')
+      g.push('<text x="'+((a+z)/2).toFixed(1)+'" y="'+(topo-2.5)+'" text-anchor="middle" class="fig-tres">3</text>');
+  }
+  return '<svg viewBox="0 0 '+w+' 30" class="fig-desenho" aria-hidden="true">'+g.join('')+'</svg>';
+}
 function buildSubdivRow(){
   wireFold('subdiv-head','subdiv-body');
   subdivSummary();
@@ -9247,12 +9350,13 @@ function buildSubdivRow(){
   const list=state.practice.subdivList;
   SUBDIVS.forEach(sd=>{
     const b=document.createElement('button');
-    b.textContent=subdivLabel(sd.k);
+    b.innerHTML=subdivSVG(sd.k);
+    b.setAttribute('aria-label',soTexto(subdivLabel(sd.k)));
     if(state.practice.useSubdivList){
       const i=list.indexOf(sd.k);
       const sounding=i>=0&&sd.k===currentSubdiv()&&state.playing;
       b.className='pick-btn'+(i>=0?(sounding?' now':' active'):'');
-      if(i>=0){b.classList.add('numbered');b.innerHTML='<span class="idx">'+(i+1)+'</span>'+subdivLabel(sd.k);}
+      if(i>=0){b.classList.add('numbered');b.innerHTML='<span class="idx">'+(i+1)+'</span>'+subdivSVG(sd.k);}
       b.onclick=()=>{
         const at=list.indexOf(sd.k);
         if(at>=0)list.splice(at,1);else list.push(sd.k);
@@ -9268,9 +9372,10 @@ function buildSubdivRow(){
   buildSubdivDirRow();
   buildPassRow();
   // Silencing the off-beats would leave the figure buttons doing nothing when
-  // the metronome plays alone, so that choice goes; how long a pass lasts takes
-  // its place, since without notes nothing else says when to move on.
-  const bare=notesSilent();
+  // the metronome plays alone — or over a drone, which holds its note whatever
+  // the figure does — so that choice goes; how long a pass lasts takes its
+  // place, since without notes nothing else says when to move on.
+  const bare=pulseOnly();
   const cb=document.getElementById('click-block');
   if(cb)cb.style.display=bare?'none':'';
 }
@@ -9320,13 +9425,23 @@ function tapTempo(){
    Up-Down entered at a different point — the same cycle described twice. It is
    offered for the notes and not here. */
 const SUBDIV_DIRS=DIRECTIONS.filter(d=>d.k!=='downup');
+/* In the drone the sequence of figures is the whole exercise, and the order is
+   his: reading it backwards is choosing a different order, which is the same
+   two taps that chose this one. Up and back down is not — no order writes it —
+   so that is the one that stays. */
+function subdivDirsAqui(){
+  return state.mode==='drone'?SUBDIV_DIRS.filter(d=>d.k!=='down'):SUBDIV_DIRS;
+}
 function buildSubdivDirRow(){
   const row=document.getElementById('subdivdir-row');row.innerHTML='';
   if(!state.practice.useSubdivList)return;          // only meaningful for a sequence
   if(state.practice.subdivDir==='downup')state.practice.subdivDir='updown';
-  SUBDIV_DIRS.forEach(d=>{
+  /* An answer that is not offered here is not overwritten either: Down chosen
+     in Scale is still Down when you go back to it, and while the drone is in
+     front of you the row lights Up, which is what the drone is playing. */
+  subdivDirsAqui().forEach(d=>{
     const b=document.createElement('button');
-    b.className='pick-btn'+(d.k===state.practice.subdivDir?' active':'');
+    b.className='pick-btn'+(d.k===subdivDirNow()?' active':'');
     b.textContent=lab('subdivdir',d.k,d.label);
     b.onclick=()=>{state.practice.subdivDir=d.k;subdivIdx=0;buildSubdivRow();updatePracticeInfo();};
     row.appendChild(b);
@@ -9800,7 +9915,7 @@ function updatePracticeInfo(){
     bits.push(tr('practice.figures',
       {one:'{n} rhythmic figure ({dir}) within each mode',
        other:'{n} rhythmic figures ({dir}) within each mode'},
-      {n:subdivOrder().length,dir:dirLabel(state.practice.subdivDir).toLowerCase()}));
+      {n:subdivOrder().length,dir:dirLabel(subdivDirNow()).toLowerCase()}));
 
   if(runsOnce())bits.push(roundPasses()>1
     ? tr('practice.onceOf','stops after all {n} passes',{n:roundPasses()})
