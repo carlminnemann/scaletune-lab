@@ -306,7 +306,7 @@ h1.wordmark .cap.tuck{margin-right:var(--tuck,-0.125em)}
    a mark dropped in it flew to the far side and read as belonging to nothing.
    It stays with the letters it answers for. */
 .head>.q-mark{margin-right:auto}
-.section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.section-label{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding-left:2px}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
 
 .mode-row.two{grid-template-columns:1fr 1fr;margin-bottom:var(--s2)}
@@ -1094,7 +1094,12 @@ details.sec .sec-sum{margin-left:0;font-weight:400;text-transform:none;letter-sp
   flex:0 0 100%;order:3;min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
 details.sec .sec-sum:empty{display:none}
 details.sec[open] .sec-sum{display:none}
-.group-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px}
+/* Two pixels of air on the left, because the panel around a label clips at
+   exactly the point the label's text begins: set in small caps at 11px, the R
+   of ROOT leans a hair past its own origin and the panel took the edge off its
+   stem. Every label carries the same two pixels, so nothing sits crooked
+   against the row of buttons under it. */
+.group-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;margin-top:12px;padding-left:2px}
 /* only the label that opens a panel loses its top margin — one inside a wrapper
    div lower down is still a new group and needs the space above it */
 .sec-body>.group-label:first-child,
@@ -5910,7 +5915,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-20c';
+const APP_VERSION='lab-2026-09-20d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -10253,14 +10258,47 @@ function freeOrder(){
   return[...NOTES.slice(i),...NOTES.slice(0,i)];
 }
 
+/* A new root moves what is already there to it. Twelve notes chosen one by one
+   are a shape — a scale, a voicing, a set of intervals he built — and the root
+   above them is what that shape is measured from, so changing it is asking for
+   the same shape somewhere else, not for an empty grid. It used to wipe the
+   selection, which meant the only way to hear his own shape in another key was
+   to build it again note by note.
+
+   Everything keeps its distance from the root in semitones, octaves included: a
+   note a tenth above the root is a tenth above the new one. The root moves by
+   the shorter way round — C to B goes down a semitone rather than up eleven —
+   so the shape stays where the hand left it. And because the grid is laid out
+   from the root, every note comes back to the square it was on. */
+function transpoeFree(novo){
+  const antigo=state.freeRoot;
+  state.freeRoot=novo;
+  const nomes=Object.keys(state.freeSelected);
+  if(!nomes.length||novo===antigo)return;
+  let passo=NOTES.indexOf(novo)-NOTES.indexOf(antigo);
+  if(passo>6)passo-=12; else if(passo<-6)passo+=12;
+  /* Every note by the same step: the distances between them, and to the root,
+     are what that leaves untouched. */
+  let abs=nomes.map(n=>semitone(n,state.freeSelected[n])+passo);
+  /* The shape as a whole goes up or down an octave rather than being bent out
+     of shape, if that is what it takes to keep it inside the range. */
+  const alto=()=>octOf(Math.max.apply(null,abs)),baixo=()=>octOf(Math.min.apply(null,abs));
+  let guarda=0;
+  while(alto()>OCT_MAX&&baixo()-1>=OCT_MIN&&guarda++<8)abs=abs.map(a=>a-12);
+  guarda=0;
+  while(baixo()<OCT_MIN&&alto()+1<=OCT_MAX&&guarda++<8)abs=abs.map(a=>a+12);
+  const fora={};
+  abs.forEach(a=>{fora[pcOf(a)]=Math.max(OCT_MIN,Math.min(OCT_MAX,octOf(a)));});
+  state.freeSelected=fora;
+}
 function buildFreeGrid(){
   const rootRow=document.getElementById('free-root-row');rootRow.innerHTML='';
   NOTES.forEach(n=>{
     const b=document.createElement('button');
     b.className='tonic-btn'+(n===state.freeRoot?' active':'');
     b.textContent=spelledText(DEFAULT_SPELL[NOTES.indexOf(n)]);
-    // picking a new root starts a clean slate
-    b.onclick=()=>{state.freeRoot=n;state.freeSelected={};buildFreeGrid();refreshSequence();restartIfPlaying();};
+    // picking a new root carries the shape over to it
+    b.onclick=()=>{transpoeFree(n);buildFreeGrid();refreshSequence();restartIfPlaying();};
     rootRow.appendChild(b);
   });
   const grid=document.getElementById('free-grid');grid.innerHTML='';
