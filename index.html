@@ -1518,12 +1518,15 @@ body.painel .sec-body>.clear-btn:last-child,
 
 .legend{display:flex;gap:12px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap}
 .note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:1.25rem}
+/* Tall enough to be three targets. A note that is on carries its octave
+   stepper, and a stepper needs a third of the card at each end to be hit with a
+   thumb — 48px of card cannot hold that and a name as well. */
 .note-btn{padding:6px 4px;font-weight:500;cursor:pointer;border:1px solid var(--border2);
   border-radius:var(--r);background:var(--bg2);color:var(--text2);text-align:center;
   position:relative;user-select:none;-webkit-user-select:none;
   transition:background 0.12s;touch-action:manipulation;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:clamp(48px,8vh,74px)}
+  min-height:clamp(66px,11vh,96px)}
 /* Room on both sides for the octave to sit out to the right without pulling the
    name off centre. */
 .note-btn.active{padding-left:20px;padding-right:20px}
@@ -1534,26 +1537,38 @@ body.painel .sec-body>.clear-btn:last-child,
   display:block;min-width:0}
 .free-grid .note-btn{padding:8px 4px}
 
-/* An arrow and the room around it: no border, no fill — what is pressed is the
-   space, what is seen is the mark. */
-.oct-btn{border:0;background:none;color:var(--text3);font-size:10px;line-height:1;
-  cursor:pointer;padding:5px 20px;width:auto;min-height:0;
-  touch-action:manipulation;display:block;margin:2px 0}
-/* A little air between the arrow and the name it moves — they were reading as
-   one mark with a note in the middle of it. */
-.note-btn>.oct-btn:first-child{margin-bottom:5px}
-.note-btn>.oct-btn:last-of-type{margin-top:5px}
-.oct-btn:active{color:var(--text)}
+/* The whole top of the card, and the whole bottom of it. The arrow used to be
+   a glyph with a little padding round it — eighteen pixels tall, floating in the
+   middle of a card whose remaining thirty at each end belonged to the note. Aim
+   at the arrow with a thumb, miss by three millimetres, and you turned the note
+   off instead of moving it.
+
+   So the target is not the glyph: it is a band reaching from the arrow to the
+   rim, the full width of the card and a third of its height. The glyph is drawn
+   at the outer edge, as far from the name as the card allows, so the eye aims
+   where the finger is actually caught. What is left in the middle — the name,
+   and a third of the height around it — is the note itself. */
+.oct-btn{position:absolute;left:0;right:0;
+  /* A third of the card, and never less than a finger's worth. The floor is
+     what the shortest card can give without the two bands closing over the
+     name between them: 24 and 24 of 66, and the name is 18. */
+  height:clamp(24px,34%,40px);
+  border:0;background:none;color:var(--text3);font-size:13px;line-height:1;
+  cursor:pointer;padding:0;margin:0;width:auto;
+  display:flex;justify-content:center;touch-action:manipulation}
+.note-btn>.oct-btn[data-oct="1"]{top:0;align-items:flex-start;padding-top:5px}
+.note-btn>.oct-btn[data-oct="-1"]{bottom:0;align-items:flex-end;padding-bottom:5px}
+/* Pressed, the whole band answers, not the arrow alone — a target you cannot
+   see the edges of is a target you cannot tell you hit. */
+.oct-btn:active{color:var(--text);background:var(--lift-hi)}
 /* The octave itself, out to the right of the name. */
 .note-oct{position:absolute;right:6px;top:50%;transform:translateY(-50%);
   font-size:12px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
 
-/* On a narrow phone the stepper is what decides how many notes fit across: at
-   its full size only two columns fit, which turns twelve notes into six rows in
-   the very mode you scroll least. Trimmed, three fit — and because the column
-   count is measured rather than written down, nothing else has to be told. */
+/* The stepper no longer decides how many notes fit across — it is laid over the
+   card rather than inside its column — so what a narrow phone trims is the room
+   the octave number asks for beside the name. */
 @media (max-width:400px){
-  .oct-btn{padding:4px 16px}
   .note-btn.active{padding-left:16px;padding-right:16px}
   .note-oct{right:4px;font-size:11px}
 }
@@ -1561,7 +1576,9 @@ body.painel .sec-body>.clear-btn:last-child,
 
 .note-btn.start .oct-btn{color:var(--green-hi);opacity:.75}
 
-.start-badge{position:absolute;top:2px;right:4px;font-size:10px;color:var(--green-hi);font-weight:700}
+/* Out of the arrow's way: the stepper reaches the top edge now and the mark sat
+   shoulder to shoulder with it. */
+.start-badge{position:absolute;top:2px;left:5px;font-size:10px;color:var(--green-hi);font-weight:700}
 
 .control-row{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
 .control-row label{font-size:13px;color:var(--text2);min-width:110px}
@@ -5893,7 +5910,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-20b';
+const APP_VERSION='lab-2026-09-20c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7846,7 +7863,7 @@ function renderDroneNote(n){
     };
   });
   div.onpointerdown=e=>{
-    if(e.target.classList.contains('oct-btn'))return;
+    if(e.target.closest&&e.target.closest('.oct-btn'))return;
     toggleDrone(n);
   };
 }
@@ -10306,7 +10323,7 @@ function renderFreeNote(n){
     };
   });
   div.onpointerdown=e=>{
-    if(e.target.classList.contains('oct-btn'))return;
+    if(e.target.closest&&e.target.closest('.oct-btn'))return;
     toggleFree(n);
   };
 }
