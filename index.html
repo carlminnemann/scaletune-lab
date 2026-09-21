@@ -2828,7 +2828,10 @@ body.bolinhas .pulse-bpm{display:none}
         <span class="btn-wrap seg" id="subdivmode-row" data-cols="fixed"></span></div>
       <div class="btn-wrap" id="subdiv-row" style="margin-bottom:6px"></div>
       <div class="btn-wrap" id="subdivdir-row" style="margin-bottom:12px"></div>
-      <div id="click-block">
+      <!-- Its own name. It was a second element carrying the tempo group's id,
+           so the code that hides this question was hiding that group instead,
+           and the question it meant to take off the screen stayed on it. -->
+      <div id="clickmode-block">
       <div class="head" style="margin-bottom:0"><span class="section-label" data-t="click-2">Click</span>
         <span class="btn-wrap seg" id="clickmode-row" data-cols="fixed"></span></div>
       </div>
@@ -2903,10 +2906,6 @@ body.bolinhas .pulse-bpm{display:none}
 <details class="sec" id="sec-rhythm" style="display:none">
   <summary><span data-t="sec.phrasing">Phrasing</span><span class="sec-sum" id="sum-rhythm"></span></summary>
   <div class="sec-body" id="rhythm-body">
-    <div id="notelen-block">
-      <div class="group-label" data-t="note-length">Note Length</div>
-      <div class="btn-wrap" id="notelen-row"></div>
-    </div>
     <div id="align-block">
       <div class="group-label" data-t="phrase-alignment">Phrase Alignment</div>
       <div class="btn-wrap" id="align-row"></div>
@@ -5916,7 +5915,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-20e';
+const APP_VERSION='lab-2026-09-21a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6078,8 +6077,12 @@ function voltaHome(){
   if(soBolinhas){fechaBolinhas();return;}
   // inside a kind of ear question, back is back to the kinds
   if(state.mode==='ear'&&state.ear.kind){earVoltaMenu();return;}
-  // inside a page of a panel, back is back to that panel's front
-  if(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto])){fechaSub();return;}
+  // inside a page of a panel, back is back to that panel's front — and where the
+  // panel is nothing but that page, back is out of the panel altogether
+  if(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto])){
+    if(paginaUnica(painelAberto)){subPag=null;fechaPainel();return;}
+    fechaSub();return;
+  }
   // and inside a panel, back is back to the mode's boxes
   if(painelAberto&&paineisDoModo()){fechaPainel();return;}
   if(state.playing)togglePlay();
@@ -6208,6 +6211,9 @@ document.addEventListener('click',e=>{
     const pag=defs.find(d=>d.k===subPag);
     if(!pag||pag.fica)return;
     if(!b.closest('#'+painelAberto))return;
+    /* And where the panel is nothing but this page, answering leaves the panel:
+       going "back" to a front made of one box is going back to nothing. */
+    if(paginaUnica(painelAberto)){setTimeout(()=>{subPag=null;fechaPainel();},0);return;}
     setTimeout(fechaSub,0);
     return;
   }
@@ -6396,10 +6402,11 @@ const PAGINAS={
      quando:()=>pulseOnly(),mexeu:difP('passCount','passUnit'),
      diz:()=>passLabel()},
   ],
+  /* Note Length — a note lasting a figure, a beat or a whole bar — is gone. The
+     figure already says how long a note is, which is what the table of time is
+     for, and answering it twice only made the two disagree. Every line now
+     takes the figure, which is what it took by default. */
   'sec-rhythm':[
-    {k:'len',   bloco:'notelen-block',  nome:()=>tr('note-length','Note Length'),
-     mexeu:dif('noteLen'),
-     diz:()=>{const n=NOTE_LENS.find(x=>x.k===state.noteLen);return n?lab('notelen',n.k,n.label):'';}},
     {k:'align', bloco:'align-block',    nome:()=>tr('phrase-alignment','Phrase Alignment'),
      mexeu:dif('alignPasses'),
      diz:()=>state.alignPasses?tr('align.restartEach','Restart each round'):tr('align.drift','Let it drift')},
@@ -6426,9 +6433,22 @@ function paginasDoPainel(){
    box said <span class="section-label">Takt</span> in German. A name on a box is
    a name, so it is taken as words. */
 function soTexto(s){return String(s==null?'':s).replace(/<[^>]*>/g,'').trim();}
+/* A panel with one page in it is a box that opens a box. Phrasing has one
+   question left now, and asking it took two taps and two screens, the first of
+   which said nothing the box behind it had not already said. Where a panel has
+   exactly one page, tapping the panel asks its question: the page opens with
+   it, the screen keeps the panel's own name — which is the name on the box that
+   was tapped — and Back goes where Back from the panel would have gone. */
+function paginaUnica(id){
+  const defs=PAGINAS[id];
+  if(!defs)return null;
+  const vis=defs.filter(d=>!d.quando||d.quando());
+  return vis.length===1?vis[0].k:null;
+}
 function nomeDaPagina(){
   const defs=paginasDoPainel();
   const d=defs&&defs.find(x=>x.k===subPag);
+  if(d&&paginaUnica(painelAberto))return soTexto(nomeDoPainel(painelAberto));
   return d?soTexto(d.nome()):'';
 }
 /* Everything in the panel goes away; the page's own block comes back, and with
@@ -6531,13 +6551,22 @@ const DOBRAS=[
    on the next — the blocks are shared between panels and modes. */
 function escondeTituloRepetido(nome){
   document.querySelectorAll('.titulo-repetido').forEach(e=>e.classList.remove('titulo-repetido'));
-  if(!nome)return;
+  /* A panel that is one page carries the panel's name at the top, so the label
+     inside it names the same screen twice whatever it is called. */
+  const so=paginaUnica(painelAberto);
+  if(so){
+    const defs=PAGINAS[painelAberto]||[];
+    const d=defs.find(x=>x.k===so);
+    if(d){try{const prop=soTexto(d.nome());if(prop)nome=[nome,prop];}catch(e){}}
+  }
+  const nomes=(Array.isArray(nome)?nome:[nome]).filter(Boolean).map(n=>String(n).toLowerCase());
+  if(!nomes.length)return;
   /* A label that names a control rather than the group — the word beside the
      tempo's own fader — keeps it even when the page is called the same thing. */
-  const alvo=[...document.querySelectorAll('.pagina-aberta .section-label,.pagina-aberta .group-label')]
+  [...document.querySelectorAll('.pagina-aberta .section-label,.pagina-aberta .group-label')]
     .filter(e=>!e.closest('.vol-line'))
-    .find(e=>soTexto(e.textContent).toLowerCase()===String(nome).toLowerCase());
-  if(alvo)alvo.classList.add('titulo-repetido');
+    .filter(e=>nomes.indexOf(soTexto(e.textContent).toLowerCase())>=0)
+    .forEach(e=>e.classList.add('titulo-repetido'));
 }
 /* One question with two answers gets the full width for each of them. Counted
    rather than asked in CSS, because what decides it is how many questions the
@@ -6679,7 +6708,8 @@ function paineisDoModo(){return PAINEIS_POR_MODO[state.mode]||null;}
 function temMenuDePaineis(){return !!paineisDoModo()&&!pastaAberta&&!emCasa;}
 function abrePainel(id){
   painelAberto=id;
-  subPag=null;            // a panel opens on its boxes, never inside a page
+  // a panel opens on its boxes — unless it has only one page, which IS its boxes
+  subPag=paginaUnica(id);
   const d=document.getElementById(id);
   if(d){d.open=true;}
   pintaCasa();
@@ -8771,7 +8801,7 @@ const PANEL_FIELDS={
             'arpTop','repeatTurn','bothWays']},
   freerange:{s:['freeSpan','freeSpanWanted','freeDirection','freeTop','repeatTurn']},
   progress:{s:['seqPattern'],arr:['seqCustom'],p:['rootMove','repeat','modesTour']},
-  phrasing:{s:['noteLen','alignPasses']},
+  phrasing:{s:['alignPasses']},
   tempo:{s:['bpm','clickVol','clickSound']},
   count:{s:['countBars','countWhen']},
   speed:{p:['tempoMode','tempoStep','tempoEvery','rampTo','rampMinutes','rampFrom']},
@@ -8872,7 +8902,7 @@ function redrawMetro(){
   if(cvo)cvo.textContent=Math.round(state.clickVol*100)+'%';
   renderSigFields();buildBeats();buildPolyBeats();renderPolyBeats();
   buildClickSoundRow();pintaPolySwitch();
-  buildNoteLenRow();buildSubdivRow();buildClickModeRow();buildAlignRow();
+  buildSubdivRow();buildClickModeRow();buildAlignRow();
   buildSpeedControls();buildCountRow();buildGapRow();buildPassRow();buildMetroOnRow();
   panelLabels();
   updateSupersededControls();
@@ -9398,9 +9428,8 @@ function buildSubdivRow(){
   // the metronome plays alone — or over a drone, which holds its note whatever
   // the figure does — so that choice goes; how long a pass lasts takes its
   // place, since without notes nothing else says when to move on.
-  const bare=pulseOnly();
-  const cb=document.getElementById('click-block');
-  if(cb)cb.style.display=bare?'none':'';
+  const cb=document.getElementById('clickmode-block');
+  if(cb)cb.style.display=pulseOnly()?'none':'';
 }
 
 /* ---------- tap tempo ---------- */
@@ -10385,24 +10414,6 @@ function toggleFree(n){
 }
 
 /* ---------- metronome dots ---------- */
-function buildNoteLenRow(){
-  const row=document.getElementById('notelen-row');row.innerHTML='';
-  NOTE_LENS.forEach(n=>{
-    const b=document.createElement('button');
-    b.className='pick-btn'+(n.k===state.noteLen?' active':'');
-    b.textContent=lab('notelen',n.k,n.label);
-    b.onclick=()=>{
-      state.noteLen=n.k;buildNoteLenRow();updateAlignInfo();refreshSectionSummaries();
-      // Take effect where the exercise already is rather than restarting it.
-      // The note grid has to be realigned, or the next note would not fall due
-      // until the counter happened to reach a multiple of the new length and
-      // the drone would simply go quiet in the meantime.
-      if(state.playing)pendingNoteLenChange=true;
-      else restartIfPlaying();
-    };
-    row.appendChild(b);
-  });
-}
 
 function buildPolyBeats(){
   const P=state.poly;
@@ -11055,7 +11066,9 @@ function applyExercise(x){
   set('clickVol',num(x.clickVol,0,1));
   set('clickSound',oneOf(x.clickSound,CLICK_VOICES));
   set('sig',num(x.sig,1,16));
-  set('noteLen',oneOf(x.noteLen,['sub','beat','bar']));
+  /* A note lasts its figure, always: the choice that said otherwise is gone, so
+     an exercise saved while it was there plays the way it reads. */
+  set('noteLen','sub');
   set('subdiv',oneOf(x.subdiv,SUBDIVS.map(d=>d.k)));
   state.alignPasses=!!x.alignPasses;
   state.clickFollowsFigure=x.clickFollowsFigure!==false;
@@ -11937,12 +11950,11 @@ function setPolyCount(which,n){
   buildPolyBeats();refreshSectionSummaries();
 }
 
-// Time signature, subdivision and note length all describe the single grid the
-// polyrhythm replaces, so they are put away while it is on rather than left
-// visible doing nothing.
+// The time signature describes the single grid the polyrhythm replaces, so it
+// is put away while it is on rather than left visible doing nothing.
 function updateSupersededControls(){
   const on=state.poly.on;
-  ['sig-block','notelen-block'].forEach(id=>{
+  ['sig-block'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=on?'none':'';
   });
@@ -12242,8 +12254,7 @@ const SECTIONS=[
    }},
   {id:'sec-rhythm',   sum:'sum-rhythm',
    text:()=>{
-     const nl=lab('notelen',state.noteLen,{sub:'Per figure',beat:'Per beat',bar:'Per bar'}[state.noteLen]||'').toLowerCase();
-     const bits=[nl,state.alignPasses?tr('sum.restarts','restarts each round'):tr('sum.drifts','drifts')];
+     const bits=[state.alignPasses?tr('sum.restarts','restarts each round'):tr('sum.drifts','drifts')];
      if(state.poly.on)bits.push(state.poly.notesFollow==='alt'
        ?tr('poly.swapping','changing layer')
        :tr('sum.following','following the {n}',{n:state.poly[polySegue()]}));
@@ -13855,7 +13866,7 @@ function applyMarkup(){
 function rebuildEverything(){
   buildTimbreRow();buildPitchLists();buildBlueRow();
   buildDroneGrid();buildFreeGrid();
-  buildBeats();buildPolyBeats();updateSupersededControls();buildNoteLenRow();
+  buildBeats();buildPolyBeats();updateSupersededControls();
   buildGrooveRow();buildKitRow();buildDensityRow();buildHatRow();buildMixer();
   buildPatternEditor();buildMetroOnRow();buildSubdivRow();buildClickModeRow();
   buildAlignRow();buildSpeedControls();buildGapRow();buildRootMoveRow();buildRepeatRow();
@@ -13949,7 +13960,6 @@ buildFreeGrid();
 buildBeats();
 buildPolyBeats();
 updateSupersededControls();
-buildNoteLenRow();
 buildGrooveRow();
 buildKitRow();
 buildDensityRow();
