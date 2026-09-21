@@ -822,5 +822,8 @@
  "practice.figuresPlain": {
   "one": "{n} figura ritmica in ogni modo",
   "other": "{n} figure ritmiche in ogni modo"
- }
+ },
+ "keys": "Tastiera",
+ "keys-2": "Tastiera",
+ "h.m.keys": "Tasti da suonare a mano, con una qualsiasi delle voci. Le frecce la spostano di un’ottava; suona nell’istante in cui premi un tasto e si ferma quando lo lasci."
 }

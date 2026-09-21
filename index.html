@@ -338,11 +338,14 @@ body.home .current-note,body.home .current-freq{display:none!important}
 /* By id, not by class: Single / Study list borrows .mode-row to be shaped like
    the modes, and hiding the class hid it too — which is how the study list
    vanished from Scale and Arpeggio. */
-/* Two columns of three, and the ear across the foot of them: seven boxes read
-   as two columns and a conclusion, where seven in a line read as a list. The
-   kinds inside Ear keep the single column — four is not enough to need two. */
+/* Two columns, and the ear across the foot of them when the count is odd: seven
+   boxes read as two columns and a conclusion, where seven in a line read as a
+   list. With the keyboard there are eight, and eight pair off — the statement
+   would be made by leaving a hole beside the last one, which says nothing.
+   The kinds inside Ear keep the single column — four is not enough to need
+   two. */
 body.home #mode-row{grid-template-columns:1fr 1fr}
-body.home #btn-mode-ear{grid-column:1 / -1}
+body.home #mode-row:not(:has(>.mode-btn:nth-child(8))) #btn-mode-ear{grid-column:1 / -1}
 body.home #mode-row,body.ouvido #ear-row{grid-auto-rows:1fr;
   gap:clamp(7px,1.9vh,15px);flex:1 1 auto;min-height:0;
   width:min(92%,420px);margin:0 auto clamp(8px,2vh,18px)}
@@ -392,6 +395,13 @@ body:not(.home) #mode-row{display:none}
 @media(max-height:520px){
   html:has(body.home),body.home,html:has(body.ouvido),body.ouvido{height:var(--app-h,100dvh);overflow:hidden}
   body.home .container,body.ouvido .container{height:100%;display:flex}
+  /* And the keyboard, for the same reason: it is one screen by construction —
+     an instrument you reach for, with nothing under it to scroll to. Held
+     sideways is where it is at its best, and that is exactly the height at
+     which the app otherwise gives up its frame. */
+  html:has(body.teclas),body.teclas{height:var(--app-h,100dvh);overflow:hidden}
+  body.teclas .container{height:100%;display:flex;flex-direction:column}
+  body.teclas .scroll{display:flex;flex-direction:column;min-height:0;overflow:hidden;flex:1 1 auto}
 }
 /* A phone on its side, or a small window: everything gives a little so the six
    still fit without the screen scrolling. */
@@ -2159,6 +2169,76 @@ body.bolinhas .pulse-bpm{display:none}
 .current-freq{text-align:center;font-size:12px;color:var(--text3);flex:0 0 auto}
 .current-freq:empty{display:none}
 .help-build{text-align:center;font-size:10px;color:var(--text3);opacity:0.6;letter-spacing:0.05em;margin-top:var(--s5)}
+/* ---------- the keyboard ----------
+   Keys, not cards: this is the one screen in the app that is an instrument, and
+   an instrument is read by its shape. The whites are a row that shares the
+   width; the blacks are laid over the seams, narrower and shorter, the way they
+   are on a piano.
+
+   Everything here is built for the finger to be believed: touch-action is none,
+   so the browser does not hold a press for a few milliseconds to see whether it
+   was going to be a drag, and a key answers on the press rather than on the
+   release. */
+#keys-section{display:none;flex-direction:column;flex:1 1 auto;min-height:0}
+body.teclas #keys-section{display:flex!important}
+body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row{display:none}
+.keys-top{display:flex;align-items:center;justify-content:center;gap:var(--s3);
+  flex:0 0 auto;margin-bottom:var(--s2)}
+.keys-oct{font-size:clamp(20px,4.5vh,32px);font-weight:300;letter-spacing:.01em;
+  color:var(--text);min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums}
+.oct-step{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);
+  border-radius:var(--r);min-width:clamp(52px,12vw,76px);min-height:clamp(38px,7vh,54px);
+  font-size:15px;cursor:pointer;touch-action:manipulation}
+.oct-step:active{background:var(--bg3);color:var(--text)}
+/* A white key is about six times as long as it is wide; given the whole screen
+   it became nine, which reads as a wall rather than as a keyboard. The ceiling
+   is written in from the key's own width once it is known, so it holds whatever
+   the octave count and the screen turn out to be. */
+.keys-board{position:relative;flex:1 1 auto;
+  /* The floor is what a phone held sideways can spare once the octave and the
+     voice have had theirs — a key shorter than this is a key you would have to
+     aim at. */
+  min-height:clamp(84px,26vh,180px);
+  display:flex;gap:2px;touch-action:none;user-select:none;-webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent}
+.key{position:relative;flex:1 1 0;min-width:0;border:1px solid var(--border2);
+  border-radius:0 0 9px 9px;cursor:pointer;touch-action:none;
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;
+  font-size:11px;font-weight:600;letter-spacing:.04em}
+.key.branca{background:var(--bg2);color:var(--text3)}
+.key.branca:first-child{border-top-left-radius:9px}
+.key.branca:last-child{border-top-right-radius:9px}
+/* The blacks sit over the seam between two whites, at a little over half the
+   width and a little under two thirds of the height — the proportions a hand
+   knows without being told. */
+.key.preta{position:absolute;top:0;z-index:2;height:62%;border-radius:0 0 7px 7px;
+  background:var(--bg);border-color:var(--border3);color:var(--text3);
+  align-items:flex-end;padding-bottom:6px;font-size:10px}
+/* Pressed, a key takes the mode's own colour — the same light the rest of the
+   app answers a finger with. */
+.key.soa{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
+.key.preta.soa{background:var(--mode);color:var(--mode-fg)}
+/* The root of the octave on screen says where you are without a legend. */
+.key.raiz{box-shadow:inset 0 -3px 0 var(--mode)}
+/* Everywhere else the app holds itself to a column you can read across; a
+   keyboard is not read, it is reached, so here it takes the whole screen — on a
+   phone held sideways that is the difference between one octave and two. */
+body.teclas .container{max-width:none}
+body.teclas .btn-row,body.teclas .current-note,body.teclas .current-freq{display:none}
+body.teclas .scroll{display:flex;flex-direction:column;min-height:0}
+body.teclas .scroll>*{flex:0 0 auto}
+body.teclas .scroll>#keys-section{flex:1 1 auto;min-height:0}
+/* The voice, under the keys, the way the tuner keeps what it measures against
+   under the reading — borrowed styling and all, since it is the same kind of
+   box doing the same kind of job. */
+body.teclas .tuner-boxes{display:grid;grid-template-columns:1fr;gap:var(--s2);
+  flex:0 0 auto;margin-top:var(--s3)}
+body.teclas .tuner-boxes .panel-box{min-height:clamp(46px,7vh,62px)}
+body.teclaspag #keys-page{display:flex!important;flex-direction:column;flex:1 1 auto;
+  min-height:0;gap:var(--s3)}
+body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);
+  flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
+
 /* On a small phone the tuner is the one panel that still will not fit, because
    the reading has a size below which it stops being a reading. It gives up what
    it can rather than scroll. */
@@ -2261,6 +2341,7 @@ body.bolinhas .pulse-bpm{display:none}
   <button class="mode-btn" id="btn-mode-scale" onclick="entraModo('scale')" data-t="scale">Scale</button>
   <button class="mode-btn" id="btn-mode-arp" onclick="entraModo('arpeggio')" data-t="arpeggio">Arpeggio</button>
   <button class="mode-btn" id="btn-mode-free" onclick="entraModo('free')" data-t="free">Free</button>
+  <button class="mode-btn" id="btn-mode-keys" onclick="entraModo('keys')" data-t="keys">Keyboard</button>
   <button class="mode-btn" id="btn-mode-tuner" onclick="entraModo('tuner')" data-t="tuner">Tuner</button>
   <button class="mode-btn" id="btn-mode-metro" onclick="entraModo('metro')" data-t="metro">♩ Metro</button>
   <button class="mode-btn" id="btn-mode-ear" onclick="entraModo('ear')" data-t="ear">Ear training</button>
@@ -2359,6 +2440,20 @@ body.bolinhas .pulse-bpm{display:none}
        screen, and the reading has all of it. -->
   <div class="tuner-boxes" id="tuner-box-row"></div>
   <div id="tuner-page" style="display:none"></div>
+</div>
+
+<!-- The keyboard: the one screen in the app you play rather than set. Built like
+     the tuner — the instrument takes the screen, and what it is played with is a
+     box under it that opens a page of its own. -->
+<div id="keys-section" style="display:none">
+  <div class="keys-top">
+    <button class="oct-step" id="keys-oct-down" type="button" data-ta="aria.octDown" aria-label="Octave down">◀</button>
+    <div class="keys-oct"><span id="keys-oct-now">C3</span></div>
+    <button class="oct-step" id="keys-oct-up" type="button" data-ta="aria.octUp" aria-label="Octave up">▶</button>
+  </div>
+  <div class="keys-board" id="keys-board"></div>
+  <div class="tuner-boxes" id="keys-box-row"></div>
+  <div id="keys-page" style="display:none"></div>
 </div>
 
 <!-- The drone's notes, built like every other panel: a box on the mode's front
@@ -2978,6 +3073,7 @@ body.bolinhas .pulse-bpm{display:none}
     <dt data-t="scale-2">Scale</dt><dd data-t="h.m.scale">Plays a scale in the key, range and direction you choose.</dd>
     <dt data-t="arpeggio-2">Arpeggio</dt><dd data-t="h.m.arp">The same, from a chord.</dd>
     <dt data-t="free-2">Free</dt><dd data-t="h.m.free">Notes you pick yourself, played in that order.</dd>
+    <dt data-t="keys-2">Keyboard</dt><dd data-t="h.m.keys">Keys to play by hand, in any of the voices. The arrows move it an octave; it sounds the moment a key is pressed and stops when it is let go.</dd>
     <dt data-t="metro-2">Metro</dt><dd data-t="h.m.metro">The metronome alone. <em>More</em> opens the rest of it.</dd>
     <dt data-t="tuner-2">Tuner</dt><dd data-t="h.m.tuner">Listens instead of playing. Nothing else sounds while it is open.</dd>
   </dl></div>
@@ -3596,6 +3692,7 @@ let state={
           shortcut, not a mode: everything it sets stays where it can be
           changed by hand afterwards. */
        nivel:'medio'},
+  keyTimbre:'piano-real',
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   /* Whether a free set of notes takes its first note again an octave up before
      it turns back. C E G with it is C E G C; without it the line is the three
@@ -5915,12 +6012,14 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-21a';
+const APP_VERSION='lab-2026-09-22a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
 // piano for the same reason: it is what you would play the line on.
 const DEFAULT_DRONE='strings';
+// and the keyboard opens on the piano, which is what a keyboard is
+const DEFAULT_KEYS='piano-real';
 const WAVE_TYPES=['sine'];
 // Assigning an unknown type to an oscillator throws, which would wedge the
 // scheduler mid-tick; fall back rather than let one bad value stop the audio.
@@ -5947,7 +6046,9 @@ function setTimbre(t){
   state.timbre=t;
   refreshSectionSummaries();
   // remember the choice so returning to this mode family restores it
-  if(state.mode==='drone')state.droneTimbre=t;else state.seqTimbre=t;
+  if(state.mode==='drone')state.droneTimbre=t;
+  else if(state.mode==='keys')state.keyTimbre=t;
+  else state.seqTimbre=t;
   buildTimbreRow();
   if(isSampled(t)&&!samplerReady(t)&&!samplerFor(t).loading)loadSampler(t);
   if(state.playing&&state.mode==='drone')startContinuous();
@@ -5967,8 +6068,8 @@ function setTimbre(t){
    same as opening the app — which is the rule the whole app is built on. */
 let emCasa=true;
 const MODE_BTN={drone:'btn-mode-drone',scale:'btn-mode-scale',arpeggio:'btn-mode-arp',
-                free:'btn-mode-free',metro:'btn-mode-metro',tuner:'btn-mode-tuner',
-                ear:'btn-mode-ear'};
+                free:'btn-mode-free',keys:'btn-mode-keys',metro:'btn-mode-metro',
+                tuner:'btn-mode-tuner',ear:'btn-mode-ear'};
 function modeLabel(m){
   const b=document.getElementById(MODE_BTN[m]);
   return b?b.textContent.trim():m;
@@ -5990,12 +6091,16 @@ function pintaCasa(){
   const noAfinador=!emCasa&&!pastaAberta&&state.mode==='tuner';
   document.body.classList.toggle('afina',noAfinador);
   document.body.classList.toggle('afinapag',noAfinador&&!!tunerPag);
+  const noTeclado=!emCasa&&!pastaAberta&&state.mode==='keys';
+  document.body.classList.toggle('teclas',noTeclado);
+  document.body.classList.toggle('teclaspag',noTeclado&&!!teclaPag);
   const n=document.getElementById('mode-back-name');
   /* The bar says where you are, and the arrow leaves it: in the drawer that is
      the drawer, and leaving it puts you back in the mode. */
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
     :soBolinhas?tr('beats.only','Only beats')
     :(state.mode==='tuner'&&tunerPag)?tunerNomeDaPagina()
+    :(state.mode==='keys'&&teclaPag)?tr('sec.timbre','Timbre')
     :(state.mode==='ear'&&earPag)?earNomeDaPagina()
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
     :(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto]))?nomeDaSub()
@@ -6008,7 +6113,7 @@ function pintaCasa(){
   if(f){
     // the tuner has no setup worth saving, so it has no drawer
     // neither the tuner nor ear training has a setup worth putting on a shelf
-    f.style.display=(state.mode==='tuner'||state.mode==='ear')?'none':'';
+    f.style.display=(state.mode==='tuner'||state.mode==='ear'||state.mode==='keys')?'none':'';
     f.classList.toggle('vazia',exercisesDoModo().length===0&&pastasDoModo().length===0);
   }
   arrumaPaineis();
@@ -6019,6 +6124,7 @@ function pintaCasa(){
   paintHelpMarks();      // the marks hang on panels, and the panels just moved
   refreshSectionSummaries();
   spreadPanelsSoon();
+  if(state.mode==='keys')requestAnimationFrame(tecladoAfere);
 }
 function entraModo(m){
   emCasa=false;
@@ -6046,10 +6152,11 @@ function limpaEstadoDoModo(){
   painelAberto=null;subPag=null;
   if(typeof earPag!=='undefined')earPag=null;
   if(typeof tunerPag!=='undefined')tunerPag=null;
+  if(typeof teclaPag!=='undefined'){teclaPag=null;if(typeof tecladoSilencia==='function')tecladoSilencia();}
   if(typeof soBolinhas!=='undefined')soBolinhas=false;
   if(typeof jogoOuvido!=='undefined')jogoOuvido=false;
   document.body.classList.remove('painel','paginas','sub','notas','caixas','earx','earpag',
-    'afina','afinapag','bolinhas','jogo');
+    'afina','afinapag','bolinhas','jogo','teclas','teclaspag');
   document.querySelectorAll('.pagina-aberta').forEach(e=>e.classList.remove('pagina-aberta'));
 }
 /* Home from anywhere, in one tap on the name — where Back walks one level at a
@@ -6073,6 +6180,8 @@ function voltaHome(){
   if(state.mode==='ear'&&earPag){earFechaPagina();return;}
   // and inside one of the tuner's, back is back to the reading
   if(state.mode==='tuner'&&tunerPag){tunerFecha();return;}
+  // inside the keyboard's voice page, back is back to the keys
+  if(state.mode==='keys'&&teclaPag){tecladoFechaPag();return;}
   // out of the circles, back to the page they were opened from
   if(soBolinhas){fechaBolinhas();return;}
   // inside a kind of ear question, back is back to the kinds
@@ -7746,7 +7855,11 @@ function setMode(m){
   state.mode=m;
   if(modeChanged&&METRO_FRESH){metroTake(m);redrawMetro();}
   const isDrone=m==='drone',isPitch=(m==='scale'||m==='arpeggio'),isMetro=m==='metro',
-        isTuner=m==='tuner',isEar=m==='ear';
+        isTuner=m==='tuner',isEar=m==='ear',isKeys=m==='keys';
+  /* The keyboard is played, not set up: like the tuner it brings nothing of the
+     exercise with it — no metronome, no phrasing, no progressions, nothing to
+     save. What it does bring is the voice, which is the whole point of it, and
+     that lives on the keyboard's own screen. */
   /* Ear training listens to nothing and counts nothing: it plays a question and
      waits. Everything the other modes need — the pulse, the range, what moves
      between passes — has nothing to say about it, so none of it is there. */
@@ -7763,14 +7876,16 @@ function setMode(m){
      they are the same elements shown and hidden. */
   if(modeChanged)document.querySelectorAll('details.sec,details.mfold').forEach(d=>d.open=false);
   [['drone','btn-mode-drone'],['scale','btn-mode-scale'],['arpeggio','btn-mode-arp'],
-   ['free','btn-mode-free'],['metro','btn-mode-metro'],['tuner','btn-mode-tuner'],
-   ['ear','btn-mode-ear']]
+   ['free','btn-mode-free'],['keys','btn-mode-keys'],['metro','btn-mode-metro'],
+   ['tuner','btn-mode-tuner'],['ear','btn-mode-ear']]
     .forEach(([k,id])=>document.getElementById(id).classList.toggle('active',m===k));
   document.getElementById('tuner-section').style.display=isTuner?'':'none';
+  document.getElementById('keys-section').style.display=isKeys?'':'none';
+  if(isKeys)tecladoEntra();
   // the tuner has no setup to save, and nothing saved would mean anything in it
   // the drawer is a place you go to, not a panel in the mode: pintaCasa decides
   document.getElementById('sec-exercises').style.display=
-    (isTuner||isEar||!pastaAberta)?'none':'';
+    (isTuner||isEar||isKeys||!pastaAberta)?'none':'';
   document.getElementById('drone-section').style.display=isDrone?'':'none';
   if(isDrone)setTimeout(fitNoteGrids,0);
   document.getElementById('pitch-section').style.display=isPitch?'':'none';
@@ -7782,12 +7897,12 @@ function setMode(m){
   document.getElementById('sec-scales-title').textContent=m==='arpeggio'?tr('sec.chords','Chords'):tr('sec.scales','Scales');
   document.getElementById('arp-lists').style.display=m==='arpeggio'?'':'none';
   // in Metro there is nothing above the metronome to be divided from
-  document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone||isEar)?'none':'';
+  document.getElementById('metro-divider').style.display=(isTuner||isMetro||isDrone||isEar||isKeys)?'none':'';
   const ms=document.getElementById('metro-section');
-  ms.style.display=(isTuner||isEar)?'none':'';
+  ms.style.display=(isTuner||isEar||isKeys)?'none':'';
   buildMetroOnRow();
   buildListModeRow();
-  splitMetro(!isTuner&&!isEar);
+  splitMetro(!isTuner&&!isEar&&!isKeys);
   updateSupersededControls();      // the accompaniment is Metro's alone
   /* The panels close when the mode changes; the folds inside them are panels in
      everything but name, so they close with them.
@@ -7805,8 +7920,8 @@ function setMode(m){
     }
   });
   // Metro plays no notes, so the note readout has nothing to read but a dash
-  document.getElementById('current-note').style.display=(isMetro||isEar)?'none':'';
-  document.getElementById('current-freq').style.display=(isMetro||isEar)?'none':'';
+  document.getElementById('current-note').style.display=(isMetro||isEar||isKeys)?'none':'';
+  document.getElementById('current-freq').style.display=(isMetro||isEar||isKeys)?'none':'';
   // Metro is nothing but the metronome, so the metronome is not foldable there.
   // What it was before is remembered, so leaving Metro gives it back.
   if(isMetro){
@@ -7815,9 +7930,9 @@ function setMode(m){
   } else if(ms.classList.contains('pinned')){
     ms.classList.remove('pinned');ms.open=metroWasOpen;
   }
-  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner||isEar)?'none':'';
+  document.getElementById('sec-rhythm').style.display=(isDrone||isMetro||isTuner||isEar||isKeys)?'none':'';
   // which instrument asks the question is exactly the point, so Timbre stays
-  document.getElementById('sec-sound').style.display=(isMetro||isTuner)?'none':'';
+  document.getElementById('sec-sound').style.display=(isMetro||isTuner||isKeys)?'none':'';
   /* Whether the exercise stops after one round applies wherever there is a
      round, so the panel is there for all of them — but the drone has no rounds
      and the tuner nothing to run, and Root Movement inside it is a scale's or
@@ -7825,7 +7940,7 @@ function setMode(m){
   /* Practice Progressions is about what moves between passes of a line of
      notes, and Metro has no notes — the panel stood there holding one control
      that had nothing to do with its name. */
-  document.getElementById('sec-progress').style.display=(isDrone||isMetro||isTuner||isEar)?'none':'';
+  document.getElementById('sec-progress').style.display=(isDrone||isMetro||isTuner||isEar||isKeys)?'none':'';
   /* Thirds and 1 2 3 are ways of walking a scale. A chord has three or four
      notes and no steps between them to walk, so the shapes go. */
   document.getElementById('seqpat-block').style.display=(m==='scale')?'':'none';
@@ -7833,9 +7948,9 @@ function setMode(m){
   placeRepeat(isMetro);
   // Each side restores the last voice you chose there: the drone starts out on
   // the strings, the sequence modes on the piano.
-  state.timbre=isDrone?state.droneTimbre:state.seqTimbre;
+  state.timbre=isDrone?state.droneTimbre:(isKeys?state.keyTimbre:state.seqTimbre);
   if(!availableTimbres().some(t=>t.k===state.timbre))
-    state.timbre=isDrone?DEFAULT_DRONE:DEFAULT_WAVE;
+    state.timbre=isDrone?DEFAULT_DRONE:(isKeys?DEFAULT_KEYS:DEFAULT_WAVE);
   buildTimbreRow();
   /* Not before the first tap: this runs once at startup too, and loading a
      voice builds the audio context to decode into. Pressing Start loads it
@@ -7851,6 +7966,7 @@ function setMode(m){
   // so a study list set up in Scale left it standing in the Tuner and in Metro
   updateRotationPanel();
   if(isTuner)buildTunerControls();
+  if(isKeys)buildTeclado();
   // the crosses do not follow you into another mode, and neither does the
   // folder you were standing in — it belongs to the drawer you came from
   exPath=[];exMoving=null;
@@ -12688,6 +12804,7 @@ function fitNoteGrids(force){
 
 function relayoutViewport(){
   measureViewport();
+  if(typeof tecladoAfere==='function')tecladoAfere();
   fitWordmark();
   layoutAllBeats();
   gridifyAll();
@@ -13145,6 +13262,232 @@ function buildTunerControls(){
      to be shared out again — without this the spread stayed as it was. */
   spreadPanelsSoon();
 }
+/* ---------- the keyboard ----------
+   The one screen in the app you play. Everything else here schedules notes
+   against a clock; a key is the opposite of that — it sounds at the instant the
+   finger lands, and stops when it leaves. So nothing on this screen goes
+   through the scheduler, and the sound is made before the key is lit.
+
+   What it is worth, in an app for practising: finding a note you are trying to
+   hear, checking a scale against the drone, or playing over the metronome. Not
+   a stage instrument — a browser's audio path costs some tens of milliseconds
+   whatever we do, and that is the one number here we cannot argue with. */
+let teclaPag=null;                  // the voice page, while it is open
+let teclaOct=3;                     // which octave the leftmost C sits in
+const TECLA_OCT_MIN=1,TECLA_OCT_MAX=6;
+const BRANCAS=[0,2,4,5,7,9,11];     // semitones of the white keys of an octave
+const PRETAS=[1,3,-1,6,8,10,-1];    // the black above each white, -1 where none
+let teclasVivas={};                 // semitone -> the voice sounding it
+let teclasDedos={};                 // pointerId -> semitone
+let teclaOitavasFeitas=0;           // how many octaves the board was drawn with
+
+/* How many octaves the screen can hold without the keys becoming targets you
+   have to aim at: 44px of white key is the floor, which on a phone held upright
+   is one octave and sideways is two. */
+function tecladoOitavas(){
+  const b=document.getElementById('keys-board');
+  const w=b?b.clientWidth:0;
+  if(!w)return 1;
+  return Math.max(1,Math.min(3,Math.floor(w/(7*44))));
+}
+function tecladoEntra(){
+  teclaPag=null;
+  tecladoSilencia();
+  const t=state.keyTimbre||DEFAULT_KEYS;
+  if(isSampled(t)&&!samplerReady(t)&&!samplerFor(t).loading&&(audioCtx||houveGesto))loadSampler(t);
+}
+function tecladoFechaPag(){
+  if(!teclaPag)return;
+  teclaPag=null;
+  buildTeclado();pintaCasa();
+}
+function tecladoAbrePag(k){
+  teclaPag=k;
+  buildTeclado();pintaCasa();
+}
+/* One voice, held until the finger leaves. The sampled instruments are played
+   through the same library the rest of the app uses; the two that loop hold the
+   note for as long as it is wanted, and the ones that decay do what the
+   instrument does. The vibraphone is struck rather than held — a bar rings past
+   the hand, which is the sound. */
+function tecladoVoz(sem){
+  if(!audioCtx)return null;
+  const now=audioCtx.currentTime;
+  const k=state.timbre;
+  if(isSampled(k)){
+    const S=samplerFor(k),spec=SAMPLED[k];
+    if(!S.ready)return null;
+    const q=sampleFor(k,sem+12);
+    if(!q)return null;
+    const n=S.inst.play(q.name,now,{gain:spec.gain,cents:q.cents,loop:!!spec.loopForDrone});
+    return {parar:()=>{try{n&&n.stop(audioCtx.currentTime+0.06);}catch(e){}}};
+  }
+  if(k==='vibraphone'){
+    const saco=[];
+    buildVibraphone(freqOf(sem),now,saco,4);
+    return {parar:()=>{}};        // it rings on, the way the bar does
+  }
+  const osc=audioCtx.createOscillator();
+  osc.type=oscType();
+  osc.frequency.value=freqOf(sem);
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(0,now);
+  g.gain.linearRampToValueAtTime(0.5,now+0.012);
+  osc.connect(g);g.connect(masterGain);osc.start(now);
+  return {parar:()=>{
+    const t=audioCtx.currentTime;
+    try{
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(g.gain.value,t);
+      g.gain.linearRampToValueAtTime(0,t+0.08);
+      osc.stop(t+0.12);
+    }catch(e){}
+  }};
+}
+function tecladoLiga(sem){
+  tecladoDesliga(sem);
+  const v=tecladoVoz(sem);
+  if(v)teclasVivas[sem]=v;
+}
+function tecladoDesliga(sem){
+  const v=teclasVivas[sem];
+  if(!v)return;
+  delete teclasVivas[sem];
+  v.parar();
+}
+function tecladoSilencia(){
+  Object.keys(teclasVivas).forEach(s=>tecladoDesliga(+s));
+  teclasDedos={};
+  document.querySelectorAll('.key.soa').forEach(e=>e.classList.remove('soa'));
+}
+/* Sound first, light second: a key that lights before it speaks is a key that
+   feels late even when it is not. */
+function tecladoPressiona(el,id){
+  const sem=+el.dataset.sem;
+  if(!audioCtx){initAudio().then(()=>{if(teclasDedos[id]===sem)tecladoLiga(sem);});}
+  else tecladoLiga(sem);
+  teclasDedos[id]=sem;
+  el.classList.add('soa');
+}
+function tecladoLarga(id){
+  const sem=teclasDedos[id];
+  if(sem===undefined)return;
+  delete teclasDedos[id];
+  if(Object.keys(teclasDedos).every(k=>teclasDedos[k]!==sem))tecladoDesliga(sem);
+  const el=document.querySelector('.key[data-sem="'+sem+'"]');
+  if(el&&Object.keys(teclasDedos).every(k=>teclasDedos[k]!==sem))el.classList.remove('soa');
+}
+function tecladoOctMove(d){
+  const n=Math.max(TECLA_OCT_MIN,Math.min(TECLA_OCT_MAX-tecladoOitavas()+1,teclaOct+d));
+  if(n===teclaOct)return;
+  tecladoSilencia();
+  teclaOct=n;
+  buildTeclado();
+}
+function buildTeclado(){
+  const board=document.getElementById('keys-board');
+  const row=document.getElementById('keys-box-row');
+  const page=document.getElementById('keys-page');
+  if(!board||!row||!page)return;
+  const oitavas=tecladoOitavas();
+  if(teclaOct>TECLA_OCT_MAX-oitavas+1)teclaOct=Math.max(TECLA_OCT_MIN,TECLA_OCT_MAX-oitavas+1);
+  board.innerHTML='';
+  const brancas=[];
+  for(let o=0;o<oitavas;o++){
+    BRANCAS.forEach((semDaBranca,i)=>{
+      const sem=semitone('C',teclaOct+o)+semDaBranca;
+      const b=document.createElement('button');
+      b.className='key branca'+(semDaBranca===0?' raiz':'');
+      b.type='button';
+      b.dataset.sem=String(sem);
+      b.textContent=bareName(((sem%12)+12)%12)+(semDaBranca===0?String(teclaOct+o):'');
+      b.setAttribute('aria-label',nameOf(sem));
+      board.appendChild(b);
+      brancas.push({el:b,o:o,i:i});
+    });
+  }
+  /* The blacks are laid over the seam between two whites once the whites have a
+     width — measured, because the width depends on how many octaves fitted. */
+  requestAnimationFrame(()=>{
+    board.querySelectorAll('.key.preta').forEach(e=>e.remove());
+    if(!brancas.length||!board.offsetParent)return;   // nothing to measure against
+    const larg=brancas[0].el.getBoundingClientRect().width;
+    if(!larg)return;
+    board.style.maxHeight=Math.round(larg*6.2)+'px';   // the proportions of a key
+    const base=board.getBoundingClientRect().left;
+    brancas.forEach(({el,o,i})=>{
+      const passo=PRETAS[i];
+      if(passo<0)return;
+      const sem=semitone('C',teclaOct+o)+passo;
+      const b=document.createElement('button');
+      b.className='key preta';
+      b.type='button';
+      b.dataset.sem=String(sem);
+      b.textContent=bareName(((sem%12)+12)%12);
+      b.setAttribute('aria-label',nameOf(sem));
+      b.style.width=Math.round(larg*0.6)+'px';
+      b.style.left=Math.round(el.getBoundingClientRect().left-base+larg*0.72)+'px';
+      board.appendChild(b);
+    });
+  });
+  teclaOitavasFeitas=oitavas;
+  /* What is on the screen, named by its ends — the first key and the last,
+     rather than by a count of octaves nobody asked for. */
+  const primeira=semitone('C',teclaOct),ultima=primeira+oitavas*12-1;
+  const now=document.getElementById('keys-oct-now');
+  if(now)now.textContent=oitavas>1?(nameOf(primeira)+'–'+nameOf(ultima)):nameOf(primeira);
+  const dn=document.getElementById('keys-oct-down'),up=document.getElementById('keys-oct-up');
+  if(dn)dn.onclick=()=>tecladoOctMove(-1);
+  if(up)up.onclick=()=>tecladoOctMove(1);
+  // the voice, in a box under the keys, the way the tuner keeps its two
+  row.innerHTML='';
+  const box=document.createElement('button');
+  box.className='panel-box';box.type='button';
+  const t=document.createElement('span');t.textContent=soTexto(tr('sec.timbre','Timbre'));
+  box.appendChild(t);
+  box.setAttribute('aria-label',soTexto(tr('sec.timbre','Timbre'))+' — '+timbreLabel(state.timbre));
+  box.onclick=()=>tecladoAbrePag('som');
+  row.appendChild(box);
+  page.innerHTML='';
+  page.style.display=teclaPag?'':'none';
+  if(teclaPag==='som'){
+    earCaixasSeg(page,availableTimbres().map(t=>[t.k,timbreLabel(t.k)]),state.timbre,v=>{
+      tecladoSilencia();
+      setTimbre(v);
+      tecladoFechaPag();      // a page is one question: answering it puts you back
+    });
+  }
+  spreadPanelsSoon();
+}
+/* How wide the board is decides how many octaves it holds, and the width is not
+   known until the screen has been laid out with the keyboard on it — the mode's
+   own class arrives after the first build, and the phone can be turned at any
+   time. So the count is measured again after every layout, and the board is
+   rebuilt only when the answer changed. */
+function tecladoAfere(){
+  if(state.mode!=='keys'||emCasa||pastaAberta)return;
+  const b=document.getElementById('keys-board');
+  if(!b||!b.offsetParent)return;
+  if(tecladoOitavas()!==teclaOitavasFeitas)buildTeclado();
+}
+/* One listener for the whole board: the keys are rebuilt whenever the octave
+   moves, and a handler wired per key would be wired again every time. */
+(function(){
+  const board=()=>document.getElementById('keys-board');
+  document.addEventListener('pointerdown',e=>{
+    const b=board();
+    if(!b||!b.contains(e.target))return;
+    const k=e.target.closest&&e.target.closest('.key');
+    if(!k)return;
+    e.preventDefault();
+    tecladoPressiona(k,e.pointerId);
+  },{passive:false});
+  const larga=e=>{if(teclasDedos[e.pointerId]!==undefined)tecladoLarga(e.pointerId);};
+  document.addEventListener('pointerup',larga);
+  document.addEventListener('pointercancel',larga);
+  window.addEventListener('blur',()=>tecladoSilencia());
+})();
+
 /* ---------- undo ----------
    One step back, wherever you were. Not built control by control — every button
    would have to know how to undo itself, and the one that forgot would be the

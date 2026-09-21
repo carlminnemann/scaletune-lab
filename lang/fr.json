@@ -822,5 +822,8 @@
  "practice.figuresPlain": {
   "one": "{n} figure rythmique dans chaque mode",
   "other": "{n} figures rythmiques dans chaque mode"
- }
+ },
+ "keys": "Clavier",
+ "keys-2": "Clavier",
+ "h.m.keys": "Des touches à jouer à la main, avec n’importe quelle voix. Les flèches le déplacent d’une octave ; il sonne à l’instant où la touche est enfoncée et s’arrête quand on la relâche."
 }

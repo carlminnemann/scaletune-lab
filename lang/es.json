@@ -822,5 +822,8 @@
  "practice.figuresPlain": {
   "one": "{n} figura rítmica dentro de cada modo",
   "other": "{n} figuras rítmicas dentro de cada modo"
- }
+ },
+ "keys": "Teclado",
+ "keys-2": "Teclado",
+ "h.m.keys": "Teclas para tocar a mano, con cualquiera de las voces. Las flechas lo mueven una octava; suena en el instante en que se pulsa una tecla y para al soltarla."
 }

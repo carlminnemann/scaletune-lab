@@ -822,5 +822,8 @@
  "practice.figuresPlain": {
   "one": "{n} figura rítmica dentro de cada modo",
   "other": "{n} figuras rítmicas dentro de cada modo"
- }
+ },
+ "keys": "Teclado",
+ "keys-2": "Teclado",
+ "h.m.keys": "Teclas para tocar à mão, em qualquer das vozes. As setas movem-no uma oitava; soa no instante em que se carrega numa tecla e pára quando se larga."
 }

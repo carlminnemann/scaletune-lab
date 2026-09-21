@@ -822,5 +822,8 @@
  "practice.figuresPlain": {
   "one": "{n} rhythmische Figur in jedem Modus",
   "other": "{n} rhythmische Figuren in jedem Modus"
- }
+ },
+ "keys": "Klaviatur",
+ "keys-2": "Klaviatur",
+ "h.m.keys": "Tasten zum Spielen von Hand, in jeder der Stimmen. Die Pfeile verschieben sie um eine Oktave; sie klingt im Moment des Anschlags und hört auf, wenn die Taste losgelassen wird."
 }
