@@ -2196,9 +2196,10 @@ body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row
    it became nine, which reads as a wall rather than as a keyboard. The ceiling
    is written in from the key's own width once it is known, so it holds whatever
    the octave count and the screen turn out to be. */
-/* At the foot of the screen, where the thumbs are: the room left over goes
-   above the keys, not under them. */
-.keys-board{position:relative;flex:0 1 auto;margin-top:auto;
+/* Long keys, filling what the screen has: he asked for them back, and on a
+   phone held sideways it is the difference between a key you play and a key you
+   tap. */
+.keys-board{position:relative;flex:1 1 auto;
   /* The floor is what a phone held sideways can spare once the octave and the
      voice have had theirs — a key shorter than this is a key you would have to
      aim at. */
@@ -2276,6 +2277,13 @@ body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;g
 
 /* A phone on its side is 380px tall: the header alone would take a tenth of it,
    so the vertical rhythm tightens rather than the layout changing. */
+/* Held sideways, the keyboard gives up the header. The name of the app, the
+   folder and the guide are worth their forty pixels on every screen you set
+   something on; this is the one you play, the way back is the bar under it, and
+   forty pixels is a third more key. */
+@media(max-height:520px) and (orientation:landscape){
+  body.teclas .header{display:none}
+}
 @media(max-height:480px) and (orientation:landscape){
   body{padding-top:calc(0.6rem + env(safe-area-inset-top));padding-bottom:calc(1.2rem + env(safe-area-inset-bottom))}
   .header{margin-bottom:0.9rem}
@@ -6017,7 +6025,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22c';
+const APP_VERSION='lab-2026-09-22d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13386,6 +13394,7 @@ function tecladoSilencia(){
   Object.keys(teclasVivas).forEach(s=>tecladoDesliga(+s));
   teclasDedos={};
   document.querySelectorAll('.key.soa').forEach(e=>e.classList.remove('soa'));
+  if(typeof tecladoMostraNotas==='function')tecladoMostraNotas();
 }
 /* Sound first, light second: a key that lights before it speaks is a key that
    feels late even when it is not. */
@@ -13403,6 +13412,17 @@ function tecladoLarga(id){
   if(Object.keys(teclasDedos).every(k=>teclasDedos[k]!==sem))tecladoDesliga(sem);
   const el=document.querySelector('.key[data-sem="'+sem+'"]');
   if(el&&Object.keys(teclasDedos).every(k=>teclasDedos[k]!==sem))el.classList.remove('soa');
+}
+/* While anything is held, the line over the keys says what is sounding — the
+   chord under your hand, written out. Let go and it goes back to saying where
+   the keyboard is. It is also the plainest answer to "is it hearing both
+   fingers?": if two are down, two names are there. */
+function tecladoMostraNotas(){
+  const el=document.getElementById('keys-oct-now');
+  if(!el)return;
+  const sems=Object.keys(teclasVivas).map(Number).sort((a,b)=>a-b);
+  if(!sems.length){el.textContent=el.dataset.repouso||'';return;}
+  el.textContent=sems.map(s=>nameOf(s)).join(' ');
 }
 function tecladoOctMove(d){
   const n=Math.max(TECLA_OCT_MIN,Math.min(TECLA_OCT_MAX-tecladoOitavas()+1,teclaOct+d));
@@ -13440,7 +13460,6 @@ function buildTeclado(){
     if(!brancas.length||!board.offsetParent)return;   // nothing to measure against
     const larg=brancas[0].el.getBoundingClientRect().width;
     if(!larg)return;
-    board.style.maxHeight=Math.round(larg*6.2)+'px';   // the proportions of a key
     const base=board.getBoundingClientRect().left;
     brancas.forEach(({el,o,i})=>{
       const passo=PRETAS[i];
@@ -13462,7 +13481,10 @@ function buildTeclado(){
      rather than by a count of octaves nobody asked for. */
   const primeira=semitone('C',teclaOct),ultima=primeira+oitavas*12-1;
   const now=document.getElementById('keys-oct-now');
-  if(now)now.textContent=oitavas>1?(nameOf(primeira)+'–'+nameOf(ultima)):nameOf(primeira);
+  if(now){
+    now.dataset.repouso=oitavas>1?(nameOf(primeira)+'–'+nameOf(ultima)):nameOf(primeira);
+    tecladoMostraNotas();
+  }
   const dn=document.getElementById('keys-oct-down'),up=document.getElementById('keys-oct-up');
   if(dn)dn.onclick=()=>tecladoOctMove(-1);
   if(up)up.onclick=()=>tecladoOctMove(1);
@@ -13497,56 +13519,74 @@ function tecladoAfere(){
   if(!b||!b.offsetParent)return;
   if(tecladoOitavas()!==teclaOitavasFeitas)buildTeclado();
 }
-/* One listener for the whole board: the keys are rebuilt whenever the octave
-   moves, and a handler wired per key would be wired again every time.
+/* Every event brings the whole hand, and the whole hand is what is answered.
 
-   Touches are taken as touches, not as pointers. Pointer events are the tidier
-   idea and they carry one finger perfectly, but a second finger on iOS never
-   arrived — the first press had called preventDefault, and that is enough for
-   Safari to stop sending the rest of the stream. Touch events hand over every
-   finger of the gesture in changedTouches, each with an identifier of its own,
-   and a chord is what a keyboard is for. Where there is no touch — a mouse —
-   the pointer path is still there; the first touch switches it off so nothing
-   is ever counted twice.
+   Reading only changedTouches was not enough: a chord would not sound on the
+   phone, one finger at a time worked and two never did, and every explanation I
+   had for it was a guess about which event iOS was withholding. So nothing is
+   inferred from which event arrived. Each touchstart, touchmove and touchend
+   carries e.touches — every finger currently on the glass — and the keyboard
+   simply makes what is sounding match it: a finger with no note gets one, a
+   note whose finger has gone is let go, and a finger that has slid onto another
+   key changes note. Whichever events the platform decides to send, the next one
+   puts it right.
 
-   A finger that slides goes with it: on the way it lets the key it left go and
-   presses the one it arrives on, which is how a keyboard is played. */
+   The listeners sit on the board as well as on the document, since a touch that
+   starts on a key is the board's business either way, and the pointer path is
+   kept for the mouse — the first touch switches it off so nothing is counted
+   twice. */
 (function(){
   const board=()=>document.getElementById('keys-board');
   const teclaEm=(x,y)=>{const el=document.elementFromPoint(x,y);return el&&el.closest?el.closest('.key'):null;};
   let houveToque=false;
 
-  document.addEventListener('touchstart',e=>{
+  function reconcilia(e){
     const b=board();
-    if(!b||!b.contains(e.target))return;
+    if(!b||!b.offsetParent)return;
     houveToque=true;
-    e.preventDefault();          // no scrolling, no zoom, no ghost mouse events
-    for(const t of e.changedTouches){
-      const k=teclaEm(t.clientX,t.clientY);
-      if(k)tecladoPressiona(k,'t'+t.identifier);
-    }
-  },{passive:false});
-
-  document.addEventListener('touchmove',e=>{
-    const b=board();
-    if(!b||!houveToque)return;
-    for(const t of e.changedTouches){
+    const vistos={};
+    for(const t of e.touches){
       const id='t'+t.identifier;
-      if(teclasDedos[id]===undefined)continue;
-      e.preventDefault();
+      vistos[id]=1;
       const k=teclaEm(t.clientX,t.clientY);
       const sem=k?+k.dataset.sem:null;
-      if(sem===teclasDedos[id])continue;     // still on the same key
-      tecladoLarga(id);
-      if(k)tecladoPressiona(k,id);
+      if(teclasDedos[id]===undefined){
+        if(k)tecladoPressiona(k,id);
+      } else if(sem!==teclasDedos[id]){
+        tecladoLarga(id);
+        if(k)tecladoPressiona(k,id);
+      }
     }
-  },{passive:false});
-
-  const largaToque=e=>{
-    for(const t of e.changedTouches)tecladoLarga('t'+t.identifier);
+    Object.keys(teclasDedos).forEach(id=>{
+      if(String(id).charAt(0)==='t'&&!vistos[id])tecladoLarga(id);
+    });
+    tecladoMostraNotas();
+  }
+  function noTeclado(e){
+    const b=board();
+    if(!b||!b.offsetParent)return false;
+    if(b.contains(e.target))return true;
+    for(const t of e.touches)if(teclaEm(t.clientX,t.clientY))return true;
+    for(const t of e.changedTouches)if(teclaEm(t.clientX,t.clientY))return true;
+    return false;
+  }
+  const inicio=e=>{
+    if(!noTeclado(e))return;
+    e.preventDefault();           // no scrolling, no zoom, no ghost mouse events
+    reconcilia(e);
   };
-  document.addEventListener('touchend',largaToque);
-  document.addEventListener('touchcancel',largaToque);
+  const move=e=>{
+    if(!houveToque||!Object.keys(teclasDedos).length)return;
+    e.preventDefault();
+    reconcilia(e);
+  };
+  const fim=e=>{if(houveToque)reconcilia(e);};
+  ['touchstart'].forEach(ev=>{
+    document.addEventListener(ev,inicio,{passive:false});
+  });
+  document.addEventListener('touchmove',move,{passive:false});
+  document.addEventListener('touchend',fim,{passive:true});
+  document.addEventListener('touchcancel',fim,{passive:true});
 
   document.addEventListener('pointerdown',e=>{
     if(houveToque||e.pointerType==='touch')return;   // the touch path has it
@@ -13556,11 +13596,15 @@ function tecladoAfere(){
     if(!k)return;
     e.preventDefault();
     tecladoPressiona(k,e.pointerId);
+    tecladoMostraNotas();
   },{passive:false});
-  const larga=e=>{if(teclasDedos[e.pointerId]!==undefined)tecladoLarga(e.pointerId);};
+  const larga=e=>{
+    if(teclasDedos[e.pointerId]===undefined)return;
+    tecladoLarga(e.pointerId);tecladoMostraNotas();
+  };
   document.addEventListener('pointerup',larga);
   document.addEventListener('pointercancel',larga);
-  window.addEventListener('blur',()=>tecladoSilencia());
+  window.addEventListener('blur',()=>{tecladoSilencia();tecladoMostraNotas();});
 })();
 
 /* ---------- undo ----------
