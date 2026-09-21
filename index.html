@@ -6012,7 +6012,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22a';
+const APP_VERSION='lab-2026-09-22b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13323,9 +13323,31 @@ function tecladoVoz(sem){
     return {parar:()=>{try{n&&n.stop(audioCtx.currentTime+0.06);}catch(e){}}};
   }
   if(k==='vibraphone'){
+    /* Held, the bar rings its own four seconds. Let go, it is damped — which is
+       what the pedal does on the instrument, and without it there was no such
+       thing as a short note: every tap rang for four seconds and the next one
+       was played over the last. The damp is a fifth of a second, not a cut: a
+       hand laid on a bar takes a moment, and a sine stopped dead is a click. */
     const saco=[];
     buildVibraphone(freqOf(sem),now,saco,4);
-    return {parar:()=>{}};        // it rings on, the way the bar does
+    return {parar:()=>{
+      const t=audioCtx.currentTime;
+      saco.forEach(n=>{
+        try{
+          if(n.gain){
+            /* Read the value first, then cancel: the bar is decaying under a
+               setTargetAtTime whose target is silence, and cancelAndHold in the
+               middle of one of those lands on the target rather than on where
+               the sound actually is — which damped the note in a millisecond
+               and put a click where the damp should be. */
+            const v=n.gain.value;
+            n.gain.cancelScheduledValues(t);
+            n.gain.setValueAtTime(v,t);
+            n.gain.linearRampToValueAtTime(0,t+0.2);
+          } else if(n.stop)n.stop(t+0.24);
+        }catch(e){}
+      });
+    }};
   }
   const osc=audioCtx.createOscillator();
   osc.type=oscType();
