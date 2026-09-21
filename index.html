@@ -2182,19 +2182,23 @@ body.bolinhas .pulse-bpm{display:none}
 #keys-section{display:none;flex-direction:column;flex:1 1 auto;min-height:0}
 body.teclas #keys-section{display:flex!important}
 body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row{display:none}
-.keys-top{display:flex;align-items:center;justify-content:center;gap:var(--s3);
-  flex:0 0 auto;margin-bottom:var(--s2)}
-.keys-oct{font-size:clamp(20px,4.5vh,32px);font-weight:300;letter-spacing:.01em;
-  color:var(--text);min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums}
+/* Small, and out of the way: where the keys are is worth a word, not a heading,
+   and the voice takes what is left of the line. */
+.keys-top{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);
+  align-items:center;gap:var(--s2);flex:0 0 auto;margin-bottom:var(--s2)}
+.keys-oct{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--text2);
+  min-width:5.2em;text-align:center;font-variant-numeric:tabular-nums}
 .oct-step{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);
-  border-radius:var(--r);min-width:clamp(52px,12vw,76px);min-height:clamp(38px,7vh,54px);
-  font-size:15px;cursor:pointer;touch-action:manipulation}
+  border-radius:var(--r);min-width:clamp(44px,11vw,58px);min-height:clamp(36px,6vh,46px);
+  font-size:13px;line-height:1;cursor:pointer;touch-action:manipulation}
 .oct-step:active{background:var(--bg3);color:var(--text)}
 /* A white key is about six times as long as it is wide; given the whole screen
    it became nine, which reads as a wall rather than as a keyboard. The ceiling
    is written in from the key's own width once it is known, so it holds whatever
    the octave count and the screen turn out to be. */
-.keys-board{position:relative;flex:1 1 auto;
+/* At the foot of the screen, where the thumbs are: the room left over goes
+   above the keys, not under them. */
+.keys-board{position:relative;flex:0 1 auto;margin-top:auto;
   /* The floor is what a phone held sideways can spare once the octave and the
      voice have had theirs — a key shorter than this is a key you would have to
      aim at. */
@@ -2231,9 +2235,8 @@ body.teclas .scroll>#keys-section{flex:1 1 auto;min-height:0}
 /* The voice, under the keys, the way the tuner keeps what it measures against
    under the reading — borrowed styling and all, since it is the same kind of
    box doing the same kind of job. */
-body.teclas .tuner-boxes{display:grid;grid-template-columns:1fr;gap:var(--s2);
-  flex:0 0 auto;margin-top:var(--s3)}
-body.teclas .tuner-boxes .panel-box{min-height:clamp(46px,7vh,62px)}
+body.teclas .tuner-boxes{display:grid;grid-template-columns:1fr;gap:var(--s2);margin:0}
+body.teclas .tuner-boxes .panel-box{min-height:clamp(36px,6vh,46px);font-size:13px}
 body.teclaspag #keys-page{display:flex!important;flex-direction:column;flex:1 1 auto;
   min-height:0;gap:var(--s3)}
 body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);
@@ -2446,13 +2449,15 @@ body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;g
      the tuner — the instrument takes the screen, and what it is played with is a
      box under it that opens a page of its own. -->
 <div id="keys-section" style="display:none">
+  <!-- One line over the keys: where they are, and what they are played with.
+       Both were under them, which is the one place a hand covers. -->
   <div class="keys-top">
-    <button class="oct-step" id="keys-oct-down" type="button" data-ta="aria.octDown" aria-label="Octave down">◀</button>
+    <button class="oct-step" id="keys-oct-down" type="button" data-ta="aria.octDown" aria-label="Octave down">▼</button>
     <div class="keys-oct"><span id="keys-oct-now">C3</span></div>
-    <button class="oct-step" id="keys-oct-up" type="button" data-ta="aria.octUp" aria-label="Octave up">▶</button>
+    <button class="oct-step" id="keys-oct-up" type="button" data-ta="aria.octUp" aria-label="Octave up">▲</button>
+    <div class="tuner-boxes" id="keys-box-row"></div>
   </div>
   <div class="keys-board" id="keys-board"></div>
-  <div class="tuner-boxes" id="keys-box-row"></div>
   <div id="keys-page" style="display:none"></div>
 </div>
 
@@ -6012,7 +6017,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22b';
+const APP_VERSION='lab-2026-09-22c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13493,10 +13498,58 @@ function tecladoAfere(){
   if(tecladoOitavas()!==teclaOitavasFeitas)buildTeclado();
 }
 /* One listener for the whole board: the keys are rebuilt whenever the octave
-   moves, and a handler wired per key would be wired again every time. */
+   moves, and a handler wired per key would be wired again every time.
+
+   Touches are taken as touches, not as pointers. Pointer events are the tidier
+   idea and they carry one finger perfectly, but a second finger on iOS never
+   arrived — the first press had called preventDefault, and that is enough for
+   Safari to stop sending the rest of the stream. Touch events hand over every
+   finger of the gesture in changedTouches, each with an identifier of its own,
+   and a chord is what a keyboard is for. Where there is no touch — a mouse —
+   the pointer path is still there; the first touch switches it off so nothing
+   is ever counted twice.
+
+   A finger that slides goes with it: on the way it lets the key it left go and
+   presses the one it arrives on, which is how a keyboard is played. */
 (function(){
   const board=()=>document.getElementById('keys-board');
+  const teclaEm=(x,y)=>{const el=document.elementFromPoint(x,y);return el&&el.closest?el.closest('.key'):null;};
+  let houveToque=false;
+
+  document.addEventListener('touchstart',e=>{
+    const b=board();
+    if(!b||!b.contains(e.target))return;
+    houveToque=true;
+    e.preventDefault();          // no scrolling, no zoom, no ghost mouse events
+    for(const t of e.changedTouches){
+      const k=teclaEm(t.clientX,t.clientY);
+      if(k)tecladoPressiona(k,'t'+t.identifier);
+    }
+  },{passive:false});
+
+  document.addEventListener('touchmove',e=>{
+    const b=board();
+    if(!b||!houveToque)return;
+    for(const t of e.changedTouches){
+      const id='t'+t.identifier;
+      if(teclasDedos[id]===undefined)continue;
+      e.preventDefault();
+      const k=teclaEm(t.clientX,t.clientY);
+      const sem=k?+k.dataset.sem:null;
+      if(sem===teclasDedos[id])continue;     // still on the same key
+      tecladoLarga(id);
+      if(k)tecladoPressiona(k,id);
+    }
+  },{passive:false});
+
+  const largaToque=e=>{
+    for(const t of e.changedTouches)tecladoLarga('t'+t.identifier);
+  };
+  document.addEventListener('touchend',largaToque);
+  document.addEventListener('touchcancel',largaToque);
+
   document.addEventListener('pointerdown',e=>{
+    if(houveToque||e.pointerType==='touch')return;   // the touch path has it
     const b=board();
     if(!b||!b.contains(e.target))return;
     const k=e.target.closest&&e.target.closest('.key');
