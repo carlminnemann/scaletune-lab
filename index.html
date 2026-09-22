@@ -6025,7 +6025,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22d';
+const APP_VERSION='lab-2026-09-22e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13294,14 +13294,17 @@ let teclasVivas={};                 // semitone -> the voice sounding it
 let teclasDedos={};                 // pointerId -> semitone
 let teclaOitavasFeitas=0;           // how many octaves the board was drawn with
 
-/* How many octaves the screen can hold without the keys becoming targets you
-   have to aim at: 44px of white key is the floor, which on a phone held upright
-   is one octave and sideways is two. */
+/* How many octaves are on the screen: one held upright, two held sideways, and
+   that is the whole rule. It used to be worked out from the width — as many
+   octaves as would fit at 44px a key — which gave a tablet three of them
+   sideways and two upright, and three octaves on a tablet is a row of keys too
+   narrow to play rather than a bigger instrument. Two wide ones beat three thin
+   ones; the range is a tap on the arrows away. */
 function tecladoOitavas(){
   const b=document.getElementById('keys-board');
   const w=b?b.clientWidth:0;
-  if(!w)return 1;
-  return Math.max(1,Math.min(3,Math.floor(w/(7*44))));
+  if(w&&w<240)return 1;                   // narrower than seven keys can bear
+  return innerWidth>innerHeight?2:1;
 }
 function tecladoEntra(){
   teclaPag=null;
