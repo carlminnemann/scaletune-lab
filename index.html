@@ -2179,7 +2179,12 @@ body.bolinhas .pulse-bpm{display:none}
    so the browser does not hold a press for a few milliseconds to see whether it
    was going to be a drag, and a key answers on the press rather than on the
    release. */
-#keys-section{display:none;flex-direction:column;flex:1 1 auto;min-height:0}
+/* Nothing on this screen is a gesture. On Android the browser decides whether a
+   second finger means a pinch, and once it has decided it takes the touches
+   away — which is a chord that plays sometimes and not others. Declared none
+   for the whole screen, there is nothing for it to decide. */
+body.teclas{touch-action:none;overscroll-behavior:none}
+#keys-section{display:none;flex-direction:column;flex:1 1 auto;min-height:0;touch-action:none}
 body.teclas #keys-section{display:flex!important}
 body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row{display:none}
 /* Small, and out of the way: where the keys are is worth a word, not a heading,
@@ -6025,7 +6030,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22e';
+const APP_VERSION='lab-2026-09-22f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13573,15 +13578,19 @@ function tecladoAfere(){
     for(const t of e.changedTouches)if(teclaEm(t.clientX,t.clientY))return true;
     return false;
   }
+  /* The refusal comes first and the reading second: a touch that landed between
+     two keys is still a touch on the keyboard, and letting that one through is
+     letting the browser start a gesture with it. */
+  const noEcra=()=>{const b=board();return !!(b&&b.offsetParent);};
   const inicio=e=>{
-    if(!noTeclado(e))return;
-    e.preventDefault();           // no scrolling, no zoom, no ghost mouse events
-    reconcilia(e);
+    if(!noEcra())return;
+    if(e.cancelable)e.preventDefault();   // no scrolling, no zoom, no pinch
+    if(noTeclado(e))reconcilia(e);
   };
   const move=e=>{
-    if(!houveToque||!Object.keys(teclasDedos).length)return;
-    e.preventDefault();
-    reconcilia(e);
+    if(!noEcra())return;
+    if(e.cancelable)e.preventDefault();
+    if(houveToque)reconcilia(e);
   };
   const fim=e=>{if(houveToque)reconcilia(e);};
   ['touchstart'].forEach(ev=>{
