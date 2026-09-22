@@ -2179,12 +2179,13 @@ body.bolinhas .pulse-bpm{display:none}
    so the browser does not hold a press for a few milliseconds to see whether it
    was going to be a drag, and a key answers on the press rather than on the
    release. */
-/* Nothing on this screen is a gesture. On Android the browser decides whether a
+/* Nothing on the keys is a gesture. On Android the browser decides whether a
    second finger means a pinch, and once it has decided it takes the touches
-   away — which is a chord that plays sometimes and not others. Declared none
-   for the whole screen, there is nothing for it to decide. */
-body.teclas{touch-action:none;overscroll-behavior:none}
-#keys-section{display:none;flex-direction:column;flex:1 1 auto;min-height:0;touch-action:none}
+   away — which is a chord that plays sometimes and not others. Over the keys
+   there is nothing for it to decide; over the row above them the ordinary rules
+   apply, because those are buttons and a button wants a tap. */
+body.teclas{overscroll-behavior:none}
+#keys-section{display:none;flex-direction:column;flex:1 1 auto;min-height:0}
 body.teclas #keys-section{display:flex!important}
 body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row{display:none}
 /* Small, and out of the way: where the keys are is worth a word, not a heading,
@@ -6030,7 +6031,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22g';
+const APP_VERSION='lab-2026-09-22h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13338,7 +13339,19 @@ function tecladoVoz(sem){
   const k=state.timbre;
   if(isSampled(k)){
     const S=samplerFor(k),spec=SAMPLED[k];
-    if(!S.ready)return null;
+    /* The voice may still be arriving — the piano is a file, and the first press
+       can be quicker than the network. It used to give nothing at all, silently.
+       The key is remembered instead: the load is asked for, and when it lands
+       the note speaks if the finger is still on it. */
+    if(!S.ready){
+      let vivo=true;
+      loadSampler(k,()=>{
+        if(!vivo||state.timbre!==k)return;
+        const v=tecladoVoz(sem);
+        if(v)teclasVivas[sem]=v;
+      });
+      return {parar:()=>{vivo=false;}};
+    }
     const q=sampleFor(k,sem+12);
     if(!q)return null;
     const n=S.inst.play(q.name,now,{gain:spec.gain,cents:q.cents,loop:!!spec.loopForDrone});
@@ -13616,19 +13629,31 @@ function tecladoAfere(){
     for(const t of e.changedTouches)if(teclaEm(t.clientX,t.clientY))return true;
     return false;
   }
-  /* The refusal comes first and the reading second: a touch that landed between
-     two keys is still a touch on the keyboard, and letting that one through is
-     letting the browser start a gesture with it. */
-  const noEcra=()=>{const b=board();return !!(b&&b.offsetParent);};
+  /* The refusal comes first and the reading second — but only over the keys. A
+     touch that lands between two keys is still a touch on the keyboard and its
+     gesture has to be refused; a touch on the octave arrows or on the voice is
+     a tap on a button, and refusing that one refuses the button with it. That
+     is what took the whole top row out on Android: the row answered nothing,
+     because the press had been cancelled before it could become a tap. */
+  const noTabuleiro=e=>{
+    const b=board();
+    if(!b||!b.offsetParent)return false;
+    const r=b.getBoundingClientRect();
+    const lista=(e.touches&&e.touches.length)?e.touches:e.changedTouches;
+    for(const t of lista)
+      if(t.clientX>=r.left&&t.clientX<r.right&&t.clientY>=r.top&&t.clientY<r.bottom)return true;
+    return false;
+  };
   const inicio=e=>{
-    if(!noEcra())return;
+    if(!noTabuleiro(e))return;
     if(e.cancelable)e.preventDefault();   // no scrolling, no zoom, no pinch
-    if(noTeclado(e))reconcilia(e);
+    reconcilia(e);
   };
   const move=e=>{
-    if(!noEcra())return;
+    if(!houveToque)return;
+    if(!Object.keys(teclasDedos).length&&!noTabuleiro(e))return;
     if(e.cancelable)e.preventDefault();
-    if(houveToque)reconcilia(e);
+    reconcilia(e);
   };
   const fim=e=>{if(houveToque)reconcilia(e);};
   ['touchstart'].forEach(ev=>{
