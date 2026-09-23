@@ -2190,8 +2190,9 @@ body.teclas #keys-section{display:flex!important}
 body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row{display:none}
 /* Small, and out of the way: where the keys are is worth a word, not a heading,
    and the voice takes what is left of the line. */
-.keys-top{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);
-  align-items:center;gap:var(--s2);flex:0 0 auto;margin-bottom:var(--s2)}
+.keys-top{display:flex;align-items:center;gap:var(--s2);flex:0 0 auto;margin-bottom:var(--s2)}
+.keys-top>#keys-box-row{flex:1 1 auto;min-width:0}
+.keys-span{flex:0 0 auto;padding:0 10px;min-width:0;white-space:nowrap}
 .keys-oct{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--text2);
   min-width:5.2em;text-align:center;font-variant-numeric:tabular-nums}
 .oct-step{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);
@@ -2477,6 +2478,9 @@ body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;g
     <button class="oct-step" id="keys-oct-down" type="button" data-ta="aria.octDown" aria-label="Octave down">▼</button>
     <div class="keys-oct"><span id="keys-oct-now">C3</span></div>
     <button class="oct-step" id="keys-oct-up" type="button" data-ta="aria.octUp" aria-label="Octave up">▲</button>
+    <!-- How much keyboard, where there is room for a choice: held sideways, one
+         octave of wide keys or two of narrower ones. -->
+    <button class="oct-step keys-span" id="keys-span" type="button"></button>
     <div class="tuner-boxes" id="keys-box-row"></div>
   </div>
   <div class="keys-board" id="keys-board"></div>
@@ -3729,6 +3733,8 @@ let state={
           changed by hand afterwards. */
        nivel:'medio'},
   keyTimbre:'piano-real',
+  /* How much keyboard is on the screen when the phone is held sideways. */
+  keyOctaves:2,
   freeSelected:{},freeRoot:'C',freeSpan:1,freeSpanWanted:1,freeDirection:'up',
   /* Whether a free set of notes takes its first note again an octave up before
      it turns back. C E G with it is C E G C; without it the line is the three
@@ -6048,7 +6054,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23b';
+const APP_VERSION='lab-2026-09-23c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13396,11 +13402,13 @@ let teclaMapa=[];                   // where every key is, blacks first
    sideways and two upright, and three octaves on a tablet is a row of keys too
    narrow to play rather than a bigger instrument. Two wide ones beat three thin
    ones; the range is a tap on the arrows away. */
+function teclaDeitado(){return innerWidth>innerHeight;}
 function tecladoOitavas(){
   const b=document.getElementById('keys-board');
   const w=b?b.clientWidth:0;
   if(w&&w<240)return 1;                   // narrower than seven keys can bear
-  return innerWidth>innerHeight?2:1;
+  if(!teclaDeitado())return 1;            // upright there is room for one, and one is right
+  return (state.keyOctaves|0)===1?1:2;    // sideways it is his to choose
 }
 function tecladoEntra(){
   teclaPag=null;
@@ -13606,6 +13614,21 @@ function buildTeclado(){
   const dn=document.getElementById('keys-oct-down'),up=document.getElementById('keys-oct-up');
   if(dn)dn.onclick=()=>tecladoOctMove(-1);
   if(up)up.onclick=()=>tecladoOctMove(1);
+  /* One octave of wide keys or two of narrower ones — a switch rather than a
+     page, because it is one question with two answers and you change it while
+     looking at the keys. Upright there is only room for one, so it is not asked
+     there. */
+  const sp=document.getElementById('keys-span');
+  if(sp){
+    sp.style.display=teclaDeitado()?'':'none';
+    sp.textContent=tr('range.octaves',{one:'{n} octave',other:'{n} octaves'},{n:oitavas});
+    sp.setAttribute('aria-label',sp.textContent);
+    sp.onclick=()=>{
+      state.keyOctaves=(tecladoOitavas()===1)?2:1;
+      tecladoSilencia();
+      buildTeclado();
+    };
+  }
   // the voice, in a box under the keys, the way the tuner keeps its two
   row.innerHTML='';
   const box=document.createElement('button');
