@@ -2206,7 +2206,9 @@ body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row
 /* Long keys, filling what the screen has: he asked for them back, and on a
    phone held sideways it is the difference between a key you play and a key you
    tap. */
-.keys-board{position:relative;flex:1 1 auto;
+/* Cropped at the ends, because a stretch that begins or ends on a black key
+   has half of that key over a note that is not on the screen. */
+.keys-board{position:relative;overflow:hidden;flex:1 1 auto;
   /* The floor is what a phone held sideways can spare once the octave and the
      voice have had theirs — a key shorter than this is a key you would have to
      aim at. */
@@ -2257,6 +2259,7 @@ body.teclaspag #keys-page{display:flex!important;flex-direction:column;flex:1 1 
   min-height:0;gap:var(--s3)}
 body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);
   flex:1 1 auto;min-height:min-content;grid-auto-rows:1fr;align-content:stretch}
+body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1fr)}
 
 /* On a small phone the tuner is the one panel that still will not fit, because
    the reading has a size below which it stops being a reading. It gives up what
@@ -6057,7 +6060,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23e';
+const APP_VERSION='lab-2026-09-23f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13609,6 +13612,23 @@ function buildTeclado(){
     const larg=brancas[0].el.getBoundingClientRect().width;
     if(!larg)return;
     const base=board.getBoundingClientRect().left;
+    /* A stretch that begins on a black key begins with half of it: the other
+       half belongs over the white below, which is not on the screen. Drawn
+       where it truly sits and cut by the edge of the board — the way a keyboard
+       cropped at that note looks. */
+    if(!teclaBranca(teclaBase)){
+      const b0=document.createElement('button');
+      b0.className='key preta';b0.type='button';
+      b0.dataset.sem=String(teclaBase);
+      b0.textContent=bareName(((teclaBase%12)+12)%12);
+      b0.setAttribute('aria-label',nameOf(teclaBase));
+      b0.style.width=Math.round(larg*0.6)+'px';
+      b0.style.left=Math.round(-larg*0.28)+'px';
+      // the half that shows is the half that carries the name
+      b0.style.justifyContent='flex-end';
+      b0.style.paddingRight='4px';
+      board.appendChild(b0);
+    }
     brancas.forEach(({el,sem})=>{
       const preta=sem+1;
       if(preta>fim||teclaBranca(preta))return;
@@ -13618,8 +13638,11 @@ function buildTeclado(){
       b.dataset.sem=String(preta);
       b.textContent=bareName(((preta%12)+12)%12);
       b.setAttribute('aria-label',nameOf(preta));
+      const esq=Math.round(el.getBoundingClientRect().left-base+larg*0.72);
       b.style.width=Math.round(larg*0.6)+'px';
-      b.style.left=Math.round(el.getBoundingClientRect().left-base+larg*0.72)+'px';
+      b.style.left=esq+'px';
+      // and at the other end, the same: the name goes where the key still is
+      if(esq+larg*0.6>board.clientWidth){b.style.justifyContent='flex-start';b.style.paddingLeft='4px';}
       board.appendChild(b);
     });
     tecladoMedeMapa();
@@ -13630,7 +13653,9 @@ function buildTeclado(){
      rather than by a count of octaves nobody asked for. */
   const now=document.getElementById('keys-oct-now');
   if(now){
-    now.dataset.repouso=nameOf(teclaBase)+'–'+nameOf(fim);
+    /* A caret, because a reading that can be pressed has to say so: framed like
+       the arrows it was still being read as a label. */
+    now.dataset.repouso=nameOf(teclaBase)+'–'+nameOf(fim)+' ⌄';
     now.onclick=()=>tecladoAbrePag('nota');
     tecladoMostraNotas();
   }
@@ -13662,6 +13687,7 @@ function buildTeclado(){
   box.onclick=()=>tecladoAbrePag('som');
   row.appendChild(box);
   page.innerHTML='';
+  page.classList.remove('notas-doze');
   page.style.display=teclaPag?'':'none';
   if(teclaPag==='som'){
     earCaixasSeg(page,availableTimbres().map(t=>[t.k,timbreLabel(t.k)]),state.timbre,v=>{
@@ -13670,11 +13696,14 @@ function buildTeclado(){
       tecladoFechaPag();      // a page is one question: answering it puts you back
     });
   } else if(teclaPag==='nota'){
-    /* Which note the stretch begins on. The seven naturals and not the twelve:
-       a keyboard that begins on a black key is a keyboard with a black key
-       hanging off the left edge, and what this is for is F to F. */
+    /* Which note the stretch begins on: all twelve. It was the seven naturals,
+       because a keyboard beginning on a black key has that black key half over
+       the note below it — which is not there. But that is what a real keyboard
+       looks like where you crop it, and E flat to E flat is a thing to want, so
+       the ends are cropped and the twelve are offered. */
+    page.classList.add('notas-doze');
     const agora=((teclaBase%12)+12)%12;
-    earCaixasSeg(page,TECLA_NATURAIS.map(pc=>[pc,bareName(pc)]),agora,pc=>{
+    earCaixasSeg(page,NOTES.map(function(_,pc){return [pc,bareName(pc)];}),agora,pc=>{
       tecladoSilencia();
       const oct=octOf(teclaBase);
       teclaBase=tecladoClampa(semitone(NOTES[pc],oct),tecladoOitavas());
