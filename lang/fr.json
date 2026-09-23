@@ -836,5 +836,6 @@
  "ear.span3": "Jusqu’à trois octaves",
  "ear.bars": "Combien de mesures",
  "h.ear.span": "À quelle distance les deux notes peuvent se trouver. Dans l’octave, un intervalle est la forme que l’oreille connaît ; sur deux ou trois octaves, le même intervalle arrive avec une octave dedans, et une dixième n’est pas une tierce.",
- "h.ear.bars": "Combien de rythme est dicté à la fois. Quatre mesures s’écrivent sur deux lignes, et tout retenir fait autant partie de l’exercice que l’entendre."
+ "h.ear.bars": "Combien de rythme est dicté à la fois. Quatre mesures s’écrivent sur deux lignes, et tout retenir fait autant partie de l’exercice que l’entendre.",
+ "keys.startOn": "Commence sur"
 }

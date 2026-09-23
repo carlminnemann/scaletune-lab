@@ -836,5 +836,6 @@
  "ear.span3": "Fino a tre ottave",
  "ear.bars": "Battute",
  "h.ear.span": "Quanto possono distare le due note. Entro l’ottava un intervallo è la forma che l’orecchio conosce; con due o tre ottave lo stesso intervallo arriva con un’ottava dentro, e una decima non è una terza.",
- "h.ear.bars": "Quanto ritmo viene dettato per volta. Quattro battute si scrivono su due righe, e tenere tutto a mente è parte dell’esercizio quanto sentirlo."
+ "h.ear.bars": "Quanto ritmo viene dettato per volta. Quattro battute si scrivono su due righe, e tenere tutto a mente è parte dell’esercizio quanto sentirlo.",
+ "keys.startOn": "Inizia su"
 }

@@ -6054,7 +6054,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23c';
+const APP_VERSION='lab-2026-09-23d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6142,7 +6142,7 @@ function pintaCasa(){
   if(n)n.textContent=pastaAberta?tr('sec.exercises','Exercises')
     :soBolinhas?tr('beats.only','Only beats')
     :(state.mode==='tuner'&&tunerPag)?tunerNomeDaPagina()
-    :(state.mode==='keys'&&teclaPag)?tr('sec.timbre','Timbre')
+    :(state.mode==='keys'&&teclaPag)?(teclaPag==='nota'?tr('keys.startOn','Starts on'):tr('sec.timbre','Timbre'))
     :(state.mode==='ear'&&earPag)?earNomeDaPagina()
     :(state.mode==='ear'&&state.ear.kind)?earKindLabel(state.ear.kind)
     :(subPag&&(painelAberto==='sec-scales'||PAGINAS[painelAberto]))?nomeDaSub()
@@ -13387,13 +13387,24 @@ function buildTunerControls(){
    a stage instrument — a browser's audio path costs some tens of milliseconds
    whatever we do, and that is the one number here we cannot argue with. */
 let teclaPag=null;                  // the voice page, while it is open
-let teclaOct=3;                     // which octave the leftmost C sits in
+/* The first key on the screen, as an absolute semitone. It used to be an
+   octave number and the keyboard always began on C — which is fine until you
+   want F to F, and then there is no way to ask for it. */
+let teclaBase=0;                    // set once the note names exist
 const TECLA_OCT_MIN=1,TECLA_OCT_MAX=6;
 const BRANCAS=[0,2,4,5,7,9,11];     // semitones of the white keys of an octave
-const PRETAS=[1,3,-1,6,8,10,-1];    // the black above each white, -1 where none
+const TECLA_NATURAIS=[0,2,4,5,7,9,11];
+function teclaBranca(sem){return BRANCAS.indexOf(((sem%12)+12)%12)>=0;}
+/* The stretch is kept inside the range the app plays in, whole. */
+function tecladoClampa(base,oitavas){
+  const lo=semitone('C',TECLA_OCT_MIN);
+  const hi=semitone('B',TECLA_OCT_MAX)-(oitavas*12-1);
+  return Math.max(lo,Math.min(hi,base));
+}
 let teclasVivas={};                 // semitone -> the voice sounding it
 let teclasDedos={};                 // pointerId -> semitone
 let teclaOitavasFeitas=0;           // how many octaves the board was drawn with
+let teclaDeitadoFeito=null;         // and which way round the screen was
 let teclaMapa=[];                   // where every key is, blacks first
 
 /* How many octaves are on the screen: one held upright, two held sideways, and
@@ -13412,6 +13423,7 @@ function tecladoOitavas(){
 }
 function tecladoEntra(){
   teclaPag=null;
+  if(!teclaBase)teclaBase=semitone('C',3);
   tecladoSilencia();
   const t=state.keyTimbre||DEFAULT_KEYS;
   if(isSampled(t)&&!samplerReady(t)&&!samplerFor(t).loading&&(audioCtx||houveGesto))loadSampler(t);
@@ -13550,10 +13562,10 @@ function tecladoMostraNotas(){
   el.textContent=sems.map(s=>nameOf(s)).join(' ');
 }
 function tecladoOctMove(d){
-  const n=Math.max(TECLA_OCT_MIN,Math.min(TECLA_OCT_MAX-tecladoOitavas()+1,teclaOct+d));
-  if(n===teclaOct)return;
+  const n=tecladoClampa(teclaBase+d,tecladoOitavas());
+  if(n===teclaBase)return;
   tecladoSilencia();
-  teclaOct=n;
+  teclaBase=n;
   buildTeclado();
 }
 function buildTeclado(){
@@ -13562,40 +13574,43 @@ function buildTeclado(){
   const page=document.getElementById('keys-page');
   if(!board||!row||!page)return;
   const oitavas=tecladoOitavas();
-  if(teclaOct>TECLA_OCT_MAX-oitavas+1)teclaOct=Math.max(TECLA_OCT_MIN,TECLA_OCT_MAX-oitavas+1);
+  teclaBase=tecladoClampa(teclaBase,oitavas);
   board.innerHTML='';
+  const fim=teclaBase+oitavas*12-1;        // the last key of the stretch
   const brancas=[];
-  for(let o=0;o<oitavas;o++){
-    BRANCAS.forEach((semDaBranca,i)=>{
-      const sem=semitone('C',teclaOct+o)+semDaBranca;
-      const b=document.createElement('button');
-      b.className='key branca'+(semDaBranca===0?' raiz':'');
-      b.type='button';
-      b.dataset.sem=String(sem);
-      b.textContent=bareName(((sem%12)+12)%12)+(semDaBranca===0?String(teclaOct+o):'');
-      b.setAttribute('aria-label',nameOf(sem));
-      board.appendChild(b);
-      brancas.push({el:b,o:o,i:i});
-    });
+  for(let sem=teclaBase;sem<=fim;sem++){
+    if(!teclaBranca(sem))continue;
+    const b=document.createElement('button');
+    /* The first key of each octave of the stretch wears its name with the
+       octave number, so you can see where you are without counting. */
+    const marca=((sem-teclaBase)%12)===0;
+    b.className='key branca'+(marca?' raiz':'');
+    b.type='button';
+    b.dataset.sem=String(sem);
+    b.textContent=bareName(((sem%12)+12)%12)+(marca?String(octOf(sem)):'');
+    b.setAttribute('aria-label',nameOf(sem));
+    board.appendChild(b);
+    brancas.push({el:b,sem:sem});
   }
   /* The blacks are laid over the seam between two whites once the whites have a
-     width — measured, because the width depends on how many octaves fitted. */
+     width — measured, because the width depends on how many octaves fitted. A
+     black always follows a white a semitone below it, whatever note the stretch
+     begins on. */
   requestAnimationFrame(()=>{
     board.querySelectorAll('.key.preta').forEach(e=>e.remove());
     if(!brancas.length||!board.offsetParent)return;   // nothing to measure against
     const larg=brancas[0].el.getBoundingClientRect().width;
     if(!larg)return;
     const base=board.getBoundingClientRect().left;
-    brancas.forEach(({el,o,i})=>{
-      const passo=PRETAS[i];
-      if(passo<0)return;
-      const sem=semitone('C',teclaOct+o)+passo;
+    brancas.forEach(({el,sem})=>{
+      const preta=sem+1;
+      if(preta>fim||teclaBranca(preta))return;
       const b=document.createElement('button');
       b.className='key preta';
       b.type='button';
-      b.dataset.sem=String(sem);
-      b.textContent=bareName(((sem%12)+12)%12);
-      b.setAttribute('aria-label',nameOf(sem));
+      b.dataset.sem=String(preta);
+      b.textContent=bareName(((preta%12)+12)%12);
+      b.setAttribute('aria-label',nameOf(preta));
       b.style.width=Math.round(larg*0.6)+'px';
       b.style.left=Math.round(el.getBoundingClientRect().left-base+larg*0.72)+'px';
       board.appendChild(b);
@@ -13603,17 +13618,18 @@ function buildTeclado(){
     tecladoMedeMapa();
   });
   teclaOitavasFeitas=oitavas;
+  teclaDeitadoFeito=teclaDeitado();
   /* What is on the screen, named by its ends — the first key and the last,
      rather than by a count of octaves nobody asked for. */
-  const primeira=semitone('C',teclaOct),ultima=primeira+oitavas*12-1;
   const now=document.getElementById('keys-oct-now');
   if(now){
-    now.dataset.repouso=oitavas>1?(nameOf(primeira)+'–'+nameOf(ultima)):nameOf(primeira);
+    now.dataset.repouso=nameOf(teclaBase)+'–'+nameOf(fim);
+    now.onclick=()=>tecladoAbrePag('nota');
     tecladoMostraNotas();
   }
   const dn=document.getElementById('keys-oct-down'),up=document.getElementById('keys-oct-up');
-  if(dn)dn.onclick=()=>tecladoOctMove(-1);
-  if(up)up.onclick=()=>tecladoOctMove(1);
+  if(dn)dn.onclick=()=>tecladoOctMove(-12);
+  if(up)up.onclick=()=>tecladoOctMove(12);
   /* One octave of wide keys or two of narrower ones — a switch rather than a
      page, because it is one question with two answers and you change it while
      looking at the keys. Upright there is only room for one, so it is not asked
@@ -13646,6 +13662,17 @@ function buildTeclado(){
       setTimbre(v);
       tecladoFechaPag();      // a page is one question: answering it puts you back
     });
+  } else if(teclaPag==='nota'){
+    /* Which note the stretch begins on. The seven naturals and not the twelve:
+       a keyboard that begins on a black key is a keyboard with a black key
+       hanging off the left edge, and what this is for is F to F. */
+    const agora=((teclaBase%12)+12)%12;
+    earCaixasSeg(page,TECLA_NATURAIS.map(pc=>[pc,bareName(pc)]),agora,pc=>{
+      tecladoSilencia();
+      const oct=octOf(teclaBase);
+      teclaBase=tecladoClampa(semitone(NOTES[pc],oct),tecladoOitavas());
+      tecladoFechaPag();
+    });
   }
   spreadPanelsSoon();
 }
@@ -13674,7 +13701,12 @@ function tecladoAfere(){
   if(state.mode!=='keys'||emCasa||pastaAberta)return;
   const b=document.getElementById('keys-board');
   if(!b||!b.offsetParent)return;
-  if(tecladoOitavas()!==teclaOitavasFeitas)buildTeclado();
+  /* Turning the phone can leave the count of octaves the same — one either way,
+     if he chose one sideways — and the screen is still a different screen: the
+     switch belongs to the landscape and was staying behind, over a keyboard
+     whose keys had moved under it. Whichever changed, the keyboard is built
+     again; when neither did, the rectangles are measured where they now are. */
+  if(tecladoOitavas()!==teclaOitavasFeitas||teclaDeitado()!==teclaDeitadoFeito)buildTeclado();
   else tecladoMedeMapa();      // same keys, somewhere else on the screen
 }
 /* Every event brings the whole hand, and the whole hand is what is answered.

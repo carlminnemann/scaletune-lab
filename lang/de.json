@@ -836,5 +836,6 @@
  "ear.span3": "Bis drei Oktaven",
  "ear.bars": "Takte",
  "h.ear.span": "Wie weit die beiden Töne auseinanderliegen dürfen. Innerhalb der Oktave ist ein Intervall die Gestalt, die das Ohr kennt; über zwei oder drei Oktaven kommt dasselbe Intervall mit einer Oktave darin — und eine Dezime ist keine Terz.",
- "h.ear.bars": "Wie viel Rhythmus auf einmal diktiert wird. Vier Takte stehen auf zwei Zeilen, und das Ganze zu behalten gehört so sehr zur Übung wie das Hören."
+ "h.ear.bars": "Wie viel Rhythmus auf einmal diktiert wird. Vier Takte stehen auf zwei Zeilen, und das Ganze zu behalten gehört so sehr zur Übung wie das Hören.",
+ "keys.startOn": "Beginnt auf"
 }
