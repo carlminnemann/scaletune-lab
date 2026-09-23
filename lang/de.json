@@ -825,5 +825,16 @@
  },
  "keys": "Klaviatur",
  "keys-2": "Klaviatur",
- "h.m.keys": "Tasten zum Spielen von Hand, in jeder der Stimmen. Die Pfeile verschieben sie um eine Oktave; sie klingt im Moment des Anschlags und hört auf, wenn die Taste losgelassen wird."
+ "h.m.keys": "Tasten zum Spielen von Hand, in jeder der Stimmen. Die Pfeile verschieben sie um eine Oktave; sie klingt im Moment des Anschlags und hört auf, wenn die Taste losgelassen wird.",
+ "int.2oct": "Zwei Oktaven",
+ "int.3oct": "Drei Oktaven",
+ "int.plus1": "{i} + Oktave",
+ "int.plus2": "{i} + 2 Oktaven",
+ "ear.span": "Abstand",
+ "ear.span1": "Innerhalb der Oktave",
+ "ear.span2": "Bis zwei Oktaven",
+ "ear.span3": "Bis drei Oktaven",
+ "ear.bars": "Takte",
+ "h.ear.span": "Wie weit die beiden Töne auseinanderliegen dürfen. Innerhalb der Oktave ist ein Intervall die Gestalt, die das Ohr kennt; über zwei oder drei Oktaven kommt dasselbe Intervall mit einer Oktave darin — und eine Dezime ist keine Terz.",
+ "h.ear.bars": "Wie viel Rhythmus auf einmal diktiert wird. Vier Takte stehen auf zwei Zeilen, und das Ganze zu behalten gehört so sehr zur Übung wie das Hören."
 }

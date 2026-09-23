@@ -825,5 +825,16 @@
  },
  "keys": "Teclado",
  "keys-2": "Teclado",
- "h.m.keys": "Teclas para tocar a mano, con cualquiera de las voces. Las flechas lo mueven una octava; suena en el instante en que se pulsa una tecla y para al soltarla."
+ "h.m.keys": "Teclas para tocar a mano, con cualquiera de las voces. Las flechas lo mueven una octava; suena en el instante en que se pulsa una tecla y para al soltarla.",
+ "int.2oct": "Dos octavas",
+ "int.3oct": "Tres octavas",
+ "int.plus1": "{i} + octava",
+ "int.plus2": "{i} + 2 octavas",
+ "ear.span": "Distancia",
+ "ear.span1": "Dentro de la octava",
+ "ear.span2": "Hasta dos octavas",
+ "ear.span3": "Hasta tres octavas",
+ "ear.bars": "Cuántos compases",
+ "h.ear.span": "Cuán lejos pueden estar las dos notas. Dentro de la octava, un intervalo es la forma que el oído conoce; con dos o tres octavas, el mismo intervalo llega con una octava dentro, y una décima no es una tercera.",
+ "h.ear.bars": "Cuánto ritmo se dicta cada vez. Cuatro compases se escriben en dos líneas, y retenerlo todo es tanto del ejercicio como oírlo."
 }

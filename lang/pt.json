@@ -825,5 +825,16 @@
  },
  "keys": "Teclado",
  "keys-2": "Teclado",
- "h.m.keys": "Teclas para tocar à mão, em qualquer das vozes. As setas movem-no uma oitava; soa no instante em que se carrega numa tecla e pára quando se larga."
+ "h.m.keys": "Teclas para tocar à mão, em qualquer das vozes. As setas movem-no uma oitava; soa no instante em que se carrega numa tecla e pára quando se larga.",
+ "int.2oct": "Duas oitavas",
+ "int.3oct": "Três oitavas",
+ "int.plus1": "{i} + oitava",
+ "int.plus2": "{i} + 2 oitavas",
+ "ear.span": "Distância",
+ "ear.span1": "Dentro da oitava",
+ "ear.span2": "Até duas oitavas",
+ "ear.span3": "Até três oitavas",
+ "ear.bars": "Quantos compassos",
+ "h.ear.span": "Quão longe podem estar as duas notas. Dentro da oitava, um intervalo é a forma que o ouvido conhece; com duas ou três oitavas, o mesmo intervalo chega com uma oitava lá dentro — e uma décima não é uma terceira.",
+ "h.ear.bars": "Quanto ritmo é ditado de cada vez. Quatro compassos são escritos em duas linhas, e segurar aquilo todo é tanto do exercício como ouvi-lo."
 }

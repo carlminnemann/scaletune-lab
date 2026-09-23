@@ -480,7 +480,7 @@ body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
    drawing takes the width it needs. */
 #ear-answers.ritmo{grid-template-columns:1fr;display:grid;gap:8px}
 #ear-answers.ritmo .pick-btn{width:100%;height:auto;padding:6px 8px}
-.ear-ritmo{width:100%;height:auto;max-height:46px;display:block}
+.ear-ritmo{width:100%;height:auto;max-height:calc(46px * var(--linhas,1));display:block}
 .ear-linha{stroke:var(--border2);stroke-width:1}
 .ear-cheia{fill:currentColor}
 .ear-tinta{stroke:currentColor;stroke-width:1.4}
@@ -727,7 +727,7 @@ body.jogo #ear-answers .pick-btn{font-size:clamp(17px,3vh,26px);border-radius:14
 /* A written bar is a picture, so it keeps its own height and grows with the
    room rather than stretching the drawing out of shape. */
 body.jogo #ear-answers.ritmo .pick-btn{min-height:0;padding:8px}
-body.jogo .ear-ritmo{max-height:none;height:clamp(34px,7vh,64px)}
+body.jogo .ear-ritmo{max-height:none;height:calc(clamp(34px,7vh,64px) * var(--linhas,1))}
 body.earpag #ear-opts{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 body.earpag #ear-page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 body.earpag #ear-page .btn-wrap{flex:1 1 auto;min-height:min-content;grid-template-columns:1fr 1fr!important;
@@ -749,7 +749,7 @@ body.earpag #sec-sound{display:none}
   body.earx .ear-panel{padding:var(--s3)}
   body.earx .ear-say{min-height:2.1em;font-size:14px;margin-bottom:var(--s2)}
   body.earx #ear-answers.ritmo{gap:5px}
-  body.earx .ear-ritmo{max-height:30px}
+  body.earx .ear-ritmo{max-height:calc(30px * var(--linhas,1))}
   body.earx .ear-head{margin-bottom:4px}
 }
 /* ---------- filling the screen ----------
@@ -3162,6 +3162,8 @@ body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;g
     <dt data-t="ear.which">What is in play</dt><dd data-t="h.ear.which">Which ones can come up. Tap to add or take one away; the answers you are offered are exactly these, so a short list is an easier round.</dd>
     <dt data-t="ear.how">Played</dt><dd data-t="h.ear.how">The two notes one after the other, upwards or downwards, or both together. <em>Up or down</em> keeps them apart and hides only which way they go; <em>Mixed</em> adds them sounding together.</dd>
     <dt data-t="ear.from">From</dt><dd data-t="h.ear.from"><em>One note</em> always sets off from the note the app is on, which trains the interval against a key you know. <em>Anywhere</em> picks a starting note of its own — harder, and the more honest test.</dd>
+    <dt data-t="ear.span">Spread</dt><dd data-t="h.ear.span">How far apart the two notes may be. Inside an octave an interval is the shape the ear knows; given two or three octaves the same interval arrives with an octave inside it, and a tenth is not a third.</dd>
+    <dt data-t="ear.bars">Bars</dt><dd data-t="h.ear.bars">How much rhythm is dictated at a time. Four bars is written on two lines, and holding the whole of it is as much of the exercise as hearing it.</dd>
     <dt data-t="ear.round.k">The round</dt><dd data-t="h.ear.round">The button under the screen starts, plays it again while you think, and asks the next one once you have answered. The ♪ beside the score repeats it at any time, answer given or not. The count is this round's; leaving the mode starts a new one.</dd>
   </dl></div>
 
@@ -3701,6 +3703,13 @@ let state={
      keeps what is in play for it, so moving between them loses nothing. */
   ear:{kind:null,roam:false,
        sel:{1:true,2:true,3:true,4:true,5:true,7:true,12:true},how:'up',
+       /* How many octaves of room the two notes have: one, and the interval is
+          the shape the ear knows; two or three, and the same interval has to be
+          recognised with an octave inside it. */
+       span:1,
+       /* How many bars of rhythm are dictated at a time. Two is a phrase you
+          can hold; four is a memory as much as an ear. */
+       bars:2,
        scales:{'Ionian':true,'Dorian':true,'Mixolydian':true,'Aeolian':true},
        chords:{'Major':true,'Minor':true,'Augmented':true,'Diminished':true},
        chordHow:'up',
@@ -6039,7 +6048,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23a';
+const APP_VERSION='lab-2026-09-23b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6981,6 +6990,12 @@ function earKindLabel(k){
           rhythm:tr('ear.k.rhythm','Rhythm')}[k]||k;
 }
 const EAR_STEPS=[1,2,3,4,5,6,7,8,9,10,11,12];
+/* How far apart the two notes may be. Inside an octave an interval is heard as
+   a shape the ear knows; a tenth is the same shape with the floor taken out
+   from under it, and telling a third from a tenth is a different exercise
+   again. One, two or three octaves of room — the interval itself is one of the
+   twelve either way, an octave or two further up. */
+const EAR_SPANS=[1,2,3];
 /* Written out, not abbreviated: m2 and M2 are the same two letters to anyone
    who has not spent years reading them, and the answer to "what was that?" is a
    name. Each language writes an interval its own way — the number takes the
@@ -6988,7 +7003,27 @@ const EAR_STEPS=[1,2,3,4,5,6,7,8,9,10,11,12];
 const EAR_LABEL={1:'minor 2nd',2:'Major 2nd',3:'minor 3rd',4:'Major 3rd',
                  5:'Perfect 4th',6:'Tritone',7:'Perfect 5th',8:'minor 6th',
                  9:'Major 6th',10:'minor 7th',11:'Major 7th',12:'Octave'};
-function intervalLabel(n){return tr('int.'+n,EAR_LABEL[n]);}
+function intervalLabel(n){
+  if(n<=12)return tr('int.'+n,EAR_LABEL[n]);
+  /* Past the octave the name is built rather than listed: a major third and an
+     octave IS a major tenth, and written that way it says what to listen for
+     instead of asking for a second table of names in seven languages. */
+  const oitavas=Math.floor((n-1)/12);
+  const resto=n-oitavas*12;
+  if(resto===12)return oitavas===1?tr('int.2oct','Two octaves'):tr('int.3oct','Three octaves');
+  const base=tr('int.'+resto,EAR_LABEL[resto]);
+  return oitavas===1?tr('int.plus1','{i} + octave',{i:base})
+                    :tr('int.plus2','{i} + 2 octaves',{i:base});
+}
+/* Every interval in play: the ones chosen, and the same ones an octave or two
+   further up where there is room for them. */
+function earSpan(){const n=state.ear.span|0;return n>=1&&n<=3?n:1;}
+function earOn(){
+  const base=EAR_STEPS.filter(function(n){return state.ear.sel[n];});
+  const out=base.slice();
+  for(let o=1;o<earSpan();o++)base.forEach(function(n){out.push(n+12*o);});
+  return out;
+}
 /* Everything the app knows, and not a shortlist: the families are pages and
    each of them opens its own scales to be switched on. A name lives in more
    than one family — the melodic minor is in its own and among the gregorian
@@ -7023,7 +7058,6 @@ function earKind(){return state.ear.kind;}
 
 /* What is in play, per kind. An empty list is a question that cannot be asked,
    and the round says so rather than asking it. */
-function earOn(){return EAR_STEPS.filter(n=>state.ear.sel[n]);}
 function earLigadas(tabela,escolhidas){
   const out=[],vistos={};
   Object.keys(tabela).forEach(function(g){
@@ -7110,7 +7144,8 @@ function earNova(){
    dotted beats to a bar, so two bars of it are four cells where two bars of a
    simple metre are eight. */
 function earCelulasPorCompasso(){return earComposto()?2:4;}
-function earCelulas(){return earCelulasPorCompasso()*2;}
+function earCompassos(){const n=state.ear.bars|0;return n===1||n===4?n:2;}
+function earCelulas(){return earCelulasPorCompasso()*earCompassos();}
 function earRitmo(pool){
   const n=earCelulas();
   for(let tenta=0;tenta<60;tenta++){
@@ -7354,36 +7389,49 @@ function earNomeDoDito(){
    is written and what is heard cannot drift apart. */
 function earRitmoSVG(beats){
   /* The cells are narrower now that there are eight of them, and a bar line
-     stands between the two bars — without it two bars read as one long one. */
-  const W=44,H=42,base=30,haste=13,g=[],w=W*beats.length;
-  g.push('<line x1="4" y1="'+base+'" x2="'+(w-4)+'" y2="'+base+'" class="ear-linha"/>');
+     stands between the two bars — without it two bars read as one long one.
+
+     Past two bars it is written on two lines, the way it would be written on
+     paper. Four bars in a row would be four bars squeezed into the width of the
+     button: the notation scales with the width, so the only way to keep a
+     sixteenth legible is to stop making the line longer. */
+  const W=44,H=42,base=30,haste=13,g=[];
   const porCompasso=earCelulasPorCompasso();
-  for(let b=porCompasso;b<beats.length;b+=porCompasso){
-    const x=(b*W+4).toFixed(1);
-    g.push('<line x1="'+x+'" y1="'+(base-16)+'" x2="'+x+'" y2="'+(base+6)+'" class="ear-linha"/>');
-  }
-  beats.forEach(function(f,b){
-    const frac=earFigsTab()[f]||[];
-    const x0=b*W+8;
-    if(f==='r'){
-      const x=x0+9,y=base-13;
-      g.push('<path d="M'+x+' '+y+' l6 7 -6 7 7 6" class="ear-tinta" fill="none" stroke-width="1.8"/>');
-      return;
+  const porLinha=porCompasso*2;
+  const linhas=[];
+  for(let i=0;i<beats.length;i+=porLinha)linhas.push(beats.slice(i,i+porLinha));
+  const w=W*Math.min(beats.length,porLinha);
+  linhas.forEach(function(linha,li){
+    const dy=li*H, y0=base+dy;
+    g.push('<line x1="4" y1="'+y0+'" x2="'+(w-4)+'" y2="'+y0+'" class="ear-linha"/>');
+    for(let b=porCompasso;b<linha.length;b+=porCompasso){
+      const x=(b*W+4).toFixed(1);
+      g.push('<line x1="'+x+'" y1="'+(y0-16)+'" x2="'+x+'" y2="'+(y0+6)+'" class="ear-linha"/>');
     }
-    const xs=frac.map(function(fr){return x0+fr*(W-16);});
-    xs.forEach(function(x){
-      g.push('<ellipse cx="'+x.toFixed(1)+'" cy="'+base+'" rx="3.4" ry="2.6" class="ear-cheia"/>');
-      g.push('<line x1="'+(x+3.2).toFixed(1)+'" y1="'+base+'" x2="'+(x+3.2).toFixed(1)+'" y2="'+(base-haste)+'" class="ear-tinta"/>');
+    linha.forEach(function(f,b){
+      const frac=earFigsTab()[f]||[];
+      const x0=b*W+8;
+      if(f==='r'){
+        const x=x0+9,y=y0-13;
+        g.push('<path d="M'+x+' '+y+' l6 7 -6 7 7 6" class="ear-tinta" fill="none" stroke-width="1.8"/>');
+        return;
+      }
+      const xs=frac.map(function(fr){return x0+fr*(W-16);});
+      xs.forEach(function(x){
+        g.push('<ellipse cx="'+x.toFixed(1)+'" cy="'+y0+'" rx="3.4" ry="2.6" class="ear-cheia"/>');
+        g.push('<line x1="'+(x+3.2).toFixed(1)+'" y1="'+y0+'" x2="'+(x+3.2).toFixed(1)+'" y2="'+(y0-haste)+'" class="ear-tinta"/>');
+      });
+      if(xs.length>1){
+        const a=xs[0]+3.2,z=xs[xs.length-1]+3.2,topo=y0-haste;
+        g.push('<rect x="'+a.toFixed(1)+'" y="'+topo+'" width="'+(z-a).toFixed(1)+'" height="2.4" class="ear-cheia"/>');
+        if(f==='16')g.push('<rect x="'+a.toFixed(1)+'" y="'+(topo+4)+'" width="'+(z-a).toFixed(1)+'" height="2.4" class="ear-cheia"/>');
+        if(f==='d')g.push('<rect x="'+(z-7).toFixed(1)+'" y="'+(topo+4)+'" width="7" height="2.4" class="ear-cheia"/>');
+        if(f==='3')g.push('<text x="'+((a+z)/2).toFixed(1)+'" y="'+(topo-3)+'" text-anchor="middle" class="ear-tres">3</text>');
+      }
     });
-    if(xs.length>1){
-      const a=xs[0]+3.2,z=xs[xs.length-1]+3.2,topo=base-haste;
-      g.push('<rect x="'+a.toFixed(1)+'" y="'+topo+'" width="'+(z-a).toFixed(1)+'" height="2.4" class="ear-cheia"/>');
-      if(f==='16')g.push('<rect x="'+a.toFixed(1)+'" y="'+(topo+4)+'" width="'+(z-a).toFixed(1)+'" height="2.4" class="ear-cheia"/>');
-      if(f==='d')g.push('<rect x="'+(z-7).toFixed(1)+'" y="'+(topo+4)+'" width="7" height="2.4" class="ear-cheia"/>');
-      if(f==='3')g.push('<text x="'+((a+z)/2).toFixed(1)+'" y="'+(topo-3)+'" text-anchor="middle" class="ear-tres">3</text>');
-    }
   });
-  return '<svg viewBox="0 0 '+w+' '+H+'" class="ear-ritmo" aria-hidden="true">'+g.join('')+'</svg>';
+  return '<svg viewBox="0 0 '+w+' '+(H*linhas.length)+'" class="ear-ritmo" aria-hidden="true" style="--linhas:'
+    +linhas.length+'">'+g.join('')+'</svg>';
 }
 
 function renderEar(){
@@ -7475,7 +7523,9 @@ function earPaginasBase(){
     {k:'how', nome:function(){return tr('ear.how','Played');},
      diz:function(){return earComoDiz(state.ear.how);}},
     {k:'from',nome:function(){return tr('ear.from','From');},
-     diz:function(){return state.ear.roam?tr('ear.roam','Anywhere'):tr('ear.fixed','One note');}}];
+     diz:function(){return state.ear.roam?tr('ear.roam','Anywhere'):tr('ear.fixed','One note');}},
+    {k:'span',nome:function(){return tr('ear.span','Spread');},
+     diz:function(){return earSpanDiz(earSpan());}}];
   if(k==='scales')return [
     earNivelCaixa(),
     {k:'tudo',nome:function(){return tr('ear.allScales','All the scales');},
@@ -7515,13 +7565,20 @@ function earPaginasBase(){
     {k:'figs',nome:function(){return tr('ear.figures','Figures');},
      diz:function(){return earFigsOn().map(earFigLabel).join(' · ');}},
     {k:'bpm', nome:function(){return tr('tempo','Tempo');},
-     diz:function(){return (state.ear.bpm||84)+' BPM';}}];
+     diz:function(){return (state.ear.bpm||84)+' BPM';}},
+    {k:'bars',nome:function(){return tr('ear.bars','Bars');},
+     diz:function(){return tr('sum.bars',{one:'{n} bar',other:'{n} bars'},{n:earCompassos()});}}];
   return [];
 }
 function earDirDiz(v){
   return {up:tr('ear.up','Up'),down:tr('ear.down','Down'),
           updown:tr('ear.upAndDown','Up and back down'),
           mix:tr('ear.mixed','Mixed')}[v]||v;
+}
+function earSpanDiz(n){
+  return n>=3?tr('ear.span3','Three octaves')
+       :n===2?tr('ear.span2','Two octaves')
+             :tr('ear.span1','Within an octave');
 }
 function earVelDiz(v){
   const x=v||0.34;
@@ -7544,9 +7601,12 @@ function earAplicaNivel(n){
   const E=state.ear,k=earKind();
   E.nivel=n;
   if(k==='intervals'){
-    if(n==='facil'){ligaSo(E.sel,[4,5,7,12]);E.how='up';E.roam=false;}
-    else if(n==='medio'){ligaSo(E.sel,[1,2,3,4,5,7,12]);E.how='updown';E.roam=false;}
-    else{ligaSo(E.sel,[1,2,3,4,5,6,7,8,9,10,11,12]);E.how='mix';E.roam=true;}
+    /* Hard is meant to be hard: every interval, either way round or sounding
+       together, from anywhere, and with two octaves of room — a tenth and a
+       third are the same twelve notes apart and nothing like the same sound. */
+    if(n==='facil'){ligaSo(E.sel,[4,5,7,12]);E.how='up';E.roam=false;E.span=1;}
+    else if(n==='medio'){ligaSo(E.sel,[1,2,3,4,5,7,12]);E.how='updown';E.roam=false;E.span=1;}
+    else{ligaSo(E.sel,[1,2,3,4,5,6,7,8,9,10,11,12]);E.how='mix';E.roam=true;E.span=2;}
   } else if(k==='scales'){
     if(n==='facil'){E.scaleDir='updown';E.scaleVel=0.42;}
     else if(n==='medio'){E.scaleDir='updown';E.scaleVel=0.30;}
@@ -7562,9 +7622,11 @@ function earAplicaNivel(n){
     E.chordExt=(n==='dificil');
   } else if(k==='rhythm'){
     const comp=earComposto();
-    if(n==='facil'){ligaSo(E.figs,['4','8','r']);E.bpm=72;}
-    else if(n==='medio'){ligaSo(E.figs,comp?['4','8','16','r']:['4','8','3','16','r']);E.bpm=84;}
-    else{ligaSo(E.figs,comp?['4','8','16','d','r']:['4','8','3','16','d','r']);E.bpm=120;}
+    /* And four bars where there were two: at that speed, with every figure in
+       play, holding the whole of it is as much of the exercise as hearing it. */
+    if(n==='facil'){ligaSo(E.figs,['4','8','r']);E.bpm=72;E.bars=2;}
+    else if(n==='medio'){ligaSo(E.figs,comp?['4','8','16','r']:['4','8','3','16','r']);E.bpm=84;E.bars=2;}
+    else{ligaSo(E.figs,comp?['4','8','16','d','r']:['4','8','3','16','d','r']);E.bpm=120;E.bars=4;}
   }
   earMexeu();
 }
@@ -7751,6 +7813,13 @@ function buildEarPage(){
     sl.oninput=function(){updateVol(this.value);out.textContent=Math.round(this.value*100)+'%';};
     vol.appendChild(lab);vol.appendChild(sl);vol.appendChild(out);
     host.appendChild(vol);
+  } else if(earPag==='span'){
+    earCaixasSeg(host,EAR_SPANS.map(function(n){return [n,earSpanDiz(n)];}),earSpan(),
+      function(v){state.ear.span=v;earMexeu();});
+  } else if(earPag==='bars'){
+    earCaixasSeg(host,[1,2,4].map(function(n){
+      return [n,tr('sum.bars',{one:'{n} bar',other:'{n} bars'},{n:n})];}),earCompassos(),
+      function(v){state.ear.bars=v;earMexeu();});
   } else if(earPag==='bpm'){
     earTempoLivre(host);
   } else if(earPag.indexOf('fam:')===0){

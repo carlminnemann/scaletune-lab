@@ -825,5 +825,16 @@
  },
  "keys": "Clavier",
  "keys-2": "Clavier",
- "h.m.keys": "Des touches à jouer à la main, avec n’importe quelle voix. Les flèches le déplacent d’une octave ; il sonne à l’instant où la touche est enfoncée et s’arrête quand on la relâche."
+ "h.m.keys": "Des touches à jouer à la main, avec n’importe quelle voix. Les flèches le déplacent d’une octave ; il sonne à l’instant où la touche est enfoncée et s’arrête quand on la relâche.",
+ "int.2oct": "Deux octaves",
+ "int.3oct": "Trois octaves",
+ "int.plus1": "{i} + octave",
+ "int.plus2": "{i} + 2 octaves",
+ "ear.span": "Écart",
+ "ear.span1": "Dans l’octave",
+ "ear.span2": "Jusqu’à deux octaves",
+ "ear.span3": "Jusqu’à trois octaves",
+ "ear.bars": "Combien de mesures",
+ "h.ear.span": "À quelle distance les deux notes peuvent se trouver. Dans l’octave, un intervalle est la forme que l’oreille connaît ; sur deux ou trois octaves, le même intervalle arrive avec une octave dedans, et une dixième n’est pas une tierce.",
+ "h.ear.bars": "Combien de rythme est dicté à la fois. Quatre mesures s’écrivent sur deux lignes, et tout retenir fait autant partie de l’exercice que l’entendre."
 }
