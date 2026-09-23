@@ -2193,8 +2193,8 @@ body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row
 .keys-top{display:flex;align-items:center;gap:var(--s2);flex:0 0 auto;margin-bottom:var(--s2)}
 .keys-top>#keys-box-row{flex:1 1 auto;min-width:0}
 .keys-span{flex:0 0 auto;padding:0 10px;min-width:0;white-space:nowrap}
-.keys-oct{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--text2);
-  min-width:5.2em;text-align:center;font-variant-numeric:tabular-nums}
+.keys-oct{font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--text);
+  min-width:6.2em;padding:0 10px;text-align:center;font-variant-numeric:tabular-nums}
 .oct-step{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);
   border-radius:var(--r);min-width:clamp(44px,11vw,58px);min-height:clamp(36px,6vh,46px);
   font-size:13px;line-height:1;cursor:pointer;touch-action:manipulation}
@@ -2476,7 +2476,10 @@ body.teclaspag #keys-page .btn-wrap{display:grid;grid-template-columns:1fr 1fr;g
        Both were under them, which is the one place a hand covers. -->
   <div class="keys-top">
     <button class="oct-step" id="keys-oct-down" type="button" data-ta="aria.octDown" aria-label="Octave down">▼</button>
-    <div class="keys-oct"><span id="keys-oct-now">C3</span></div>
+    <!-- The reading is the control: it says where the keyboard is and opens the
+         note it starts on. It was plain text between two buttons, which is to
+         say it looked like a label and nobody would ever press it. -->
+    <button class="oct-step keys-oct" id="keys-oct-now" type="button"></button>
     <button class="oct-step" id="keys-oct-up" type="button" data-ta="aria.octUp" aria-label="Octave up">▲</button>
     <!-- How much keyboard, where there is room for a choice: held sideways, one
          octave of wide keys or two of narrower ones. -->
@@ -6054,7 +6057,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23d';
+const APP_VERSION='lab-2026-09-23e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -13398,7 +13401,7 @@ function teclaBranca(sem){return BRANCAS.indexOf(((sem%12)+12)%12)>=0;}
 /* The stretch is kept inside the range the app plays in, whole. */
 function tecladoClampa(base,oitavas){
   const lo=semitone('C',TECLA_OCT_MIN);
-  const hi=semitone('B',TECLA_OCT_MAX)-(oitavas*12-1);
+  const hi=semitone('B',TECLA_OCT_MAX)-oitavas*12;
   return Math.max(lo,Math.min(hi,base));
 }
 let teclasVivas={};                 // semitone -> the voice sounding it
@@ -13576,7 +13579,11 @@ function buildTeclado(){
   const oitavas=tecladoOitavas();
   teclaBase=tecladoClampa(teclaBase,oitavas);
   board.innerHTML='';
-  const fim=teclaBase+oitavas*12-1;        // the last key of the stretch
+  /* An octave from F is F to F, not F to E: the stretch closes on the note it
+     began on, an octave up. Ending a semitone short left the last black key
+     hanging off the right edge with no white to sit against — which is what a
+     keyboard that stops between two notes looks like. */
+  const fim=teclaBase+oitavas*12;
   const brancas=[];
   for(let sem=teclaBase;sem<=fim;sem++){
     if(!teclaBranca(sem))continue;
