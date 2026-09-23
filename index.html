@@ -6120,7 +6120,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23g';
+const APP_VERSION='lab-2026-09-23h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -7975,7 +7975,15 @@ function buildEarOpts(){
   if(painel)painel.style.display=(earPag&&!jogoOuvido)?'none':'';
   if(!earPag)buildEarOptRow();
   buildEarPage();
+  /* Twice: now, and again once the screen has been laid out with the page on
+     it. How the answers stand is decided by how much room there is, and the
+     room is not known yet — pintaCasa puts the class that gives the page the
+     screen on the body AFTER this runs, so the first measurement was made in
+     the old layout and came back "not enough room". The answers opened in two
+     tall columns and only fell into their proper line when something was
+     touched, which is the app correcting itself in front of you. */
   arrumaEscolhasDoOuvido();
+  requestAnimationFrame(()=>requestAnimationFrame(arrumaEscolhasDoOuvido));
 }
 function earFigLabel(f){
   return {'4':tr('ear.f.quarter','Quarters'),'8':tr('ear.f.eighth','Eighths'),
