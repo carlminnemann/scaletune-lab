@@ -2216,21 +2216,29 @@ body.teclaspag .keys-top,body.teclaspag .keys-board,body.teclaspag #keys-box-row
   border-radius:0 0 9px 9px;cursor:pointer;touch-action:none;
   display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;
   font-size:11px;font-weight:600;letter-spacing:.04em}
-.key.branca{background:var(--bg2);color:var(--text3)}
+/* Black and white, in every palette. This is the one thing in the app that is
+   not a surface of the app: it is an instrument, and a piano is the same
+   instrument in a dark room and a bright one. The greys and the mode's own
+   colour read as a control panel with keys drawn on it, which is exactly what
+   it looked like. The white is ivory rather than paper — a real key is warm and
+   pure white glares — and the black is not quite black, for the same reason. */
+.key.branca{background:#f2efe9;color:#4a4a4a;border-color:rgba(0,0,0,.38)}
 .key.branca:first-child{border-top-left-radius:9px}
 .key.branca:last-child{border-top-right-radius:9px}
 /* The blacks sit over the seam between two whites, at a little over half the
    width and a little under two thirds of the height — the proportions a hand
    knows without being told. */
 .key.preta{position:absolute;top:0;z-index:2;height:62%;border-radius:0 0 7px 7px;
-  background:var(--bg);border-color:var(--border3);color:var(--text3);
+  background:#16171b;border-color:#000;color:#b9b9b9;
   align-items:flex-end;padding-bottom:6px;font-size:10px}
-/* Pressed, a key takes the mode's own colour — the same light the rest of the
-   app answers a finger with. */
-.key.soa{background:var(--mode-bg);border-color:var(--mode);color:var(--mode-fg)}
-.key.preta.soa{background:var(--mode);color:var(--mode-fg)}
-/* The root of the octave on screen says where you are without a legend. */
-.key.raiz{box-shadow:inset 0 -3px 0 var(--mode)}
+/* Pressed, a key is the same key with the light off it — which is what a finger
+   on a real one does. No colour of the app's: the instrument answers as an
+   instrument. */
+.key.branca.soa{background:#cfc9bd;color:#2e2e2e}
+.key.preta.soa{background:#3b3d44;color:#e8e8e8}
+/* Where each octave begins, said in the key's own shadow rather than in a
+   colour — a mark you can find with the eye and forget while playing. */
+.key.raiz{box-shadow:inset 0 -3px 0 rgba(0,0,0,.42)}
 /* Everywhere else the app holds itself to a column you can read across; a
    keyboard is not read, it is reached, so here it takes the whole screen — on a
    phone held sideways that is the difference between one octave and two. */
@@ -6031,7 +6039,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-22h';
+const APP_VERSION='lab-2026-09-23a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8258,9 +8266,9 @@ function restartKeyRun(){
   state.startDeg=0;
   renderPitchPickers();updateInfo();refreshSequence();updateRotationPanel();
 }
-function restartModesRun(){
-  restartKeyRun();
-  if(!modesRunOn())return;
+/* Back to the mode the run set off from, whether or not the run is still on —
+   which is the case that matters when it is being switched off. */
+function voltaAoComecoDosModos(){
   modesStep=0;passTick=0;
   if(!modesHome||modesHome.group!==state.scaleGroup)return;
   if(state.root===modesHome.root&&state.scaleName===modesHome.name)return;
@@ -8268,6 +8276,11 @@ function restartModesRun(){
   state.scaleName=modesHome.name;
   state.startDeg=0;
   renderPitchPickers();updateInfo();refreshSequence();updateRotationPanel();
+}
+function restartModesRun(){
+  restartKeyRun();
+  if(!modesRunOn())return;
+  voltaAoComecoDosModos();
 }
 /* Up-Down and Down-Up, during a run through the modes, mean the run itself
    turns: C ionian up to the C above, and the D above that is where D dorian
@@ -9445,6 +9458,13 @@ function buildRootMoveRow(){
       ? tr('modes.hasPattern','A shape already walks every degree — the modes would play the same notes seven times')
       : tr('modes.needs','Pick one seven-note scale — the modes are its own rotations');
     else b.onclick=()=>{
+      /* Ending a run through the modes puts the scale back where the run set
+         off from — before this becomes the new home. Switched off half way
+         through, and while it was still playing, the mode it happened to be on
+         was being written down as home: the exercise stayed on the seventh
+         mode, and every run after that began there instead of at the scale he
+         had chosen. */
+      voltaAoComecoDosModos();
       state.practice.rootMove=m.k;
       /* Each mode runs one octave from its own note: that is the exercise, and
          over two octaves the next mode would start where the ear has lost the
