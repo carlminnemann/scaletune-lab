@@ -2280,21 +2280,27 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
   .tuner-panel{padding:var(--s2) var(--s3)}
 }
 
-/* A frame needs height to be worth it. On a screen under 520px tall — a phone on
-   its side — holding the name, the modes and Start in place left 113px in the
-   middle for everything else, which is worse than scrolling. There the page
-   scrolls as a page again, and the button holds itself to the bottom instead. */
+/* A screen under 520px tall — a phone on its side.
+
+   It used to let the whole page scroll here, on the grounds that a frame needs
+   height to be worth it: holding the name, the modes and Start in place left
+   113px in the middle. What that cost was worse. Start was then the last thing
+   in a document, stuck to the foot of the screen with the ground drawn behind
+   it, and whatever the page had below it was painted over — a chooser you could
+   see half of and reach by a scroll that gave no sign it existed.
+
+   So the frame holds here too, and the name goes instead (the rule further
+   down): the bar above and Start below stay where they are and what is between
+   them scrolls, the same shape the home screen and the keyboard already kept
+   sideways. It is worth more than the forty pixels it costs, and with the page
+   in columns sideways most pages need no scrolling at all. */
 @media(max-height:520px){
-  html,body{height:auto;overflow:visible}
-  .container{height:auto;display:block}
-  .scroll{overflow:visible;min-height:0;margin:0;padding:0}
-  /* the page scrolls here, so there is no fixed box for Metro to centre in */
-  .scroll.centred{display:block}
-  .scroll.centred>#metro-section,.scroll.centred>#tuner-section{margin-top:0;margin-bottom:var(--s2)}
-  .btn-row{position:sticky;bottom:calc(0.5rem + env(safe-area-inset-bottom));z-index:5;
-    margin-bottom:1rem}
-  .btn-row::before{content:'';position:absolute;inset:-10px -16px;background:var(--bg);
-    z-index:-1;box-shadow:0 -12px 16px -6px var(--bg)}
+  html,body{height:var(--app-h,100dvh);overflow:hidden}
+  .container{height:100%;display:flex}
+  .scroll{flex:1 1 auto;min-height:0;overflow-y:auto}
+  /* nothing passes under it now: it is outside what scrolls */
+  .btn-row{position:relative;bottom:auto;margin-bottom:0}
+  .btn-row::before{display:none}
 }
 
 /* A phone on its side is 380px tall: the header alone would take a tenth of it,
@@ -2332,51 +2338,46 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
    a screen you read, not on one you are setting with the phone on its side, and
    the bar under it is still the way back. */
 @media(max-height:520px) and (orientation:landscape){
-  /* A page keeps its frame. The screen's own rule sideways is that the page
-     scrolls as a page, and it holds for a panel of boxes; on a page it put the
-     one button you press while it plays at the end of a document and drew the
-     ground behind it, over whatever was there. Here the bar above and Start
-     below stay where they are and what is between them scrolls — the same shape
-     the home screen and the keyboard already keep sideways. Nearly every page
-     now fits without scrolling at all; this is what happens to the two that do
-     not, the subdivision and the pattern. */
-  html:has(body.caixas),body.caixas,
-  html:has(body.painel),body.painel,
-  html:has(body.earx),body.earx,
-  html:has(body.afina),body.afina,
-  html:has(body.sub),body.sub{height:var(--app-h,100dvh);overflow:hidden}
-  body.caixas .container,body.painel .container,body.sub .container,
-  body.earx .container,body.afina .container{height:100%;display:flex}
-  body.caixas .scroll,body.painel .scroll,body.sub .scroll,
-  body.earx .scroll,body.afina .scroll{flex:1 1 auto;min-height:0;overflow-y:auto}
-  body.caixas .header,body.painel .header,body.sub .header,
-  body.earx .header,body.afina .header{display:none}
-  body.caixas .mode-bar,body.painel .mode-bar,body.sub .mode-bar,
-  body.earx .mode-bar,body.afina .mode-bar{margin-bottom:0.5rem}
+  /* The name of the app is worth its forty pixels on a screen you read, not on
+     one you are setting something on with the phone on its side. The home
+     screen keeps it; everywhere you have already chosen a mode, the bar under
+     it is the way back and the forty pixels go to the work. */
+  body:not(.home):not(.ouvido) .header{display:none}
+  body:not(.home):not(.ouvido) .mode-bar{margin-bottom:0.5rem}
   /* Sideways there is width: a page uses all of it, and a row of answers takes
      as many columns as fit rather than two long ones. Not the stacked answers —
      wide and short is what they are for — and not the twelve notes. */
   body.sub .container{max-width:none}
   body.sub .pagina-aberta .btn-wrap:not(.notas):not(.pilha):not(.unica){
     grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important}
-  /* it holds itself to the bottom of a page that scrolls; this one does not.
-     The foot of the screen keeps its padding: a phone on its side draws its own
-     bar over the bottom of the page, and Start is what would be under it. */
-  body.sub .btn-row{margin-bottom:0;padding-top:0}
+  /* the page below is tight enough already; the button gives back what the gap
+     above it was for. The foot of the screen keeps its padding: a phone on its
+     side draws its own bar over the bottom, and Start is what would be under */
+  body.sub .btn-row{padding-top:0}
   body.sub .play-btn{padding:10px}
   /* More than one block open is what a page in columns is: two blocks where the
      first has a sibling that is also open. */
   body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta){
-    display:grid!important;grid-template-columns:auto 1fr auto;
-    column-gap:var(--s4);row-gap:var(--s2);align-content:start}
-  /* The tempo, then the bar with its circles, then the click — the reading order
-     of the page it was, left to right. The two switches take the line under
-     them, as wide as all three. */
+    display:grid!important;grid-template-columns:110px minmax(0,1fr) auto;
+    column-gap:var(--s4);row-gap:var(--s2);align-content:start;align-items:start}
+  /* The tempo, then the bar with its circles — or, with the polyrhythm on, the
+     two pulses in its place — then the click.
+
+     The two switches go under the tempo and not across the foot, because of
+     what they do: POLY is what turns this page into the other one, and the
+     other one is taller. Across the foot it was the last thing on the page,
+     so turning the polyrhythm on pushed the switch that turns it off under the
+     fold — you could get in and not out. In the first column it is a hand's
+     breadth from the number, and it stays on the screen whatever the page
+     below it does. */
   body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#tempo-block{grid-area:1/1}
+  /* the two of them stand one under the other in a column that narrow, rather
+     than one of them hanging out of it */
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#beats-only-line{
+    grid-area:2/1;margin:0;flex-wrap:wrap;justify-content:flex-start;gap:var(--s1)}
   body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#sig-block,
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#poly-block{grid-area:1/2}
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#click-block{grid-area:1/3}
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#beats-only-line{grid-area:2/1/2/4}
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#poly-block{grid-area:1/2/3/3}
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#click-block{grid-area:1/3/3/4}
 }
 </style>
 <script>
@@ -6184,7 +6185,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24a';
+const APP_VERSION='lab-2026-09-24b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
