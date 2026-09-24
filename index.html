@@ -2356,28 +2356,42 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
   body.sub .btn-row{padding-top:0}
   body.sub .play-btn{padding:10px}
   /* More than one block open is what a page in columns is: two blocks where the
-     first has a sibling that is also open. */
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta){
-    display:grid!important;grid-template-columns:110px minmax(0,1fr) auto;
+     first has a sibling that is also open. Not while the pulse has the screen
+     to itself — Only beats leaves one block on the page and the columns were
+     still set, so the circles were drawn in the first of them and the big pulse
+     came up the size of a thumbnail in the corner. */
+  /* The click's own column is held to 230: left to ask for what it wants it
+     took 263 and the middle went down to 221, which is narrower than the five
+     circles of a five-against-four and set the whole block wrapping. */
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta){
+    display:grid!important;grid-template-columns:auto minmax(0,1fr) minmax(0,230px);
     column-gap:var(--s4);row-gap:var(--s2);align-content:start;align-items:start}
   /* The tempo, then the bar with its circles — or, with the polyrhythm on, the
-     two pulses in its place — then the click.
+     two pulses in its place — then the click. The block in the middle is the
+     tall one and it takes both rows; the two switches take the line above the
+     other two, one at each end of the screen with what they govern between
+     them.
 
-     The two switches go under the tempo and not across the foot, because of
-     what they do: POLY is what turns this page into the other one, and the
-     other one is taller. Across the foot it was the last thing on the page,
-     so turning the polyrhythm on pushed the switch that turns it off under the
-     fold — you could get in and not out. In the first column it is a hand's
-     breadth from the number, and it stays on the screen whatever the page
-     below it does. */
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#tempo-block{grid-area:1/1}
-  /* the two of them stand one under the other in a column that narrow, rather
-     than one of them hanging out of it */
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#beats-only-line{
-    grid-area:2/1;margin:0;flex-wrap:wrap;justify-content:flex-start;gap:var(--s1)}
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#sig-block,
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#poly-block{grid-area:1/2/3/3}
-  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#click-block{grid-area:1/3/3/4}
+     Above and not below because of what they do: POLY is what turns this page
+     into the other one, and the other one is taller than the screen. On the
+     line under the blocks it was pushed off by the very thing it had just
+     turned on — you could get in and not out. On the line above, the middle can
+     be as tall as it likes and the way out is still the first thing there. */
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta)>#tempo-block{
+    grid-area:2/1}
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta)>#sig-block,
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta)>#poly-block{
+    grid-area:1/2/3/3}
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta)>#click-block{
+    grid-area:2/3}
+  /* the line itself steps out of the way so its two switches can sit in cells
+     of their own, one over the tempo and one over the click */
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta)>#beats-only-line{
+    display:contents!important}
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta) #only-beats{
+    grid-area:1/1;justify-self:start;align-self:center}
+  body.sub:not(.bolinhas) .sec-body:has(>.pagina-aberta~.pagina-aberta) #poly-switch{
+    grid-area:1/3;justify-self:end;align-self:center}
 }
 </style>
 <script>
@@ -6185,7 +6199,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24b';
+const APP_VERSION='lab-2026-09-24c';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
