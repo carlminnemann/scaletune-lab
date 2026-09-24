@@ -2362,8 +2362,21 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
      one you are setting something on with the phone on its side. The home
      screen keeps it; everywhere you have already chosen a mode, the bar under
      it is the way back and the forty pixels go to the work. */
-  body:not(.home):not(.ouvido) .header{display:none}
+  /* Where the script has not put it in the bar — the home screen, the ear
+     screen, the keyboard, or a browser that ran the CSS before the script —
+     it goes, as it did: the row is worth more as page than as name. */
+  body:not(.home):not(.ouvido):not(.cabeca-na-barra) .header{display:none}
   body:not(.home):not(.ouvido) .mode-bar{margin-bottom:0.5rem}
+  /* In the bar: the name and the three buttons at the right-hand end of it,
+     small, sharing the row the way back already has. */
+  body.cabeca-na-barra .mode-bar{min-height:30px}
+  body.cabeca-na-barra .mode-bar>.header{
+    display:flex;align-items:center;gap:6px;margin:0 0 0 auto;flex:0 0 auto}
+  body.cabeca-na-barra .mode-bar>.header .head-btns{justify-self:auto;gap:5px}
+  body.cabeca-na-barra .mode-bar>.header .theme-btn{width:27px;height:27px;font-size:13px}
+  body.cabeca-na-barra .mode-bar>.header #folder-btn svg{width:16px;height:15px}
+  body.cabeca-na-barra .mode-bar>.header h1.wordmark.wordmark{font-size:15px;margin:0 2px 0 0}
+  body.cabeca-na-barra .mode-bar>.header h1.wordmark .cap{font-size:23px}
   /* Sideways there is width: a page uses all of it, and a row of answers takes
      as many columns as fit rather than two long ones. Not the stacked answers —
      wide and short is what they are for — and not the twelve notes. */
@@ -6297,7 +6310,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24g';
+const APP_VERSION='lab-2026-09-24h';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6402,6 +6415,9 @@ function pintaCasa(){
     f.classList.toggle('vazia',exercisesDoModo().length===0&&pastasDoModo().length===0);
   }
   arrumaPaineis();
+  /* Which screen this is decides where the app's own row belongs — the home
+     screen keeps it at the top sideways, everywhere else it goes in the bar. */
+  arrumaCabecalho();
   /* The header is not the same shape in every screen — the home screen gives
      the name the whole width, a mode gives it what is left between the buttons
      — so what fits has to be measured again on each of them. */
@@ -13178,9 +13194,36 @@ function fitNoteGrids(force){
   });
 }
 
+/* The app's own row, sideways.
+
+   Held sideways there is no height for a row of its own — that was the whole
+   reason the page got its frame back — and hiding it took the name, the undo,
+   the disk and the guide with it, which are exactly what you reach for while
+   you are working. They do not need a row: the bar with the way back on it is
+   already there, and its right-hand half is empty. So sideways the header goes
+   and stands at the end of that bar, and costs nothing at all.
+
+   Moved, not copied: one node, so the buttons keep their handlers, their state
+   and their place in the tab order, and upright it goes back where it was. */
+function arrumaCabecalho(){
+  const cab=document.querySelector('.header'),
+        bar=document.getElementById('mode-bar'),
+        caixa=document.querySelector('.container');
+  if(!cab||!bar||!caixa)return;
+  const b=document.body.classList;
+  const deitado=window.matchMedia('(max-height:520px) and (orientation:landscape)').matches
+                &&!b.contains('home')&&!b.contains('ouvido')&&!b.contains('teclas');
+  const naBarra=cab.parentElement===bar;
+  if(deitado&&!naBarra){bar.appendChild(cab);b.add('cabeca-na-barra');}
+  /* Back to the top of the container and not merely above the bar: the row of
+     modes sits between the two, and put back by the bar the name came out
+     under the six buttons on the home screen. */
+  else if(!deitado&&naBarra){caixa.insertBefore(cab,caixa.firstChild);b.remove('cabeca-na-barra');}
+}
 function relayoutViewport(){
   measureViewport();
   if(typeof tecladoAfere==='function')tecladoAfere();
+  arrumaCabecalho();
   fitWordmark();
   layoutAllBeats();
   gridifyAll();
