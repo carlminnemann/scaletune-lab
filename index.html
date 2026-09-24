@@ -1633,8 +1633,12 @@ body.painel .sec-body>.clear-btn:last-child,
 /* A fader is aimed at with a thumb on a phone. The track is thicker, the cap is
    bigger, and the row it lives in is taller — eight of them in the mixer, a
    finger's width apart, was the thing that could not be hit. */
+/* A fader has a length past which it is only longer. Sideways the page was
+   given the whole screen so its blocks could stand side by side, and the faders
+   went with it — 469px of hairline with a small cap somewhere along it, where
+   upright they are 260. They stop where they stop being worth more. */
 input[type=range]{-webkit-appearance:none;appearance:none;background:none;
-  cursor:pointer;height:34px;touch-action:pan-y;min-width:0;--f:0}
+  cursor:pointer;height:34px;touch-action:pan-y;min-width:0;max-width:360px;--f:0}
 input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;
   background:linear-gradient(to right,var(--fader) 0 calc(var(--f)*1%),var(--border2) calc(var(--f)*1%) 100%)}
 input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:var(--border2)}
@@ -6405,7 +6409,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24i';
+const APP_VERSION='lab-2026-09-24j';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
