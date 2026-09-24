@@ -587,6 +587,7 @@
  "h.g.start": "或者空格键——正在输入框里打字时除外。",
  "h.g.offline": "打开过一次之后，完全离线也能用。加到主屏幕就像一个应用。",
  "h.all": "查看完整说明",
+ "h.manual": "手册",
  "aria.helpMarks": "在每个面板上显示 ?",
  "aria.helpFor": "{what} 的说明",
  "h.s.saved.k": "保存一套设置",

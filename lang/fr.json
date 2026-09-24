@@ -602,6 +602,7 @@
  "h.g.start": "Ou la barre d'espace, sauf si tu écris dans un champ.",
  "h.g.offline": "Une fois ouverte, l'app fonctionne sans réseau. Ajoute-la à l'écran d'accueil et elle se comporte comme une app.",
  "h.all": "Voir tout le guide",
+ "h.manual": "Manuel",
  "aria.helpMarks": "Afficher un ? sur chaque panneau",
  "aria.helpFor": "Ce que fait {what}",
  "h.s.saved.k": "Garder une préparation",
