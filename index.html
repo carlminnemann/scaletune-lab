@@ -6431,7 +6431,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24m';
+const APP_VERSION='lab-2026-09-25a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6922,8 +6922,19 @@ const PAGINAS={
     /* In Drone the click is asked for rather than assumed, and with the panel in
        boxes that question needed a box: it lives in the metronome's own block
        and would otherwise have been hidden with everything else. */
+    /* The one box in the metronome that is not a question. Whether there is a
+       click over the drone at all has two answers and no page worth opening for
+       them: the box is the switch, and says which way it is by wearing the
+       mode's colour the way every box does when it has been moved. */
     {k:'ondrone',bloco:'metro-on-block',nome:()=>tr('over-the-drone','Over the drone'),fica:true,
      quando:()=>state.mode==='drone',mexeu:dif('metroInDrone'),
+     alterna:()=>{
+       state.metroInDrone=!state.metroInDrone;
+       buildMetroOnRow();
+       buildPagRow();
+       refreshSectionSummaries();
+       restartIfPlaying();
+     },
      diz:()=>state.metroInDrone?tr('common.on','On'):tr('common.off','Off')},
     {k:'sub',   bloco:'subdiv-block',  nome:()=>tr('subdivision','Subdivision'),fica:true,
      quando:()=>!(state.poly.on||(grooveOn()&&pulseOnly())),
@@ -7245,7 +7256,13 @@ function buildPagRow(){
       b.classList.add('tem');
       if(diz){const u=document.createElement('span');u.className='sub';u.textContent=diz;b.appendChild(u);}
     }
-    b.onclick=()=>abreSub(d.k);
+    /* Nearly every box opens the page of the question it holds. One or two hold
+       a question with two answers, which is no page at all: those switch. */
+    if(d.alterna){
+      b.setAttribute('aria-pressed',mexeu?'true':'false');
+      b.onclick=()=>d.alterna();
+    }
+    else b.onclick=()=>abreSub(d.k);
     row.appendChild(b);
   });
   travaCaixasSoon();
