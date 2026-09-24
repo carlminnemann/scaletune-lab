@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ScaleTune · teste de arrasto</title>
+<style>
+/* Deliberately its own page, with none of the app's stylesheet: what is being
+   asked here is which of the app's decisions kills the drag, so each fader
+   carries one of them and nothing else. */
+:root{color-scheme:dark}
+body{margin:0;padding:14px 16px calc(24px + env(safe-area-inset-bottom));
+  background:#060606;color:#eee;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px}
+h1{font-size:17px;margin:0 0 4px}
+p.sub{margin:0 0 16px;color:#b8b8b8;font-size:13px;line-height:1.45}
+.caso{border:1px solid #444;border-radius:10px;padding:10px 12px;margin-bottom:12px;background:#151515}
+.caso h2{font-size:13px;margin:0 0 2px;letter-spacing:.04em;text-transform:uppercase;color:#b8b8b8}
+.caso .nota{font-size:12px;color:#8f8f8f;margin:0 0 8px;line-height:1.4}
+input[type=range]{width:100%;display:block}
+.marca{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#c8c8c8;
+  font-variant-numeric:tabular-nums}
+.marca b{color:#fff;font-weight:600}
+.ok{color:#8fd19e}.mau{color:#e08b8b}
+/* 2 — a app tinha isto até hoje */
+#b{touch-action:pan-y}
+/* 3 — o que a app tem agora */
+#c{-webkit-appearance:none;appearance:none;background:none;cursor:pointer;height:34px;
+  touch-action:none;min-width:0;max-width:360px;--f:0}
+#c::-webkit-slider-runnable-track{height:5px;border-radius:3px;
+  background:linear-gradient(to right,#e8e8ec 0 calc(var(--f)*1%),#585858 calc(var(--f)*1%) 100%)}
+#c::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:22px;
+  margin-top:-9px;border-radius:7px;background:#2c2c2c;border:2px solid #e8e8ec;box-sizing:border-box}
+/* 4 — o mesmo, dentro de uma caixa que rola, como na app */
+#rola{height:96px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  border:1px dashed #555;border-radius:8px;padding:8px}
+#rola .alto{height:220px}
+#d{-webkit-appearance:none;appearance:none;background:none;height:34px;touch-action:none;--f:0}
+#d::-webkit-slider-runnable-track{height:5px;border-radius:3px;
+  background:linear-gradient(to right,#e8e8ec 0 calc(var(--f)*1%),#585858 calc(var(--f)*1%) 100%)}
+#d::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:22px;
+  margin-top:-9px;border-radius:7px;background:#2c2c2c;border:2px solid #e8e8ec;box-sizing:border-box}
+/* 5 — um que refaz DOM a cada passo, como fazia o do tempo */
+#e{-webkit-appearance:none;appearance:none;background:none;height:34px;touch-action:none}
+#lixo{min-height:22px;font-size:12px;color:#8f8f8f}
+.resumo{border:1px solid #585858;border-radius:10px;padding:10px 12px;background:#101010;
+  font-size:13px;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>Teste de arrasto dos faders</h1>
+<p class="sub">Arrasta cada um <b>devagar, da esquerda para a direita</b>, sem levantar o dedo.
+Cada caixa conta o que recebeu. O que interessa é a linha <b>move</b>: se ficar a 0, esse
+fader não se arrasta neste telefone.</p>
+
+<div class="caso">
+  <h2>1 · fader cru, sem nada da app</h2>
+  <p class="nota">O que o browser faz sozinho.</p>
+  <input type="range" id="a" min="0" max="100" value="30">
+  <div class="marca" data-para="a"></div>
+</div>
+
+<div class="caso">
+  <h2>2 · com touch-action: pan-y</h2>
+  <p class="nota">O que a app tinha até hoje.</p>
+  <input type="range" id="b" min="0" max="100" value="30">
+  <div class="marca" data-para="b"></div>
+</div>
+
+<div class="caso">
+  <h2>3 · com o aspeto e as regras da app</h2>
+  <p class="nota">O que a app tem agora: touch-action none, barra e punho desenhados.</p>
+  <input type="range" id="c" min="0" max="100" value="30">
+  <div class="marca" data-para="c"></div>
+</div>
+
+<div class="caso">
+  <h2>4 · o mesmo, dentro de uma caixa que rola</h2>
+  <p class="nota">Como na app, onde a página rola por dentro.</p>
+  <div id="rola"><div class="alto"><input type="range" id="d" min="0" max="100" value="30">
+    <p class="nota">há mais coisas por baixo, para a caixa ter de rolar</p></div></div>
+  <div class="marca" data-para="d"></div>
+</div>
+
+<div class="caso">
+  <h2>5 · um que refaz a página a cada passo</h2>
+  <p class="nota">Como fazia o do tempo até hoje.</p>
+  <input type="range" id="e" min="0" max="100" value="30">
+  <div id="lixo"></div>
+  <div class="marca" data-para="e"></div>
+</div>
+
+<div class="resumo" id="resumo">Ainda não arrastaste nada.</div>
+
+<script>
+/* Cada fader conta os seus próprios toques. "move" é quantas vezes o valor
+   mudou com o dedo em cima sem o levantar — que é exactamente o que falta
+   quando um fader se deixa tocar e não arrastar. */
+var estado={};
+function marca(id){
+  var m=document.querySelector('.marca[data-para="'+id+'"]');
+  var e=estado[id];
+  var bom=e.move>1;
+  m.innerHTML='<span>start <b>'+e.start+'</b></span>'+
+    '<span>touchmove <b>'+e.tmove+'</b></span>'+
+    '<span class="'+(bom?'ok':'mau')+'">move <b>'+e.move+'</b></span>'+
+    '<span>cancelável <b>'+(e.cancel===null?'—':(e.cancel?'sim':'não'))+'</b></span>'+
+    '<span>valor <b>'+e.val+'</b></span>';
+  var todos=Object.keys(estado).filter(function(k){return estado[k].start>0;});
+  if(todos.length){
+    var arrastam=todos.filter(function(k){return estado[k].move>1;});
+    document.getElementById('resumo').innerHTML=
+      'Arrastaste <b>'+todos.length+'</b>: arrastam <b class="'+(arrastam.length?'ok':'mau')+'">'+
+      (arrastam.length?arrastam.join(', '):'nenhum')+'</b>'+
+      (arrastam.length<todos.length?' · não arrastam <b class="mau">'+
+        todos.filter(function(k){return estado[k].move<=1;}).join(', ')+'</b>':'');
+  }
+}
+['a','b','c','d','e'].forEach(function(id){
+  var el=document.getElementById(id);
+  estado[id]={start:0,tmove:0,move:0,cancel:null,val:el.value,dentro:false};
+  var e=estado[id];
+  el.addEventListener('touchstart',function(){e.start++;e.dentro=true;e.move=0;marca(id);},{passive:true});
+  el.addEventListener('touchmove',function(ev){e.tmove++;if(e.cancel===null)e.cancel=ev.cancelable;marca(id);},{passive:true});
+  el.addEventListener('touchend',function(){e.dentro=false;marca(id);},{passive:true});
+  el.addEventListener('input',function(){
+    e.val=el.value;
+    if(e.dentro)e.move++;
+    if(id==='c'||id==='d')el.style.setProperty('--f',el.value);
+    if(id==='e'){   /* refaz DOM a cada passo, como fazia o do tempo */
+      var l=document.getElementById('lixo');
+      l.innerHTML='';
+      for(var i=0;i<12;i++){var s=document.createElement('span');s.textContent='· ';l.appendChild(s);}
+    }
+    marca(id);
+  });
+  marca(id);
+});
+</script>
+</body>
+</html>
