@@ -244,9 +244,19 @@ html,body{height:var(--app-h,100dvh)}
   .head-btns{gap:4px}
   .header .theme-btn{width:32px;height:32px;font-size:14px}
 }
+/* The guide's bubble made the right-hand group three buttons again, and on a
+   320 screen that was eight pixels more than the name had: it was already at
+   the 13px floor and still needed 80 in a box of 72, so the lab mark was being
+   drawn under the disk. The mark cannot go — it is what tells this app from the
+   one Carl's testers have — so the buttons give the eight pixels back. */
+@media(max-width:345px){
+  .header{--headside:96px}
+  .head-btns{gap:3px}
+  .header .theme-btn{width:30px;height:30px;font-size:13px}
+}
 /* The narrowest screen anyone actually carries is the folded Galaxy Fold. */
 @media(max-width:300px){
-  .header{--headside:84px}
+  .header{--headside:88px}
   .head-btns{gap:3px}
   .header .theme-btn{width:27px;height:27px;font-size:12px}
 }
@@ -423,7 +433,7 @@ body:not(.home) #mode-row{display:none}
 #undo-btn.empty{opacity:.5}
 /* 20x18 for a 22x20 drawing: the disk is taller than the folder was, and given
    the folder's box it would have been squashed a tenth out of square. */
-#folder-btn svg{width:20px;height:18px;fill:none;stroke:currentColor;
+#folder-btn svg,#guide-btn svg{width:20px;height:18px;fill:none;stroke:currentColor;
   stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;pointer-events:none}
 /* An empty drawer says so quietly, and stays open to a finger — it is exactly
    where the first exercise gets saved. It borrowed the undo's "empty" class,
@@ -448,7 +458,7 @@ body.pasta .ex-name{height:48px;font-size:15px;border-radius:12px}
 body.pasta .ex-new{gap:9px}
 body.pasta .ex-new .pick-btn{min-height:48px;font-size:15px;border-radius:12px;padding:0 18px}
 body.pasta #undo-btn{visibility:visible}
-body.pasta #folder-btn,body.pasta #help-toggle{visibility:hidden}
+body.pasta #folder-btn,body.pasta #help-toggle,body.pasta #guide-btn{visibility:hidden}
 /* Small, and at the end of the line it shares with Tempo: a way in, not a
    control competing with the one beside it. Lit, it wears the mode's colour
    like everything else that is on. */
@@ -2454,6 +2464,19 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
     </button>
     <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
             data-ta="aria.helpMarks" aria-label="Show a ? on every panel">?</button>
+    <!-- The guide, whole, from anywhere. The ? beside it puts a mark on every
+         panel, and a mark opens the guide at that panel — which is the right
+         way in when you are standing in front of something you do not
+         understand, and no way in at all when you simply want to read the
+         thing. That door was at the foot of a section you had to find first. -->
+    <button class="theme-btn" id="guide-btn" type="button" onclick="openHelp()"
+            data-ta="h.all" aria-label="See the whole guide">
+      <svg viewBox="0 0 22 20" aria-hidden="true" focusable="false">
+        <path d="M3.4 2.2h15.2a1.8 1.8 0 0 1 1.8 1.8v8.6a1.8 1.8 0 0 1-1.8 1.8H8.9l-4.4 3.4v-3.4H3.4a1.8 1.8 0 0 1-1.8-1.8V4a1.8 1.8 0 0 1 1.8-1.8z"/>
+        <path d="M5.8 6.4h10.4"/>
+        <path d="M5.8 9.8h6.8"/>
+      </svg>
+    </button>
   </span>
 </div>
 
@@ -6269,7 +6292,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24e';
+const APP_VERSION='lab-2026-09-24f';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
