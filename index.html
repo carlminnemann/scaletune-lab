@@ -1637,8 +1637,16 @@ body.painel .sec-body>.clear-btn:last-child,
    given the whole screen so its blocks could stand side by side, and the faders
    went with it — 469px of hairline with a small cap somewhere along it, where
    upright they are 260. They stop where they stop being worth more. */
+/* touch-action:none, and not pan-y. pan-y was there so that a finger landing on
+   a fader could still scroll the page it was on, and the price was the fader:
+   a touch that starts on it and moves sideways is held by the browser while it
+   decides whether this is a scroll, and by the time it decides the drag is not
+   the element's to do. Which is exactly what it did — tap and the cap goes
+   there, drag and nothing moves. Here the fader takes the gesture whole. The
+   page keeps its scroll everywhere else on the row: the name on the left and
+   the reading on the right are most of its width. */
 input[type=range]{-webkit-appearance:none;appearance:none;background:none;
-  cursor:pointer;height:34px;touch-action:pan-y;min-width:0;max-width:360px;--f:0}
+  cursor:pointer;height:34px;touch-action:none;min-width:0;max-width:360px;--f:0}
 input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;
   background:linear-gradient(to right,var(--fader) 0 calc(var(--f)*1%),var(--border2) calc(var(--f)*1%) 100%)}
 input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:var(--border2)}
@@ -6409,7 +6417,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24j';
+const APP_VERSION='lab-2026-09-24k';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
