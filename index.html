@@ -4193,6 +4193,56 @@ let nextBeatTime=0,beatIdx=0,seqIdx=0,tickCount=0,subIdx=0,activeSubdiv=1;
 let roundsInFigure=0,pendingNoteLenChange=false;
 const lookahead=0.12,schedInterval=25;
 
+/* The screen, while something is sounding.
+
+   A metronome is the one thing here you set going and then do not touch, and a
+   phone counts not being touched as nothing happening: it locks, and on iOS the
+   audio goes with the screen. A student of Carl's lost the click in the middle
+   of practising and, when she woke the phone, the bar came back in a different
+   place from the one she was playing in. So while the app is sounding it asks
+   the browser to hold the screen awake, and gives it back the moment it stops.
+
+   The lock is dropped whenever the page is hidden, which is why it is asked for
+   again on the way back. Where the browser has no such thing — an older iOS, a
+   desktop — the call does nothing and the phone behaves as it always did. */
+let ecraSeguro=null;
+function seguraEcra(){
+  if(ecraSeguro||!navigator.wakeLock||document.hidden)return;
+  try{
+    navigator.wakeLock.request('screen').then(s=>{
+      /* it can arrive after the sound has already stopped */
+      if(!state.playing){try{s.release();}catch(e){}return;}
+      ecraSeguro=s;
+      s.addEventListener('release',()=>{ecraSeguro=null;});
+    }).catch(()=>{});
+  }catch(e){}
+}
+function largaEcra(){
+  const s=ecraSeguro;ecraSeguro=null;
+  if(s){try{s.release();}catch(e){}}
+}
+
+/* The clock, on the way back from an interruption.
+
+   There are two ways it can be wrong, and the scheduler already knew one: a
+   clock that jumped ahead, which would have it fire a burst of catch-up beats.
+   The other is the phone locking, and it is the opposite — the audio clock does
+   not run on, it freezes. Nothing sounds, and when the screen comes back the
+   scheduler finds a beat due in a moment and carries on in the middle of the
+   bar, seconds after the player stopped hearing it.
+
+   Real time is the witness. Where it has run on and the audio clock has not,
+   what happened was silence, and the bar starts again from its first beat —
+   the same answer the other case gets, and the only one a player can follow. */
+let relogioVisto=null;
+function houveInterrupcao(){
+  const real=performance.now()/1000, som=audioCtx.currentTime;
+  const v=relogioVisto;
+  relogioVisto={real,som};
+  if(!v)return false;
+  return (real-v.real)-(som-v.som)>0.4;
+}
+
 
 /* ---------- pitch helpers ---------- */
 function semitone(pc,oct){return NOTES.indexOf(pc)+oct*12;}
@@ -4330,7 +4380,9 @@ function initAudio(){
     // restarts it on its own.
     audioCtx.onstatechange=keepRunning;
     document.addEventListener('visibilitychange',()=>{
-      if(!document.hidden)keepRunning();
+      // the screen lock is dropped by the browser whenever the page goes away,
+      // so coming back to a running metronome asks for it again
+      if(!document.hidden){keepRunning();if(state.playing)seguraEcra();}
     });
     /* A gesture is the one thing iOS never refuses, so any touch while the
        sound is meant to be running is taken as permission to have it back. */
@@ -5695,6 +5747,7 @@ function startPlayback(){
       refreshSequence();
     }
     nextBeatTime=audioCtx.currentTime+0.12;
+    relogioVisto=null;             // the two clocks are only compared within a run
     beatIdx=0;seqIdx=0;tickCount=0;subIdx=0;roundsInFigure=0;pendingNoteLenChange=false;activeSubdiv=currentSubdiv();
     metroBars=0;metroBeats=0;metroCycles=0;grooveBeat=0;
     pendingCount=false;pendingLanding=null;resolveIn=0;resolveNote=null;
@@ -5812,7 +5865,10 @@ function scheduleCountCycle(t0){
 function polySchedulerTick(){
   if(!audioCtx||audioCtx.state!=='running')return;
   if(runEnding){if(audioCtx.currentTime>=runEndAt)endRunNow();return;}
-  if(nextBeatTime<audioCtx.currentTime-0.5)nextBeatTime=audioCtx.currentTime+0.05;
+  // a clock that jumped, or one that was frozen by the phone locking: either
+  // way the cycle begins again rather than resuming in the middle of itself
+  if(nextBeatTime<audioCtx.currentTime-0.5||houveInterrupcao())
+    nextBeatTime=audioCtx.currentTime+0.05;
   let guard=0;
   while(nextBeatTime<audioCtx.currentTime+lookahead&&guard++<8){
     tempoOverTime(nextBeatTime,countTicks>0);
@@ -5848,7 +5904,9 @@ function schedulerTick(){
   // If the phone slept or the tab was backgrounded the audio clock jumps far
   // ahead. Without this the loop would fire a burst of catch-up beats, running
   // several passes at once and skipping whole keys of the cycle. Resync instead.
-  if(nextBeatTime<audioCtx.currentTime-0.5){
+  // The frozen clock of a locked phone is the same interruption seen from the
+  // other side, and gets the same answer: the bar starts again.
+  if(nextBeatTime<audioCtx.currentTime-0.5||houveInterrupcao()){
     nextBeatTime=audioCtx.currentTime+0.05;
     beatIdx=0;tickCount=0;subIdx=0;
   }
@@ -6056,6 +6114,9 @@ function setPlayUI(on){
     ?(on?tr('play.stopListening','■ Stop listening'):tr('play.listen','● Listen'))
     :(on?tr('play.stop','■ Stop'):tr('play.start','▶ Start'));
   b.classList.toggle('playing',on);
+  /* the screen stays awake for as long as there is something to listen to, and
+     not a moment longer — the tuner's listening counts */
+  if(on)seguraEcra();else largaEcra();
   renderPulse();   // the running metronome's own display comes and goes with it
   // clears (or lights) the green "sounding now" marker on the study list
   if(state.mode==='scale'||state.mode==='arpeggio'){
@@ -6199,7 +6260,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24c';
+const APP_VERSION='lab-2026-09-24d';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
