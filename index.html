@@ -5559,7 +5559,7 @@ function setPolyVol(l,v){
   if(l==='b')state.polyVolB=n;else state.polyVolA=n;
   const out=document.getElementById('polyvol-'+l+'-out');
   if(out)out.textContent=Math.round(n*100)+'%';
-  refreshSectionSummaries();
+  depoisDoFader(refreshSectionSummaries);   // same reason as the tempo's
 }
 function polyAccFor(layer,i){
   const arr=layer==='a'?state.poly.accA:state.poly.accB;
@@ -6346,14 +6346,26 @@ function restartIfPlaying(){
 function liveChange(){}
 
 /* ---------- simple controls ---------- */
+/* While a fader is being moved, what its value sets off elsewhere waits.
+
+   WebKit hands a slider's drag back to the page the moment the page is rebuilt
+   under it, and the tempo's fader rebuilt three things on every step of the
+   way — the ramp's own controls, every panel's summary line and the clears. So
+   on the iPhone the tempo was the one fader that could be tapped to a place and
+   not dragged to one, while the click's fader, which only writes a number
+   beside itself, dragged as it always had.
+
+   The tempo, the number over it and what is sounding follow the finger; the
+   rest of the page catches up a fifth of a second after the finger stops. */
+let faderTarde=0;
+function depoisDoFader(f){clearTimeout(faderTarde);faderTarde=setTimeout(f,180);}
 function updateBPM(v){
   state.bpm=parseInt(v);
   document.getElementById('bpm-display').value=v;
   tapTimes=[];
   // a ramp runs from the tempo you set, so setting one moves its starting point
   state.practice.rampFrom=state.bpm;
-  buildSpeedControls();
-  refreshSectionSummaries();
+  depoisDoFader(()=>{buildSpeedControls();refreshSectionSummaries();});
   pintaPulsoBpm();
 }
 function updateVol(v){
@@ -6417,7 +6429,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24k';
+const APP_VERSION='lab-2026-09-24l';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
