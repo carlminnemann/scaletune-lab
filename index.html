@@ -421,8 +421,10 @@ body:not(.home) #mode-row{display:none}
    .35, and a control you cannot read is not saying "nothing to do", it is
    saying nothing at all. */
 #undo-btn.empty{opacity:.5}
-#folder-btn svg{width:21px;height:18px;fill:none;stroke:currentColor;
-  stroke-width:1.5;stroke-linejoin:round;pointer-events:none}
+/* 20x18 for a 22x20 drawing: the disk is taller than the folder was, and given
+   the folder's box it would have been squashed a tenth out of square. */
+#folder-btn svg{width:20px;height:18px;fill:none;stroke:currentColor;
+  stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;pointer-events:none}
 /* An empty drawer says so quietly, and stays open to a finger — it is exactly
    where the first exercise gets saved. It borrowed the undo's "empty" class,
    which carries pointer-events:none, and that made the one button you need in
@@ -2439,8 +2441,15 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
          It sits against the name, with the undo on the other side of it. -->
     <button class="theme-btn" id="folder-btn" type="button" onclick="abrePasta()"
             data-ta="aria.folder" aria-label="Saved exercises">
-      <svg viewBox="0 0 22 18" aria-hidden="true" focusable="false">
-        <path d="M2 3.6h6.2l1.7 2.2h10.1v9.6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4.6a1 1 0 0 1 1-1z"/>
+      <!-- The disk. A folder said "there are things in here somewhere" and left
+           the one button you need in order to keep anything to be guessed at;
+           the disk says save, which is what the screen behind it is for. That
+           nobody under thirty has held one has stopped mattering: it is the
+           save mark everywhere, the way a paper envelope is still the mail. -->
+      <svg viewBox="0 0 22 20" aria-hidden="true" focusable="false">
+        <path d="M3 2h12l4 4v11a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
+        <path d="M6.5 2v5.5h8V2"/>
+        <path d="M6 11.5h10v6.5H6z"/>
       </svg>
     </button>
     <button class="theme-btn" id="help-toggle" type="button" onclick="toggleHelpMarks()"
@@ -6260,7 +6269,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24d';
+const APP_VERSION='lab-2026-09-24e';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
