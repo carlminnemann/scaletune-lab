@@ -2314,6 +2314,70 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
   details.sec>summary{padding:0.6rem 1rem}
   details.sec .sec-body{padding:0.75rem 1rem}
 }
+
+/* A page held sideways.
+
+   The metronome's first page is four blocks — the tempo, the bar, the click and
+   the pair of switches — and one under another they are 355px on a screen 320
+   tall. The page then scrolls as a page, which is what a short screen does here,
+   but Start is stuck to the foot of it with the ground drawn behind it: the
+   chooser for how many beats are in the bar sat under that button with nothing
+   to say it was there, and the answer to "why can I not reach it" was a scroll
+   nobody could see was possible.
+
+   Sideways there is width and no height. So a page made of more than one block
+   stands its blocks side by side, and the metronome's fits whole — measured at
+   667x320: 342px of page became 320, which is the screen. Everything else about
+   a page sideways is the same trade: the app's name is worth its forty pixels on
+   a screen you read, not on one you are setting with the phone on its side, and
+   the bar under it is still the way back. */
+@media(max-height:520px) and (orientation:landscape){
+  /* A page keeps its frame. The screen's own rule sideways is that the page
+     scrolls as a page, and it holds for a panel of boxes; on a page it put the
+     one button you press while it plays at the end of a document and drew the
+     ground behind it, over whatever was there. Here the bar above and Start
+     below stay where they are and what is between them scrolls — the same shape
+     the home screen and the keyboard already keep sideways. Nearly every page
+     now fits without scrolling at all; this is what happens to the two that do
+     not, the subdivision and the pattern. */
+  html:has(body.caixas),body.caixas,
+  html:has(body.painel),body.painel,
+  html:has(body.earx),body.earx,
+  html:has(body.afina),body.afina,
+  html:has(body.sub),body.sub{height:var(--app-h,100dvh);overflow:hidden}
+  body.caixas .container,body.painel .container,body.sub .container,
+  body.earx .container,body.afina .container{height:100%;display:flex}
+  body.caixas .scroll,body.painel .scroll,body.sub .scroll,
+  body.earx .scroll,body.afina .scroll{flex:1 1 auto;min-height:0;overflow-y:auto}
+  body.caixas .header,body.painel .header,body.sub .header,
+  body.earx .header,body.afina .header{display:none}
+  body.caixas .mode-bar,body.painel .mode-bar,body.sub .mode-bar,
+  body.earx .mode-bar,body.afina .mode-bar{margin-bottom:0.5rem}
+  /* Sideways there is width: a page uses all of it, and a row of answers takes
+     as many columns as fit rather than two long ones. Not the stacked answers —
+     wide and short is what they are for — and not the twelve notes. */
+  body.sub .container{max-width:none}
+  body.sub .pagina-aberta .btn-wrap:not(.notas):not(.pilha):not(.unica){
+    grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important}
+  /* it holds itself to the bottom of a page that scrolls; this one does not.
+     The foot of the screen keeps its padding: a phone on its side draws its own
+     bar over the bottom of the page, and Start is what would be under it. */
+  body.sub .btn-row{margin-bottom:0;padding-top:0}
+  body.sub .play-btn{padding:10px}
+  /* More than one block open is what a page in columns is: two blocks where the
+     first has a sibling that is also open. */
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta){
+    display:grid!important;grid-template-columns:auto 1fr auto;
+    column-gap:var(--s4);row-gap:var(--s2);align-content:start}
+  /* The tempo, then the bar with its circles, then the click — the reading order
+     of the page it was, left to right. The two switches take the line under
+     them, as wide as all three. */
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#tempo-block{grid-area:1/1}
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#sig-block,
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#poly-block{grid-area:1/2}
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#click-block{grid-area:1/3}
+  body.sub .sec-body:has(>.pagina-aberta~.pagina-aberta)>#beats-only-line{grid-area:2/1/2/4}
+}
 </style>
 <script>
 // Runs before first paint so the page never flashes the wrong theme.
@@ -6120,7 +6184,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-23h';
+const APP_VERSION='lab-2026-09-24a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
