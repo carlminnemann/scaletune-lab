@@ -6431,7 +6431,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-25a';
+const APP_VERSION='lab-2026-09-25b';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -8239,7 +8239,7 @@ function buildEarPage(){
     const vol=document.createElement('div');vol.className='control-row ear-vol';
     const lab=document.createElement('label');lab.textContent=tr('volume','Volume');
     const sl=document.createElement('input');sl.type='range';sl.min='0';sl.max='1';
-    sl.step='0.05';sl.value=String(state.volume);sl.style.flex='1';
+    sl.step='0.05';poeFader(sl,String(state.volume));sl.style.flex='1';
     const out=document.createElement('span');out.textContent=Math.round(state.volume*100)+'%';
     sl.oninput=function(){updateVol(this.value);out.textContent=Math.round(this.value*100)+'%';};
     vol.appendChild(lab);vol.appendChild(sl);vol.appendChild(out);
@@ -9068,7 +9068,7 @@ function setBpmAuto(v){
   const next=Math.max(BPM_MIN,Math.min(BPM_MAX,Math.round(v)));
   if(next===state.bpm)return;
   state.bpm=next;
-  document.getElementById('bpm-slider').value=next;
+  poeFader(document.getElementById('bpm-slider'),next);
   document.getElementById('bpm-display').value=next;
   refreshSectionSummaries();
 }
@@ -9547,12 +9547,12 @@ function redrawMetro(){
   buildRootMoveRow();buildRepeatRow();buildListModeRow();
   renderPitchPickers();updateInfo();updateRotationPanel();updateDroneReadout();
   const d=document.getElementById('bpm-display');if(d)d.value=state.bpm;
-  const sl=document.getElementById('bpm-slider');if(sl)sl.value=state.bpm;
-  const cv=document.getElementById('click-vol');if(cv)cv.value=state.clickVol;
+  poeFader(document.getElementById('bpm-slider'),state.bpm);
+  poeFader(document.getElementById('click-vol'),state.clickVol);
   /* The volume is nobody's but the slider's — nothing else writes it, so it
      cannot drift. It is put back with the others anyway: a fader that has to be
      trusted to be the only writer is one bug away from lying. */
-  const vs=document.getElementById('vol-slider');if(vs)vs.value=state.volume;
+  poeFader(document.getElementById('vol-slider'),state.volume);
   const vo=document.getElementById('vol-out');if(vo)vo.textContent=Math.round(state.volume*100)+'%';
   const cvo=document.getElementById('click-vol-out');
   if(cvo)cvo.textContent=Math.round(state.clickVol*100)+'%';
@@ -10106,7 +10106,7 @@ let tapTimes=[],tapResetTimer=null;
    setting one. All three say the same thing now, so all three do. */
 function setBpm(v){
   state.bpm=Math.max(BPM_MIN,Math.min(BPM_MAX,Math.round(v)));
-  document.getElementById('bpm-slider').value=state.bpm;
+  poeFader(document.getElementById('bpm-slider'),state.bpm);
   document.getElementById('bpm-display').value=state.bpm;
   state.practice.rampFrom=state.bpm;
   buildSpeedControls();
@@ -11122,7 +11122,7 @@ function renderPolyBeats(){
     const out=document.getElementById('polyvol-'+l+'-out');
     const v=polyNivel(l);
     if(lab)lab.textContent=String(n);
-    if(sld)sld.value=String(v);
+    poeFader(sld,String(v));
     if(out)out.textContent=Math.round(v*100)+'%';
   });
   [['a',P.a,P.accA],['b',P.b,P.accB]].forEach(([layer,n,acc])=>{
@@ -12409,7 +12409,7 @@ function buildMixer(){
   }
   [...host.children].forEach(row=>{
     const k=row.dataset.voice, v=Math.round((state.mix[k]!=null?state.mix[k]:1)*100);
-    row.querySelector('input').value=String(v);
+    poeFader(row.querySelector('input'),String(v));
     row.querySelector('.val').textContent=v+'%';
   });
   paintMixUsed();
@@ -15215,6 +15215,16 @@ function pintaFader(el){
   el.style.setProperty('--f',p.toFixed(2));
 }
 function pintaFaders(){document.querySelectorAll('input[type=range]').forEach(pintaFader);}
+/* A fader moved by anything but a hand is two writes and not one: the value,
+   which moves the cap, and the fill behind it, which is drawn by the app and
+   knows nothing until it is told. Tap tempo and the typed number did only the
+   first, so the cap went and the line stayed where it was. Anything that sets
+   a fader goes through here, and then it cannot be forgotten. */
+function poeFader(el,v){
+  if(!el)return;
+  el.value=v;
+  pintaFader(el);
+}
 document.addEventListener('input',e=>{if(e.target&&e.target.type==='range')pintaFader(e.target);},true);
 // A wheel over a range input silently changes its value — that once moved
 // the BPM from 80 to 123 during testing. Block it; drag or arrow keys only.
@@ -15263,7 +15273,7 @@ document.querySelectorAll('input[type=number]').forEach(el=>{
     let v=parseInt(el.value,10);
     if(isNaN(v))v=state.bpm;
     setBpm(v);
-    document.getElementById('bpm-slider').value=state.bpm;
+    poeFader(document.getElementById('bpm-slider'),state.bpm);
   };
   el.addEventListener('blur',settle);
   el.addEventListener('keydown',e=>{
