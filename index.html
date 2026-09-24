@@ -1883,11 +1883,13 @@ body.paginas #pat-mine-info{order:12}
    metronome writes one, the two words under it the size every other answer in
    the app is, and the pair of them together in the middle of the screen. */
 /* Short of the screen, and so in the middle of it. Only where the page fits:
-   a page taller than the screen scrolls, and it starts at the top. */
-body.sub.centra-pagina .scroll{display:flex!important;flex-direction:column;
-  justify-content:center;min-height:0;height:auto}
-/* The panel's own block is told to grow by the rule that lets it fill a panel;
-   on a page that is being centred it takes only the height it needs. */
+   a page taller than the screen scrolls, and it starts at the top.
+
+   The room above it is written on by centraSeCabe as padding — this was a flex
+   column centring its contents, and a fader laid out that way cannot be dragged
+   on iOS, only tapped. The page still has to be told not to stretch into the
+   height the padding leaves, which is all that is left here. */
+body.sub.centra-pagina .scroll{display:block!important;min-height:0;height:auto}
 body.sub.centra-pagina .scroll>*,
 body.sub.centra-pagina #pitch-section,body.sub.centra-pagina #free-section{
   flex:0 0 auto!important}
@@ -6429,7 +6431,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24l';
+const APP_VERSION='lab-2026-09-24m';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6659,14 +6661,42 @@ function nomeDaSub(){
    nothing under them reads as a list cut short — where they do not fill it they
    are centred in it. A page that is taller than the screen is left alone: it
    has to scroll, and a scrolling page starts at the top. */
+/* Centred by the room above it, not by making the page a flex box.
+
+   It was a flex column with justify-content:center, and on iOS that is the one
+   thing a fader cannot live inside: a slider drawn by the app rather than by
+   the browser loses its own hit-testing when it is laid out as a flex item that
+   way — it can be tapped to a place and not dragged to one. Which is what
+   happened, and only ever where the page fitted: turn the polyrhythm on, or
+   start the exercise, and the page grows past the screen, the centring goes,
+   and the same faders drag. The mixer fitted, so it never dragged.
+
+   A page that fits is short of the screen by a known number of pixels. Half of
+   them above it puts it in the middle just as well, and leaves everything in it
+   laid out the way it is everywhere else. */
 function centraSeCabe(){
   const sc=document.getElementById('scroll-area');
   if(!sc)return;
+  sc.style.paddingTop='';
   document.body.classList.remove('centra-pagina');
   if(!document.body.classList.contains('sub'))return;
   if(document.body.classList.contains('estica-chain'))return;
   if(document.body.classList.contains('bolinhas'))return;
-  if(sc.scrollHeight<=sc.clientHeight+1)document.body.classList.add('centra-pagina');
+  /* The room is what is left under the page, and scrollHeight cannot say: it is
+     never less than the box it is measured in. What the page actually reaches
+     is where the lowest thing on it ends. */
+  const caixa=sc.getBoundingClientRect();
+  let fundo=caixa.top;
+  [...sc.children].forEach(e=>{
+    if(!e.offsetParent)return;
+    const b=e.getBoundingClientRect().bottom;
+    if(b>fundo)fundo=b;
+  });
+  const livre=caixa.bottom-fundo;
+  if(livre>1&&sc.scrollTop===0){
+    sc.style.paddingTop=Math.round(livre/2)+'px';
+    document.body.classList.add('centra-pagina');
+  }
 }
 function arrumaEscalas(){
   const dentro=(painelAberto==='sec-scales');
