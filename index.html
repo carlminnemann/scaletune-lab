@@ -4400,6 +4400,88 @@ function keepRunning(){
   resumeTimer=setTimeout(keepRunning,400);
 }
 
+/* Sound that comes back from a screen that went to sleep.
+
+   The screen is held awake while something sounds, and not while the app sits
+   open doing nothing — so it does go out, and on iOS the audio session goes
+   out with it. What comes back is not always the context you left: it says it
+   is running, its clock is stopped, and nothing it schedules is heard. The
+   phone still lists the page as the thing playing, and going there, pausing it
+   and coming back is what put it right by hand. That pause is an interruption
+   the page is told about, and it ends with the session being taken again.
+
+   So the page does for itself what that hand did, in three steps, each tried
+   only because the one before it did not work:
+
+     - ask for the session and resume the context;
+     - give the session back and take it again, with a silent sound pushed
+       through the output, which is what makes the hardware open;
+     - and if the clock still has not moved, build the whole thing again. A
+       context that has been taken away and not handed back cannot be talked
+       round, and everything standing on it — the samplers, the drums, the
+       sustain loops — is rebuilt as it is asked for, the way it arrived.
+
+   The clock is the witness throughout: a context that is really running moves
+   it, and one that only says so does not. */
+let acordando=null,voltouDoEscuro=false;
+function relogioAnda(ms){
+  if(!audioCtx)return Promise.resolve(false);
+  const t0=audioCtx.currentTime;
+  return new Promise(r=>setTimeout(()=>r(!!audioCtx&&audioCtx.currentTime>t0+0.004),ms));
+}
+/* One sample of silence. It is not for hearing: an output that has been idle
+   opens when something is played through it, and nothing else asks it to. */
+function sopraMudo(){
+  try{
+    const b=audioCtx.createBuffer(1,1,audioCtx.sampleRate);
+    const s=audioCtx.createBufferSource();
+    s.buffer=b;s.connect(audioCtx.destination);s.start(0);
+  }catch(e){}
+}
+async function reconstroiAudio(){
+  const velho=audioCtx;
+  const tocava=state.playing;
+  if(tocava){state.playing=false;stopPlayback();}
+  audioCtx=null;masterGain=null;masterLimit=null;
+  Object.keys(samplers).forEach(k=>delete samplers[k]);
+  Object.keys(loopBufferCache).forEach(k=>delete loopBufferCache[k]);
+  drumBufs=null;drumsLoading=false;drumsFailed=false;
+  try{if(velho&&velho.state!=='closed')velho.close();}catch(e){}
+  await initAudio();
+  const vivo=!!audioCtx&&await relogioAnda(90);
+  if(tocava&&vivo){
+    /* Same care Start takes: the voice was loaded into the context that has
+       just been thrown away, so on a sampled timbre the notes wait for it. */
+    const arranca=()=>{state.playing=true;setPlayUI(true);startPlayback();};
+    if(state.mode!=='metro'&&isSampled(state.timbre)&&!samplerReady(state.timbre))
+      loadSampler(state.timbre,arranca);
+    else arranca();
+  }
+  else if(tocava)setPlayUI(false);
+  return vivo;
+}
+/* podeReconstruir: only where we are inside a press. A new context built
+   without one is refused on iOS and comes up mute for the life of the page,
+   which would turn a context that might still have been woken into one that
+   certainly cannot be. */
+function garanteAudioVivo(podeReconstruir){
+  if(!audioCtx)return Promise.resolve(true);
+  if(acordando)return acordando;
+  acordando=(async()=>{
+    claimAudioSession();
+    if(audioCtx.state!=='running'){try{await audioCtx.resume();}catch(e){}}
+    if(await relogioAnda(90))return true;
+    try{await audioCtx.suspend();}catch(e){}
+    try{const s=navigator.audioSession;if(s)s.type='auto';}catch(e){}
+    claimAudioSession();
+    try{await audioCtx.resume();}catch(e){}
+    sopraMudo();
+    if(await relogioAnda(140))return true;
+    return podeReconstruir?reconstroiAudio():false;
+  })();
+  return acordando.finally(()=>{acordando=null;});
+}
+
 function initAudio(){
   if(!audioCtx){
     /* The one rule this file has about the context: it is built inside a
@@ -4432,12 +4514,25 @@ function initAudio(){
     document.addEventListener('visibilitychange',()=>{
       // the screen lock is dropped by the browser whenever the page goes away,
       // so coming back to a running metronome asks for it again
-      if(!document.hidden){keepRunning();if(state.playing)seguraEcra();}
+      if(document.hidden){voltouDoEscuro=true;return;}
+      keepRunning();
+      if(state.playing)seguraEcra();
+      /* What can be done without a press is done now, so that a screen woken
+         and played straight away is already right. What needs one waits. */
+      if(voltouDoEscuro)garanteAudioVivo(false);
     });
     /* A gesture is the one thing iOS never refuses, so any touch while the
-       sound is meant to be running is taken as permission to have it back. */
+       sound is meant to be running is taken as permission to have it back —
+       and the first touch after the screen was away is also where a context
+       that came back dead is allowed to be built again. */
+    const aoTocar=()=>{
+      keepRunning();
+      if(!voltouDoEscuro)return;
+      voltouDoEscuro=false;
+      garanteAudioVivo(true);
+    };
     ['pointerdown','keydown','touchend'].forEach(ev=>
-      document.addEventListener(ev,keepRunning,{passive:true}));
+      document.addEventListener(ev,aoTocar,{passive:true}));
   }
   claimAudioSession();
   if(audioCtx.state==='running')return Promise.resolve();
@@ -6310,7 +6405,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-24h';
+const APP_VERSION='lab-2026-09-24i';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
