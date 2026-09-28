@@ -4163,8 +4163,27 @@ let countTicks=0;
    wait the three that remain, and come in on the next first beat. A sliver is
    not a count, so anything under a beat is given a bar of its own instead. */
 /* The nearest tonic to a note: what the phrase is reaching for when it lands. */
+/* Which note a phrase comes home to, in the mode it is being played in.
+
+   The scale and the arpeggio have a root and it is theirs. Free has whatever
+   you marked as the start of the line you built — and if you marked none, the
+   lowest note of it, which is where the line sets off from anyway.
+
+   It used to ask state.root whatever the mode was, and in Free that is the
+   scale mode's root, left standing wherever it was last used. So a line built
+   on C, counted in each round, came home to whatever D or G the other mode
+   happened to be holding; and where that was the note the line had just
+   finished on, you heard the same note twice and then the count. */
+function pcDaTonica(){
+  if(state.mode!=='free')return NOTES.indexOf(state.root);
+  if(state.freeRoot&&(state.freeRoot in state.freeSelected))
+    return NOTES.indexOf(state.freeRoot);
+  const list=Object.keys(state.freeSelected)
+    .map(pc=>semitone(pc,state.freeSelected[pc])).sort((a,b)=>a-b);
+  return list.length?((list[0]%12)+12)%12:-1;
+}
 function tonicNear(abs){
-  const pc=NOTES.indexOf(state.root);
+  const pc=pcDaTonica();
   if(pc<0)return abs;
   let best=null;
   for(let k=-12;k<=12;k++){
@@ -6431,7 +6450,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-25b';
+const APP_VERSION='lab-2026-09-28a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -9576,7 +9595,13 @@ function metroPass(){
 function advancePass(){
   /* Where the phrase has just arrived, and the tonic nearest it — taken before
      anything moves, because by the end of this the key may be a fourth away. */
-  const landing=sequence.length?tonicNear(sequence[sequence.length-1]):null;
+  /* And nothing to land where the line has already finished at home: sounding
+     the note it just ended on, and only then counting, is a stutter and not an
+     ending. Eight of the twelve ways a free line can be set up end on the tonic
+     by themselves — every one of them would have said it twice. */
+  const ultimaDoPasso=sequence.length?sequence[sequence.length-1]:null;
+  const casa=ultimaDoPasso===null?null:tonicNear(ultimaDoPasso);
+  const landing=(casa===null||casa===ultimaDoPasso)?null:casa;
   /* Being here at all means the line has come round, so it is no longer at its
      beginning: from now on the note it turns on at the bottom sounds twice. */
   const eraFresco=runFresh;
