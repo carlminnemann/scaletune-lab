@@ -1187,6 +1187,14 @@ details.sec[open] .sec-sum{display:none}
 /* ---------- the tuner's own screen ----------
    The reading takes what there is, the two boxes sit under it, and a page of
    choices takes the screen from both — the same law as everywhere else. */
+/* No transport in the tuner. Every other mode has one thing you press to make
+   it happen; this one happens by itself from the moment you arrive, so a button
+   at the foot of it would have nothing left to say — and the room it gives back
+   goes to the needle, which is the thing being read at arm's length. */
+body.afina .btn-row,body.afinapag .btn-row{display:none}
+/* The one way back in when the microphone was refused: the reading itself. */
+body.afina .tuner-panel{cursor:default}
+body.afina.sem-micro .tuner-panel{cursor:pointer}
 body.afina .scroll{display:flex;flex-direction:column;min-height:0}
 body.afina .scroll>*{flex:0 0 auto}
 body.afina #tuner-section{display:flex!important;flex-direction:column;flex:1 1 auto;min-height:min-content}
@@ -2597,7 +2605,10 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
      than sounds: the microphone would hear the app itself, so nothing else may
      be playing while it is open. -->
 <div id="tuner-section" style="display:none">
-  <div class="panel tuner-panel">
+  <!-- Pressing the reading asks for the microphone again. It does nothing while
+       the tuner is listening, which is nearly always: this is here for the one
+       case where the browser said no and there is no button left to press. -->
+  <div class="panel tuner-panel" onclick="tunerToca()">
     <div class="tuner-read">
       <div class="tuner-note" id="tuner-note">—</div>
       <div class="tuner-cents" id="tuner-cents"></div>
@@ -6452,7 +6463,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-09-28a';
+const APP_VERSION='lab-2026-10-30a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -6581,6 +6592,15 @@ function entraModo(m){
      a menu with one box in it. */
   if(m==='metro')painelAberto='metro-section';
   setMode(m);
+  /* The tuner listens, and there is nothing to press. A mode you go to in order
+     to hear yourself should be hearing you by the time it is on the screen —
+     and the tap that opened it is the gesture a browser wants before it will
+     open a microphone, so this is the one moment the asking is free.
+
+     Only from here, which is a tap on the mode. The same mode restored on the
+     next launch is not a tap, and a page that asks for a microphone before it
+     has been touched is asking for a refusal it cannot undo. */
+  if(m==='tuner')startTuner();
   const sc=document.getElementById('scroll-area');
   if(sc)sc.scrollTop=0;
   pintaCasa();
@@ -13609,9 +13629,15 @@ async function startTuner(){
     }
   }catch(e){
     wantMic=false;claimAudioSession();
-    setStatus(tr('tuner.needMic','The tuner needs the microphone. Allow it and press Listen again.'));
+    /* Refused, and there is no button to offer. The screen itself becomes the
+       way back in — said in the message, and marked on the body so the panel
+       knows it is now something to press. */
+    document.body.classList.add('sem-micro');
+    setStatus(tr('tuner.needMic','The tuner needs the microphone. Allow it, then tap the reading.'));
+    renderTuner(null);
     return false;
   }
+  document.body.classList.remove('sem-micro');
   micNode=audioCtx.createMediaStreamSource(micStream);
   // rumble out, everything above a fundamental out, then measure
   const hp=audioCtx.createBiquadFilter();hp.type='highpass';hp.frequency.value=22;
@@ -13623,7 +13649,14 @@ async function startTuner(){
   tunerLoop();
   return true;
 }
+/* A tap on the reading, which only means anything when there is nothing being
+   read: the microphone was refused and the player has just allowed it. */
+function tunerToca(){
+  if(state.mode!=='tuner'||micStream)return;
+  startTuner();
+}
 function stopTuner(){
+  document.body.classList.remove('sem-micro');
   if(micRaf)cancelAnimationFrame(micRaf);micRaf=0;
   if(micStream)micStream.getTracks().forEach(t=>t.stop());
   micStream=null;micNode=null;micAnalyser=null;
@@ -13655,7 +13688,11 @@ function renderTuner(f){
   if(f===null){
     noteEl.textContent='—';noteEl.classList.remove('in-tune');
     centsEl.textContent='';centsEl.classList.remove('in-tune');
-    hzEl.textContent=micStream?tr('tuner.listening','listening for a note'):tr('tuner.press','press Listen');
+    /* Not listening, in a mode that listens from the moment you arrive, means
+       the microphone was refused — so the line says what to do about it rather
+       than naming a button that is no longer there. */
+    hzEl.textContent=micStream?tr('tuner.listening','listening for a note')
+                              :tr('tuner.press','tap the reading to listen');
     needle.style.left='50%';needle.classList.remove('in-tune');needle.classList.add('parado');
     drawStrobe(0,false);
     return;

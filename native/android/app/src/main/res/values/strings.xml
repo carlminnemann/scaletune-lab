@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ScaleTune</string>
+    <string name="title_activity_main">ScaleTune</string>
+    <string name="package_name">com.carlminnemann.scaletune</string>
+    <string name="custom_url_scheme">com.carlminnemann.scaletune</string>
+</resources>

@@ -1,22 +1,24 @@
 # ScaleTune Lab
 
-The workbench. Everything here is an experiment on the app people are using,
-which lives in its own repository and at its own address:
+**This is the app.** It began as a workbench beside an older one, and the two
+addresses are still there:
 
-    the app      https://carlminnemann.github.io/Scaletune/
-    the lab      https://carlminnemann.github.io/scaletune-lab/
+    the lab      https://carlminnemann.github.io/scaletune-lab/   ← this one
+    the old app  https://carlminnemann.github.io/Scaletune/
 
-Carl's testers are on the first one. Nothing reaches it from here without him
-saying so — when something in the lab is worth keeping, it is copied across
-deliberately, not merged.
+Carl's testers are here, on the lab, and only here. The other repository is
+his own, for trying things on his phone; nothing is copied across to it, and
+work asked for "for everyone" means work in this one. (30-10-2026, his words:
+"apenas para o lab. eles têm acesso apenas a esse.")
 
 ## The one rule that is not about design
 
 **Both addresses are on the same domain**, and a browser keeps what a page
 stores by domain, not by address. So every key this app writes carries `lab` in
 its name — `scaletune-lab-exercises`, `scaletune-lab-theme`, and the rest — and
-so does its offline cache. Break that and the workbench starts writing into the
-saved exercises of the people who are testing the real thing.
+so does its offline cache. Break that and this app starts writing into whatever
+the older one has on the same phone — and the names go the other way too: this
+is where the saved exercises of the people testing are.
 
 The name on the screen carries a `lab` mark for the same reason.
 
