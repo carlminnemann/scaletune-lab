@@ -1538,6 +1538,35 @@ body.painel .sec-body>.clear-btn:last-child,
   align-items:center;justify-content:center;text-align:center}
 .ex-moving{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:var(--s3);
   font-size:11px;color:var(--text2);font-style:italic}
+/* An exercise on its way out. It opens where the row it belongs to is, like
+   the line that says what is being moved: sending one is a thing you do to a
+   name in the list, not a screen you have to come back from. The code is set
+   in a monospace so that a character read out loud is the character meant. */
+.ex-share{padding:10px;margin-bottom:var(--s3);border:1px solid var(--border2);
+  border-radius:var(--r);background:var(--bg3)}
+.ex-share-top{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px}
+.ex-share-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:11px;line-height:1.45;color:var(--text2);background:var(--bg2);
+  border:1px solid var(--border3);border-radius:var(--r);padding:8px;
+  /* Five lines of it, and five lines exactly. A cap in round pixels left the
+     last line cut across the middle, which reads as a rendering fault rather
+     than as a box you can scroll — and the box is border-box, so the cap has
+     to carry the padding and the border as well or the fault comes back two
+     pixels tall. A short exercise is shorter than this and shows whole. */
+  max-height:calc(5 * 1.45em + 19px);overflow:auto;overflow-wrap:anywhere;
+  user-select:all;-webkit-user-select:all}
+.ex-share-hint{font-size:11px;line-height:1.5;color:var(--text3);font-style:italic;margin-top:8px}
+.ex-share-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ex-share-row .pick-btn.ex-share-btn{flex:0 1 auto;width:auto;min-width:0;
+  padding:0 14px;min-height:var(--h);justify-content:center;text-align:center}
+.ex-share-row .pick-btn.ex-share-x{flex:0 0 34px;width:34px;min-width:34px;padding:0}
+/* The way in. Closed, it is a quiet line under the drawer — most of the time
+   nobody has sent you anything, and it should not ask to be noticed. */
+.ex-get{margin-top:var(--s2)}
+.ex-get.ex-new{margin-top:var(--s3)}
+.ex-getbtn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border2);
+  border-radius:var(--r);background:var(--bg3);color:var(--text3);font-family:inherit;
+  touch-action:manipulation}
 .ex-list{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--s4)}
 .ex-list:empty{display:none}
 .ex-row{display:flex;align-items:stretch;gap:6px}
@@ -2577,12 +2606,17 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
     <div class="ex-crumbs" id="ex-crumbs"></div>
     <div class="ex-list" id="ex-list"></div>
     <div class="ex-moving" id="ex-moving" style="display:none"></div>
+    <!-- One exercise on its way out: the code to read or copy, and the two
+         ways of sending it. -->
+    <div class="ex-share" id="ex-share" style="display:none"></div>
     <div class="ex-new">
       <input class="ex-name" id="ex-name" type="text" maxlength="40"
              autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="pick-btn ex-save" id="ex-save" onclick="saveExercise()"></button>
       <button class="pick-btn ex-save" id="ex-newfolder" onclick="newFolder()"></button>
     </div>
+    <!-- And one on its way in. -->
+    <div class="ex-get" id="ex-get"></div>
     <div class="info-line" id="ex-info"></div>
   </div>
 </details>
@@ -3297,6 +3331,8 @@ body.teclaspag #keys-page.notas-doze .btn-wrap{grid-template-columns:repeat(3,1f
     <dt data-t="h.ex.fold.k">Folders</dt><dd data-t="h.ex.fold"><em>＋ Folder</em> makes one from the name in the field and steps into it. What you save from then on goes where you are standing, and the line under the list says so. A folder inside a folder is made the same way: go in, and make the next one there.</dd>
     <dt data-t="h.ex.walk.k">Getting about</dt><dd data-t="h.ex.walk">Tap a folder to go in. The trail above the list — <em>Exercises › Lessons › João</em> — takes you back to any step of it. A folder says how much is under it, at any depth.</dd>
     <dt data-t="h.ex.move.k">Moving one</dt><dd data-t="h.ex.move">The ⇢ picks an exercise up. Walk to the folder you want and tap <em>Put it here</em>. Two taps and no dragging, which is the only kind that works with a finger.</dd>
+    <dt data-t="h.ex.send.k">Sending one to somebody</dt><dd data-t="h.ex.send">The ↗ on a row turns that exercise into a link and a code. <em>Send link</em> hands it to a message; tapping it opens the exercise in their app and keeps it in their drawer, in the folder you prepared it in. The code is the same thing in writing, for where a link cannot land — an app kept on the home screen of an iPhone does not share what it has stored with Safari, so send the code and have it pasted into <em>Receive</em>. Nothing travels but the practice: not your volume, your theme or your language.</dd>
+    <dt data-t="h.ex.get.k">Receiving one</dt><dd data-t="h.ex.get"><em>↓ Receive an exercise</em> under the drawer takes a code or a link that was sent to you. It is saved and opened, ready to play. A name you already have is not written over — the one arriving is numbered instead.</dd>
     <dt data-t="h.ex.del.k">Deleting</dt><dd data-t="h.ex.del"><em>✕ Select</em> above the list opens the crosses, and while they are open a tap on one removes that row — so a delete is something you went there to do, not something a thumb can do in passing. It closes itself when you leave. A folder goes only when it is empty.</dd>
   </dl></div>
 
@@ -6463,7 +6499,7 @@ const TIMBRES=[
   {k:'vibraphone', label:'Vibraphone',  decays:true},
   {k:'sine',       label:'Sine',        decays:false},
 ];
-const APP_VERSION='lab-2026-10-30a';
+const APP_VERSION='lab-2026-10-31a';
 const DEFAULT_WAVE='sine';
 // A drone is a held tone to tune against, so it opens on the voice that sounds
 // like an instrument rather than a test tone. The sequence modes open on the
@@ -11710,6 +11746,24 @@ const EX_DEEP=['droneSelected','freeSelected','accents','mix','poly','custom','p
 const EX_MAX=200;
 let exercises=[];
 
+/* What an exercise looks like before anything has been chosen, which is what
+   makes one small enough to travel: a shared exercise carries only the fields
+   that differ from this, and is laid back over it on the way in, so a field
+   that was never mentioned arrives at its default rather than at whatever the
+   person receiving it happened to be doing.
+
+   Filled at the end of init rather than here. Two of these fields do not exist
+   until the app has been built — the per-beat accents are written by
+   buildBeats, and the two polyrhythm layers by buildPolyBeats — and taken too
+   early this held an empty array where the default is four beats, which is 120
+   bytes of "default" in every exercise ever sent. Nothing the app restores
+   from a previous launch is part of the practice, so init is early enough. */
+const EX_FRESH={};
+function fixaExFresh(){
+  EX_KEYS.forEach(k=>{EX_FRESH[k]=state[k];});
+  EX_DEEP.forEach(k=>{try{EX_FRESH[k]=JSON.parse(JSON.stringify(state[k]));}catch(e){}});
+}
+
 /* An exercise is where it starts, not where it happens to be. Run the modes
    from C ionian, stop on E phrygian, save: what you meant to keep is C ionian.
    Three things walk away from their starting point while an exercise runs — the
@@ -12114,6 +12168,202 @@ function deleteExercise(i){
   setStatus(tr('ex.deleted','Deleted "{n}".',{n:e.n}));
   setTimeout(()=>setStatus(''),1800);
 }
+/* ---------- giving an exercise away ----------
+   A teacher prepares the week's work on one phone and the students have to end
+   up with it on theirs. Everything else here works with no network, no account
+   and no server, and this is not going to be the one thing that does not: an
+   exercise is small enough to be the message itself.
+
+   Measured rather than guessed: the whole snapshot is 1423 bytes of JSON, but
+   nearly all of it is the app's own defaults. Carrying only what differs from
+   EX_FRESH, a scale exercise — the key, the scale, two octaves, up and down,
+   84, a bar of count-in — is eight fields and 126 bytes. That is a link you
+   can send in a chat and a code short enough to read out.
+
+   Two doors, one payload. The link is for a tap. The code is for where a link
+   cannot land: on an iPhone, an app kept on the home screen does not share
+   what it has stored with Safari, so a link opened from a message can arrive
+   in the wrong one of the two. A pasted code goes where the person pasting it
+   is standing, which is always the right place.
+
+   None of this is code and none of it is trusted. What arrives is data, laid
+   over the defaults and then read by applyExercise, which checks every field
+   against the live tables — so the worst a bad share can do is cost a field. */
+const SHARE_V=1,SHARE_TAG='ST1';
+const SHARE_MAX=20000;      // a pasted code is a message, not a file
+
+function b64url(txt){
+  const by=new TextEncoder().encode(txt);
+  let bin='';by.forEach(b=>{bin+=String.fromCharCode(b);});
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function deB64url(txt){
+  let s=txt.replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  const bin=atob(s),by=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)by[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(by);
+}
+/* The mode is carried whatever it is. It is the one field that is not a
+   setting but an address — it says which drawer the exercise belongs in — and
+   a drone exercise, being the default, would otherwise travel without it. */
+function codigoDeEx(e){
+  const s=(e&&e.s)||{},magro={};
+  Object.keys(s).forEach(k=>{
+    if(k==='mode')return;
+    let igual;
+    try{igual=JSON.stringify(s[k])===JSON.stringify(EX_FRESH[k]);}catch(err){igual=false;}
+    if(!igual)magro[k]=s[k];
+  });
+  const carga={v:SHARE_V,n:e.n,m:s.mode,s:magro};
+  if(e.f&&e.f.length)carga.f=e.f.slice();
+  return b64url(JSON.stringify(carga));
+}
+function linkDeEx(e){
+  return location.origin+location.pathname+'#x='+codigoDeEx(e);
+}
+/* Written out with a tag in front of it, so that what is pasted into a message
+   is recognisable as something rather than as a wall of characters — and read
+   back with or without it, and with or without the link it may be wrapped in,
+   because what gets pasted is whatever the person had in hand. */
+function textoDeEx(e){return SHARE_TAG+'-'+codigoDeEx(e);}
+function leCodigo(txt){
+  if(!txt)return null;
+  let t=String(txt).trim().replace(/\s+/g,'');
+  if(!t||t.length>SHARE_MAX)return null;
+  const at=t.lastIndexOf('#x=');
+  if(at>=0)t=t.slice(at+3);
+  if(t.slice(0,SHARE_TAG.length+1).toUpperCase()===SHARE_TAG+'-')t=t.slice(SHARE_TAG.length+1);
+  t=t.replace(/[^A-Za-z0-9\-_]/g,'');
+  if(!t)return null;
+  let o;
+  try{o=JSON.parse(deB64url(t));}catch(err){return null;}
+  if(!o||typeof o!=='object'||o.v!==SHARE_V)return null;
+  const nome=typeof o.n==='string'?o.n.trim().slice(0,40):'';
+  if(!nome||!o.s||typeof o.s!=='object')return null;
+  const cheio={};
+  EX_KEYS.forEach(k=>{cheio[k]=EX_FRESH[k];});
+  EX_DEEP.forEach(k=>{try{cheio[k]=JSON.parse(JSON.stringify(EX_FRESH[k]));}catch(err){}});
+  Object.keys(o.s).forEach(k=>{if(k in cheio)cheio[k]=o.s[k];});
+  cheio.mode=EX_MODOS.indexOf(o.m)>=0?o.m:'scale';
+  const f=Array.isArray(o.f)
+    ? o.f.filter(n=>typeof n==='string'&&n.trim()).map(n=>n.trim().slice(0,40)).slice(0,8)
+    : [];
+  return {n:nome,v:1,f,s:cheio};
+}
+/* The folder it was prepared in travels with it, so a week's work arrives as a
+   week's work and not as eight loose names at the top of the drawer. Every
+   folder above it as well: one whose parent is missing cannot be walked to. */
+function garantePasta(modo,p){
+  if(!p.length)return;
+  const lista=exFolders[modo]=exFolders[modo]||[];
+  for(let i=1;i<=p.length;i++){
+    const sub=p.slice(0,i);
+    if(!lista.some(f=>mesmoCaminho(f,sub)))lista.push(sub);
+  }
+  writeFolders();
+}
+function importaEx(txt){
+  const nova=leCodigo(txt);
+  if(!nova){
+    setStatus(tr('ex.badCode','That is not a ScaleTune exercise.'));
+    setTimeout(()=>setStatus(''),3000);
+    return false;
+  }
+  if(exercises.length>=EX_MAX){
+    setStatus(tr('ex.tooMany','{n} is as many as fit. Delete one first.',{n:EX_MAX}));
+    setTimeout(()=>setStatus(''),3000);
+    return false;
+  }
+  /* A name already taken is not a reason to lose either of them: what arrives
+     from somebody else never writes over what you have. Saving over a name is
+     a thing you do on purpose, and this was not. */
+  const modo=modoDe(nova);
+  const tomado=n=>exercises.some(e=>e.n.toLowerCase()===n.toLowerCase()&&
+                   modoDe(e)===modo&&mesmoCaminho(caminhoDe(e),nova.f));
+  if(tomado(nova.n)){
+    const base=nova.n.slice(0,36);
+    let n=2;while(n<100&&tomado(base+' '+n))n++;
+    nova.n=base+' '+n;
+  }
+  garantePasta(modo,nova.f);
+  exercises.unshift(nova);
+  if(!writeExercises())return false;
+  exGetAberto=false;exSharing=null;
+  /* It opens, because it was asked for. Filing it away and leaving the app as
+     it was would mean whoever tapped the link has to go and find the thing
+     they just tapped. */
+  if(applyExercise(nova.s)){
+    rebuildEverything();
+    if(pastaAberta)fechaPasta();
+    /* Arriving from a link lands on the six modes, because that is where the
+       app always opens. Walk in: somebody who tapped what a teacher sent them
+       should be looking at it, not at a menu with a message under it.
+
+       Not the tuner. Going into it opens the microphone, and the tap that
+       makes that free is a tap on the mode — a page opened from a message has
+       not had one, so the asking would be a refusal that cannot be undone. */
+    if(emCasa&&state.mode!=='tuner')entraModo(state.mode);
+  }
+  /* Standing where it landed, and after the rebuild rather than before it:
+     changing mode walks the drawer back to the top, so a path set first is a
+     path thrown away. Open the drawer now and the new one is in front of you,
+     in the folder it was prepared in. */
+  exPath=nova.f.slice();
+  buildExercises();
+  setStatus(nova.f.length
+    ? tr('ex.gotInto','Saved "{n}" in {p}.',{n:nova.n,p:nova.f.join(' / ')})
+    : tr('ex.got','Saved "{n}".',{n:nova.n}));
+  setTimeout(()=>setStatus(''),3500);
+  return true;
+}
+/* Which exercise has its code on the screen, and whether the field for pasting
+   one in is open. Never both: they are the two ends of the same errand, and
+   only one of them is yours at a time. */
+let exSharing=null,exGetAberto=false;
+function shareExercise(i){
+  const e=exercises[i];if(!e)return;
+  exSharing=(exSharing&&exSharing.e===e)?null:{e,code:textoDeEx(e),link:linkDeEx(e)};
+  exGetAberto=false;
+  buildExercises();
+}
+function fechaShare(){exSharing=null;buildExercises();}
+function abreGet(){
+  exGetAberto=true;exSharing=null;buildExercises();
+  setTimeout(()=>{const f=document.getElementById('ex-get-field');if(f)f.focus();},0);
+}
+function fechaGet(){exGetAberto=false;buildExercises();}
+function colaEx(){
+  const f=document.getElementById('ex-get-field');
+  if(!f)return;
+  if(!f.value.trim()){f.focus();return;}
+  if(!importaEx(f.value))f.select();
+}
+/* No clipboard, or no permission for it: selecting the code is what is left,
+   and it is what people do anyway — the box is there to be read. */
+function marcaCodigo(){
+  const cx=document.getElementById('ex-share-code');
+  if(cx){
+    const r=document.createRange();r.selectNodeContents(cx);
+    const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+  }
+  setStatus(tr('ex.copyByHand','Copy it by hand — it is selected.'));
+  setTimeout(()=>setStatus(''),3000);
+}
+function copiaTexto(txt,diz){
+  const feito=()=>{setStatus(diz);setTimeout(()=>setStatus(''),2000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(feito).catch(marcaCodigo);
+  } else marcaCodigo();
+}
+function enviaEx(){
+  if(!exSharing)return;
+  const e=exSharing.e;
+  if(navigator.share){
+    navigator.share({title:e.n,text:e.n,url:exSharing.link}).catch(()=>{});
+  } else copiaTexto(exSharing.link,tr('ex.linkCopied','Link copied.'));
+}
+
 function buildExercises(){
   const list=document.getElementById('ex-list');
   if(!list)return;
@@ -12178,11 +12428,18 @@ function buildExercises(){
     b.className='pick-btn';b.textContent=e.n;
     b.title=tr('ex.loadHint','Set everything up as it was saved');
     b.onclick=()=>loadExercise(i);
+    /* Sending one is a thing you do to a name in this list, so it is a button
+       on the row like moving it, and what comes up comes up here — not on a
+       screen of its own that you would have to come back from. */
+    const sh=document.createElement('button');
+    sh.className='pick-btn ex-move ex-send';sh.textContent='↗';
+    sh.setAttribute('aria-label',tr('ex.shareName','Send {n}',{n:e.n}));
+    sh.onclick=()=>shareExercise(i);
     const mv=document.createElement('button');
     mv.className='pick-btn ex-move';mv.textContent='⇢';
     mv.setAttribute('aria-label',tr('ex.moveName','Move {n}',{n:e.n}));
     mv.onclick=()=>moveStart(i);
-    row.appendChild(b);row.appendChild(mv);
+    row.appendChild(b);row.appendChild(sh);row.appendChild(mv);
     if(apagaEx){
       const d=document.createElement('button');
       d.className='pick-btn ex-del';d.textContent='✕';
@@ -12215,6 +12472,34 @@ function buildExercises(){
       mov.appendChild(diz);mov.appendChild(aqui);mov.appendChild(nao);
     } else mov.style.display='none';
   }
+  // the code of whichever one is being sent, and the two ways of sending it
+  const cx=document.getElementById('ex-share');
+  if(cx){
+    if(exSharing&&exercises.indexOf(exSharing.e)<0)exSharing=null;
+    cx.innerHTML='';
+    if(exSharing){
+      cx.style.display='';
+      const t=document.createElement('div');t.className='ex-share-top';
+      t.textContent=tr('ex.shareTitle','Send "{n}"',{n:exSharing.e.n});
+      const cod=document.createElement('div');
+      cod.className='ex-share-code';cod.id='ex-share-code';cod.textContent=exSharing.code;
+      const diz=document.createElement('div');diz.className='ex-share-hint';
+      diz.textContent=tr('ex.shareHint','The link opens it in their app and saves it there. Where a link cannot reach — an app kept on the home screen of an iPhone — send the code instead, and have it pasted into Receive.');
+      const linha=document.createElement('div');linha.className='ex-share-row';
+      const bt=(txt,fn)=>{
+        const b=document.createElement('button');
+        b.type='button';b.className='pick-btn ex-share-btn';b.textContent=txt;b.onclick=fn;
+        linha.appendChild(b);return b;
+      };
+      bt(navigator.share?tr('ex.send','Send link'):tr('ex.copyLink','Copy link'),enviaEx);
+      bt(tr('ex.copyCode','Copy code'),
+         ()=>copiaTexto(exSharing.code,tr('ex.codeCopied','Code copied.')));
+      const x=bt('✕',fechaShare);
+      x.classList.add('ex-share-x');
+      x.setAttribute('aria-label',tr('ex.close','Close'));
+      cx.appendChild(t);cx.appendChild(cod);cx.appendChild(diz);cx.appendChild(linha);
+    } else cx.style.display='none';
+  }
   const f=document.getElementById('ex-name');
   if(f)f.placeholder=tr('ex.placeholder','Name this exercise');
   const sv=document.getElementById('ex-save');
@@ -12225,6 +12510,37 @@ function buildExercises(){
   }
   const nf=document.getElementById('ex-newfolder');
   if(nf)nf.textContent=tr('ex.newFolder','＋ Folder');
+  /* The other end of the same errand: somebody sent you one. Closed it is a
+     quiet line under the drawer, because most of the time nobody has. */
+  const gt=document.getElementById('ex-get');
+  if(gt){
+    gt.innerHTML='';
+    if(exGetAberto){
+      gt.className='ex-get ex-new';
+      const campo=document.createElement('input');
+      campo.className='ex-name';campo.id='ex-get-field';campo.type='text';
+      campo.autocomplete='off';campo.setAttribute('autocorrect','off');campo.spellcheck=false;
+      // short, because the field is narrow: anything longer is cut off mid-word
+      campo.placeholder=tr('ex.getPlaceholder','Code or link');
+      campo.addEventListener('keydown',ev=>{
+        if(ev.key==='Enter'){ev.preventDefault();colaEx();}
+      });
+      const ad=document.createElement('button');
+      ad.className='pick-btn ex-save';ad.type='button';
+      ad.textContent=tr('ex.add','Add');ad.onclick=colaEx;
+      const x=document.createElement('button');
+      x.className='pick-btn ex-save';x.type='button';x.textContent='✕';
+      x.setAttribute('aria-label',tr('ex.close','Close'));x.onclick=fechaGet;
+      gt.appendChild(campo);gt.appendChild(ad);gt.appendChild(x);
+    } else {
+      gt.className='ex-get';
+      const b=document.createElement('button');
+      b.type='button';b.className='ex-getbtn';
+      b.textContent=tr('ex.get','↓ Receive an exercise');
+      b.onclick=abreGet;
+      gt.appendChild(b);
+    }
+  }
   const meus=exercisesDoModo().length;
   const pastas=pastasDoModo().length;
   const info=document.getElementById('ex-info');
@@ -15254,6 +15570,9 @@ METRO_FRESH_G.mix=clonar(state.mix);
 METRO_FRESH_G.custom=clonar(state.custom);
 TUNER_FRESH={};
 SO_DO_TUNER.forEach(k=>TUNER_FRESH[k]=state[k]);
+// and the same template for an exercise, which is what one that is shared is
+// measured against — see EX_FRESH
+fixaExFresh();
 setMode(state.mode);
 /* Every dropdown in the app becomes a wheel. They are all in the markup from
    the start, so one pass here catches them all; what fills them with options
@@ -15462,6 +15781,16 @@ spreadPanelsSoon();
 // the name is set in a face that may not have arrived yet, and a fallback font
 // is a different width; measure again once the real one is in
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitWordmark).catch(()=>{});
+/* An exercise that arrived as a link. Last, because importing one opens it and
+   everything it opens has to be built by then; and read out of the address
+   straight away, so that a reload is not a second copy of the same thing. */
+(function(){
+  const h=location.hash||'';
+  if(h.indexOf('#x=')!==0)return;
+  const codigo=h.slice(3);
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  if(codigo)setTimeout(()=>importaEx(codigo),0);
+})();
 </script>
 </body>
 </html>
